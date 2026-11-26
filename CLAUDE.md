@@ -23,13 +23,13 @@ This is a FRESH START (owner, Nov 26 2026: "we need an entire transformation - n
 
 ## The book
 
-- **The story is Bunyan's: his order of events and his meaning.** Before writing a story moment, read it in the book file. The telling is new; where it departs from the book in events or meaning, tell the owner and list it under "Departures" here.
+- **The ideas are Bunyan's; the story is new** (owner: "compelling story with all the major ideas inspired by the ideas from PP"). Before designing a moment, read the part of the book its idea comes from, and say in the storyboard which idea of the book it carries (the burden, the far light, the wrong easy way, help at the worst moment, the burden falling off, and so on). Keep a table here of the book's major ideas and where each lives in the new story, so none is lost.
 - **The storyteller only tells the story.** Anything that tells the child what to do is a side message (quiet italics, never spoken).
 - **How gently to tell the dark parts** needs the owner's ruling, level by level.
 
-### Departures from the book
+### The book's ideas and where they live in the new story
 
-(none yet)
+(to be filled as the storyboards are agreed)
 
 ## Working with the owner
 
@@ -69,7 +69,11 @@ This is a FRESH START (owner, Nov 26 2026: "we need an entire transformation - n
 
 ## Rules for play
 
-- **No jumps, no obstacles, no score, no counter.** One way to go: walk, a story moment, walk ("atmospheric story driven ... like Riven and Myst ... though I don't want the wandering"). Nothing can be failed or missed for good.
+**THE NEW DIRECTION FOR THIS GAME (owner, Nov 26 2026): "this version can be slightly more open ended - maybe less uni directional but with choices that actually make a difference (maybe 3-4 per level) and game like elements here and there (though really a thinking man's game and visually stunning with compelling story with all the major ideas inspired by the ideas from PP)"; and "we need storyboards - let's use painting artistic direction notes - maybe first get some ideas on look and colors - simple".** So, unlike the 1678 game: (1) each level has about three or four choices that change what follows (a way taken, a person trusted, a thing carried or left), not choices that come back to the same place; (2) the way is less one-directional; (3) game-like elements here and there, of a thinking kind (working something out, reading a place), never reflexes; (4) the story is NEW, carrying the book's major ideas, not its scenes line by line. How choices carry forward, and what a wrong way costs, is to be designed in the storyboards and agreed with the owner before any level is built. Work in this order: look and colours, then storyboards, then building.
+
+The rules below are the old game's. They hold unless the new direction above changes them (marked).
+
+- **No jumps, no score, no counter, no lives, no game over** (gentle; a wrong way has a cost in the story, as the Slough and the burning hill do in the book, and a way back). *Changed:* the old rule "one way to go ... nothing can be missed" no longer holds.
 - **Hold to walk; a tap only touches. Hold anywhere** on the screen, also outside the picture. **Nothing moves on its own except the words**, apart from story moves the owner agrees to one by one.
 - **Words stay with what they tell of:** fixed places on the road; give the road room so stops hold him a moment at most.
 - **A line never starts over another voice.** No skipping by accident: a line cannot be tapped away until its recording has finished.
