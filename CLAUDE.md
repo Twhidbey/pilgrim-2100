@@ -14,6 +14,18 @@ This is a FRESH START (owner, Nov 26 2026: "we need an entire transformation - n
 - `tools/`: `clip-cut.py` (a clip of a figure on white to a sheet: walk or gesture), `video-frames.py`, `gesture-frames.py`, `cutout.py`, `flat-feet.py`, `pack-check.py`, `make-voice.py`. They still name the old game's files in places: fix each when first used here.
 - To borrow from the old game when needed (read its code, do not copy blindly): the engine in its `index.html` (camera, baked scenery, `drawFrame`, the words engine `talk`/`caption`/`hint`, voices, touch, sound, the music player, the page's self-update, the Home Screen app), `keepsakes.js` (the ribbon and the contents-page menu), `moments.js` (key moments and silent jumps), `editor.js`, and the tests in its `tools/`.
 
+## THE STORY AND THE WORLD (owner, Nov 26 2026; his words)
+
+"the opening is a nuclear bomb explosion, then eyes opening (maybe use the eyes I coded up) like waking from a dream. The opening level is life ~~after~~ before the bomb but during a war, the land is wracked by war and fighting and debauchery and theres wide spread destruction but not total apocalypse yet. Then as levels progress there's signs of more and more destruction and havoc - the society is advanced using mechs and AI to do farming (ala Jakub Różalski) but electricity is spotty and eventually goes away so mechs become landscape statues. The cross level needs work - will touch base later about how to do that. But the story is essentially an exterior picture of the interior journey that a man takes in but less overtly than PP - subtle strokes - almost like narnia or LOTR but modern."
+
+What follows from it:
+- **The opening:** the bomb seen as a dream (the "wrath to come" he has foreseen), then his eyes open, then the world as it still is: at war, not yet ended. **The owner has eyes already coded somewhere: ask where; they were not found in `pilgrims-progress` nor by a code search of the owner's repositories.**
+- **The world's arc is the game's arc:** level by level more is broken; the power fails; the farming machines stop where they stand and become part of the land, like statues. This is also the colour and scenery script.
+- **The machines:** tall quiet working machines in farmland, in the spirit of Jakub Różalski's paintings (machines in a pastoral land, painted, not science fiction). He is a living artist: take the idea, never copy his designs, his world or any picture of his. Draw ours as plain quiet silhouettes in the layered look (the art direction's "no fantasy illustration" still rules: real places, real weather, the machine one strange thing in the picture).
+- **Allegory by subtle strokes:** no names like Obstinate or Worldly Wiseman, no meanings explained; people and places are real and of 2100, and carry the book's ideas underneath, as Narnia and The Lord of the Rings do. Never state the moral.
+- **The Cross level is open:** the owner will come back to it. Do not design it.
+- **To ask the owner (raised Nov 26):** who plays this game now. The old one was for children of 7 to 10; a bomb, a war and "debauchery" told for that age need his ruling on how gently (the old rule: the dark parts are ruled level by level), or the audience is now older.
+
 ## Decisions waiting on the owner (nothing is built until these are settled)
 
 1. **The world.** The old concept page (`concept-2200.html` in the old repo, live at https://twhidbey.github.io/pilgrims-progress/concept-2200.html) offers four directions of a quiet, gentle apocalypse: A Fallen towers, B Rust and ash, C The green return, D Glass age. It predates the art direction below and needs a fresh pass. The owner has not chosen.
