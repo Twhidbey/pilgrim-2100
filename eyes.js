@@ -457,5 +457,64 @@ function shadeDark(c, W, H, f, K, S, cx, cy) {
   if (K.grain) c.drawImage(grain(W, H, K.grain), 0, 0);
   c.restore();
 }
-return { draw: drawEyes, n: EYES.n, setWrinkle: v => { WRINKLE = v; } };
+// BUILD 18: THE EYES DRAWN GRAPHIC (owner, of build 17: "It's not the warmth - it's the eye structure ... eyes can open a
+// little wider. It's sort of in uncanny valley right now ... needs to be more realistic or more graphic"; chose graphic).
+// The same tracked shapes (the owner's own movement), painted like a grey watercolour sketch, the way the game's figures
+// are: washes of one grey, soft edges (painted small and stretched up, the game's rule), lines that fade at their ends,
+// a flat grey iris, no rendered skin, pores or wrinkles. The eye opens to the clip's own natural width (no squint).
+function drawGraphic(c, W, H, f) {
+  const S = W / 1.62, cx = W / 2, cy = H * .56;
+  const lay = (k) => { const m = drawGraphic.cv || (drawGraphic.cv = {}); const w = Math.max(2, Math.round(W / k)), h = Math.max(2, Math.round(H / k)), key = k + ':' + w + 'x' + h; let cv = m[key]; if (!cv) { cv = m[key] = document.createElement('canvas'); cv.width = w; cv.height = h; } const g = cv.getContext('2d'); g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, w, h); g.setTransform(S / k, 0, 0, S / k, cx / k, cy / k); return [cv, g]; };
+  const smooth = A => { const o = []; for (let i = 0; i < A.length - 1; i++) for (let k = 0; k < 8; k++) { const t = k / 8, p0 = A[Math.max(0, i - 1)], p1 = A[i], p2 = A[i + 1], p3 = A[Math.min(A.length - 1, i + 2)], cr = (a, b, c2, d) => .5 * (2 * b + (-a + c2) * t + (2 * a - 5 * b + 4 * c2 - d) * t * t + (-a + 3 * b - 3 * c2 + d) * t * t * t); o.push([cr(p0[0], p1[0], p2[0], p3[0]), cr(p0[1], p1[1], p2[1], p3[1])]); } o.push(A[A.length - 1]); return o; };      // Catmull-Rom: no corners
+  const poly = (g, A, B) => { g.beginPath(); g.moveTo(A[0][0], A[0][1]); for (const p of A) g.lineTo(p[0], p[1]); if (B) for (let i = B.length - 1; i >= 0; i--) g.lineTo(B[i][0], B[i][1]); g.closePath(); };
+  const blob = (g, x, y, rx, ry, col, a) => { g.save(); g.translate(x, y); g.scale(rx, ry); const q = g.createRadialGradient(0, 0, 0, 0, 0, 1); q.addColorStop(0, `rgba(${col},${a})`); q.addColorStop(.6, `rgba(${col},${a * .45})`); q.addColorStop(1, `rgba(${col},0)`); g.fillStyle = q; g.fillRect(-1, -1, 2, 2); g.restore(); };
+  const ribbon = (g, A, wf, col, a) => { const n = A.length - 1, L = [], R2 = []; for (let i = 0; i <= n; i++) { const p = A[i], q = A[Math.min(n, i + 1)], o = A[Math.max(0, i - 1)], dx = q[0] - o[0], dy = q[1] - o[1], l = Math.hypot(dx, dy) || 1, w = wf(i / n) / 2; L.push([p[0] - dy / l * w, p[1] + dx / l * w]); R2.push([p[0] + dy / l * w, p[1] - dx / l * w]); } g.fillStyle = `rgba(${col},${a})`; poly(g, L, R2); g.fill(); };      // one filled shape whose width follows wf(t): no beads where strokes overlap
+  const fadeLine = (g, A, wd, col, a) => ribbon(g, A, t => wd * Math.sin(Math.PI * t) ** .8, col, a);      // a line that thins to nothing at both ends
+  const E = ['R', 'L'].map(e => ({ e, up: pts(e, 'up', f), lo: pts(e, 'lo', f), cr: pts(e, 'cr', f), ir: pts(e, 'ir', f), bu: pts(e, 'bu', f), bl: pts(e, 'bl', f), un: pts(e, 'un', f) }));
+  for (const d of E) { const open0 = d.lo[4][1] - d.up[4][1], kO = (t => t * t * (3 - 2 * t))(Math.max(0, Math.min(1, (open0 - .02) / .05))); for (let i = 0; i < d.up.length; i++) d.up[i] = [d.up[i][0], d.lo[i][1] + (d.up[i][1] - d.lo[i][1]) * (.15 + .85 * kO)]; d.open = d.lo[4][1] - d.up[4][1]; d.U = smooth(d.up); d.L = smooth(d.lo); }      // the lids meet cleanly as they close
+  c.save(); c.setTransform(1, 0, 0, 1, 0, 0);
+  // 1 the ground: one grey, modelled with broad soft washes (light on the bridge, brow ridge and cheek tops; shade in the sockets)
+  c.fillStyle = '#5f5b57'; c.fillRect(0, 0, W, H);
+  { const [cv, g] = lay(10); blob(g, 0, .04, 1.1, .5, '150,145,138', .9); blob(g, 0, -.03, .11, .42, '186,180,171', .55); blob(g, 0, -.2, .55, .08, '165,159,151', .4);
+    for (const d of E) { const m = d.up[4], s = d.e === 'R' ? -1 : 1; blob(g, m[0] - s * .02, m[1] - .01, .25, .13, '52,49,47', .6); blob(g, d.up[d.up.length - 1][0] - s * .015, m[1] - .03, .1, .09, '46,44,42', .28); blob(g, m[0] + s * .05, m[1] + .17, .22, .05, '170,164,156', .45); }
+    c.drawImage(cv, 0, 0, W, H); }
+  // 2 crease, fold under the eye and brows, soft
+  { const [cv, g] = lay(3.2); g.lineCap = 'round'; g.lineJoin = 'round';
+    for (const d of E) {
+      fadeLine(g, smooth(d.cr), .02, '40,37,35', .45);
+      fadeLine(g, smooth(d.un.slice(1, -1)), .014, '50,47,44', .12);
+      const BU = smooth(d.bu), BL = smooth(d.bl), M = BU.map((p, i) => [(p[0] + BL[i][0]) / 2, (p[1] + BL[i][1]) / 2]), th = BU.map((p, i) => Math.hypot(p[0] - BL[i][0], p[1] - BL[i][1]));
+      const outerFirst = Math.abs(M[0][0]) > Math.abs(M[M.length - 1][0]), wAt = t => th[Math.round(t * (th.length - 1))];
+      ribbon(g, M, t => { const u = outerFirst ? 1 - t : t; return wAt(t) * .92 * Math.min(1, Math.pow(u / .3, .55)) * (1 - .55 * u) * (1 - u ** 4); }, '38,35,33', .7);      // the brow: one wash, a rounded head near the nose, tapering to a fine tail (u: 0 at the head)
+      fadeLine(g, M, .022, '28,26,25', .35);      // darkest along its middle
+    }
+    c.drawImage(cv, 0, 0, W, H); }
+  // 3 the eyes
+  { const [cv, g] = lay(2.1); g.lineCap = 'round'; g.lineJoin = 'round';
+    for (const d of E) {
+      if (d.open < .006) continue;
+      g.save(); poly(g, d.U, d.L); g.clip();
+      g.fillStyle = '#9d988f'; g.fillRect(-1, -1, 2, 2);
+      for (const p of [d.up[0], d.up[d.up.length - 1]]) blob(g, p[0], p[1], .06, .05, '60,57,54', .5);      // the whites darken into the corners
+      const ir = d.ir, r = (Math.hypot(ir[1][0] - ir[0][0], ir[1][1] - ir[0][1]) + Math.hypot(ir[3][0] - ir[0][0], ir[3][1] - ir[0][1])) / 2 * 1.04;
+      blob(g, ir[0][0], ir[0][1], r, r, '74,79,82', 1.6); g.fillStyle = 'rgba(70,74,77,.9)'; g.beginPath(); g.arc(ir[0][0], ir[0][1], r * .9, 0, 7); g.fill();
+      g.strokeStyle = 'rgba(28,31,33,.55)'; g.lineWidth = r * .14; g.beginPath(); g.arc(ir[0][0], ir[0][1], r * .9, 0, 7); g.stroke();
+      blob(g, ir[0][0], ir[0][1], r * .45, r * .45, '12,12,12', 1.8);
+      blob(g, ir[0][0] - r * .3, ir[0][1] - r * .32, r * .12, r * .1, '230,227,220', .7);
+      const top = Math.min(...d.up.map(p => p[1])), q = g.createLinearGradient(0, top, 0, top + .05); q.addColorStop(0, 'rgba(26,24,23,.75)'); q.addColorStop(1, 'rgba(26,24,23,0)'); g.fillStyle = q; g.fillRect(-1, top - .01, 2, .07);      // the lid's shade across the top of the ball
+      g.restore();
+    }
+    for (const d of E) {
+      const n = d.U.length - 1, outerFirst = Math.abs(d.U[0][0]) > Math.abs(d.U[n][0]), ok = .4 + .6 * Math.min(1, d.open / .05);
+      ribbon(g, d.U.map(p => [p[0], p[1] - .004]), t => { const u = outerFirst ? 1 - t : t; return (.003 + .014 * Math.sin(Math.PI * Math.min(1, u * 1.06)) ** .55) * ok; }, '30,28,27', .8);      // the upper lid's edge and lashes: one soft shape, thickest toward the outer corner
+      fadeLine(g, d.L, .007, '40,37,35', .4);      // the lower lid, light
+    }
+    c.drawImage(cv, 0, 0, W, H); }
+  // 4 the picture falls away to black at its edges; a little paper grain
+  c.save(); c.translate(W / 2, H * .5); c.scale(W * .56, H * .78); { const g = c.createRadialGradient(0, 0, 0, 0, 0, 1); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(.6, 'rgba(0,0,0,.08)'); g.addColorStop(.85, 'rgba(0,0,0,.6)'); g.addColorStop(1, 'rgba(0,0,0,.96)'); c.fillStyle = g; } c.fillRect(-2, -2, 4, 4); c.restore();
+  if (!drawGraphic.paper || drawGraphic.paper.width !== W || drawGraphic.paper.height !== H) { const p = drawGraphic.paper = document.createElement('canvas'); p.width = W; p.height = H; const g = p.getContext('2d'), R = rnd(77); for (let i = 0; i < W * H / 70; i++) { g.fillStyle = `rgba(${R() < .5 ? '255,255,255' : '0,0,0'},${.03 + R() * .04})`; g.fillRect(R() * W, R() * H, 1 + R() * 2, 1 + R() * 2); } }
+  c.drawImage(drawGraphic.paper, 0, 0);
+  c.restore();
+}
+return { draw: drawEyes, drawGraphic, n: EYES.n, setWrinkle: v => { WRINKLE = v; } };
 })();

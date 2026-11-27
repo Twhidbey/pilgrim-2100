@@ -202,7 +202,7 @@ body.portrait:not(.playing) #rot{display:none}
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 17 · Nov 27 2026</div>
+  <div id="build">build 18 · Nov 27 2026</div>
   <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
@@ -3002,8 +3002,7 @@ function wakeEyes(then) {
     }
     const bw = Math.min(W, H * 2.6), bh = Math.round(bw * 520 / 1650), f = t < T[3] ? 12 : 12 + 54 * ease(Math.min(1, (t - T[3]) / D.open));
     if (t > T[1]) { if (!frame.band || frame.band.width !== Math.round(bw)) { frame.band = document.createElement('canvas'); frame.band.width = Math.round(bw); frame.band.height = bh; }
-      EYESWAKE.draw.fx = { squint: .9, brimUp: .06 }; if (EYESWAKE.setWrinkle) EYESWAKE.setWrinkle(1.1);      // build 17 (owner, with a still of a weathered man's squint): narrowed, brows down, deep creases, warm skin
-      EYESWAKE.draw(frame.band.getContext('2d'), frame.band.width, bh, f, 'western');
+      if (EYESWAKE.drawGraphic) EYESWAKE.drawGraphic(frame.band.getContext('2d'), frame.band.width, bh, f); else EYESWAKE.draw(frame.band.getContext('2d'), frame.band.width, bh, f, 'dusk');      // build 18 (owner: "uncanny valley ... more realistic or more graphic"; chose graphic): drawn as a grey watercolour sketch
       c.globalAlpha = Math.min(1, (t - T[1]) / D.inn); c.drawImage(frame.band, (W - frame.band.width) / 2, (H - bh) / 2); c.globalAlpha = 1; }
     if (t > T[5]) ec.style.opacity = Math.max(0, 1 - (t - T[5]) / D.out);
     if (!told && t > T[5] + D.out * .5) { told = true; then(); }
@@ -3234,7 +3233,7 @@ document.getElementById('on2').onclick = () => SL.on ? go3() : HL.on ? go5() : g
   for (const [who, txt] of INTRO) vox(who, txt);          // the first words, ready before Begin is pressed
 })();
 </script>
-<script src="eyes.js?v=17"></script>
+<script src="eyes.js?v=18"></script>
 <script src="slough.js?v=12"></script>
 <script src="hill.js?v=662"></script>
 <script src="rooms.js?v=2"></script>
