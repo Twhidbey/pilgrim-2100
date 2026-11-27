@@ -6,13 +6,21 @@ This is a FRESH START (owner, Nov 26 2026: "we need an entire transformation - n
 
 ## Files
 
-- `index.html`: for now only a holding page with the build stamp. It will become the game (engine and the first level).
-- `book/pilgrims-progress-part-one.txt`: Bunyan's own text of Part One (public domain), section numbers like `{18}`. The story's spine.
-- `heaven.js` (object `HV`): THE FAR LIGHT, one drawn light for the whole game: `HV.draw(ctx, x, y, r, a)`. Carried over unchanged.
-- `assets/christian-*.pack`: Christian's pictures from the old game (walk, stand, turn with and without the book; run; kneel; weep; wade, stuck, reach; the cross clip; the coat's stand, walk and leap). A `.pack` = count, lengths, WebP frames end to end. His clothes were made timeless on purpose (worn, handmade, layered cloth), so they serve 2100. Delete any that the new game turns out not to use.
-- `assets/sfx/`: recorded sounds (footsteps by ground, bog, knocks), mostly CC0; `CREDITS.txt` must stay with them (the knocks are CC-BY-SA).
-- `tools/`: `clip-cut.py` (a clip of a figure on white to a sheet: walk or gesture), `video-frames.py`, `gesture-frames.py`, `cutout.py`, `flat-feet.py`, `pack-check.py`, `make-voice.py`. They still name the old game's files in places: fix each when first used here.
-- To borrow from the old game when needed (read its code, do not copy blindly): the engine in its `index.html` (camera, baked scenery, `drawFrame`, the words engine `talk`/`caption`/`hint`, voices, touch, sound, the music player, the page's self-update, the Home Screen app), `keepsakes.js` (the ribbon and the contents-page menu), `moments.js` (key moments and silent jumps), `editor.js`, and the tests in its `tools/`.
+**Build 2 (Nov 27 2026): the old game's engine and Levels 1, 2, 3 and 5 were brought over whole, as the starting point** (owner: "Yes please bring in old engine"). They are still the 1678 telling in every word and picture; each is to be changed here into the 2100 telling, one piece at a time, with before and after stills. The old repository's notes (`Twhidbey/pilgrims-progress`, `CLAUDE.md`) describe every part of this code in detail: read the level's section there before changing it.
+
+- `index.html`: the engine, the book title page and Level 1 (the City of Destruction). Level 1 is only a scaffold: the city at war and the opening (the bomb dreamed, his eyes opening) will replace it.
+- `slough.js` (object `SL`): Level 2, the Slough. To become the fields with machines and the no man's land.
+- `hill.js` (object `HL`): Level 3, the burning mountain and the gate. To gain the shelter at the mountain's foot and the drones at the gate. Its end card now goes on to the Cross.
+- `cross.js` (object `CR`): Level 5, the Cross. To gain the trench, the steeple and the graveyard; **the owner will say how; do not redesign it before then.**
+- `rooms.js`: a stand-in for the old Level 4 (the Interpreter's House), which was NOT brought over: an object `RM` that is never on, because the engine still asks after it by name. Its line on the contents page and in the menu is hidden. Clean the engine of it when convenient.
+- `heaven.js` (`HV`, the far light), `keepsakes.js` (`KS`: the ribbon, the contents-page menu, his Bible and roll), `moments.js` (`MO`: key moments and silent jumps), `editor.js` (`ED`, with `?edit`), `edit.html`, the two manifests.
+- `assets/`: everything those levels use (figure packs, pictures, voices, music, recorded sounds; `assets/sfx/CREDITS.txt` must stay). No room pictures.
+- `book/pilgrims-progress-part-one.txt`: Bunyan's own text, section numbers like `{18}`.
+- `tools/`: tests `playtest.js` (1, 2, 3, 5; "1back", "2back"), `phone-touch-test.js`, `phone-test-3.js`, stills `stills2.js`, `stills3.js`; and the picture, video and voice tools.
+
+**Testing (before every push):** `python3 -m http.server 8123 &` in this repo; `NODE_PATH=$(npm root -g) node tools/playtest.js 1` (also 2, 3, 5), ONE AT A TIME (run four at once and a page can miss a script); a syntax check of every script with `new Function`. At build 2 all four reach their end cards.
+
+**Known leftovers of the old game, to clear as each part is rebuilt:** the title is still the 1678 book; the page's title and Home Screen names say "Pilgrim's Progress"; the editor's jump list may still name the house.
 
 ## THE STORY AND THE WORLD (owner, Nov 26 2026; his words)
 
@@ -43,9 +51,9 @@ What follows from it:
 | The walls called Salvation | a low wall either side of the highway | a trench |
 | The Cross | a plain cross on a hill | the steeple of an old church sticking out of the ground |
 | The sepulchre | a cave at the hill's foot | the graveyard below the steeple |
-| The burden | a sack on his back | all the books of his civilization, and something of his own that ties him to his sin |
+| The burden | a sack on his back | a pack of the stuff of his civilization (not shown inside); his book stays in his hand |
 
-**Raised with the owner, not yet answered:** (1) in the book it is a BOOK that wakes him, and now books are the burden: what wakes him in 2100 (the dream alone, or one small book among the many, the one he keeps)? (2) what the personal belonging is; (3) the machines at the start still work, and by which level they have stopped; (4) the eyes he coded: where they are. **Shown Nov 27:** a sheet of his six ideas sketched in code onto stills of the old levels (not in the repo).
+**Answered Nov 27:** "He wakes up from dream itself but book he does carry with him. I'm not sure the bag should have books it's stuff from his civ. It doesn't need to be shown per se." So: the DREAM wakes him; he still carries his book in his hand; the burden is a pack of the stuff of his civilization, its contents not shown. **The eyes** are in the chat titled "Whole game: gamewide recommendations": an eyes lab (`eyes-lab.html`, lab 21: eyes drawn in code from tracked shapes, with a crying take) that was sent to the owner but never committed; that chat was asked on Nov 27 to push it to a branch `eyes` of the old repository. **Still open:** a personal belonging, if any is shown; by which level the machines have stopped. **Shown Nov 27:** a sheet of his six ideas sketched in code onto stills of the old levels (not in the repo).
 
 ## Decisions waiting on the owner (nothing is built until these are settled)
 
@@ -67,7 +75,7 @@ What follows from it:
 ## Working with the owner
 
 - **Repo `Twhidbey/pilgrim-2100`, branch `main`. Pushing `main` publishes the game** once GitHub Pages is on (https://twhidbey.github.io/pilgrim-2100/, a minute or two). Commit and push after every change, then tell the owner it is live; a phone may show an old copy, so give the link with `?v=N`.
-- **Build stamp** (`id="build"`, bottom right): `build N · date`. Bump N on every push that changes the game, so one number means one push. **Currently build 1.** If several chats push: `git fetch` and rebase just before pushing, and take the next number.
+- **Build stamp** (`id="build"`, bottom right): `build N · date`. Bump N on every push that changes the game, so one number means one push. **Currently build 2.** If several chats push: `git fetch` and rebase just before pushing, and take the next number.
 - **SPEND AS LITTLE AS POSSIBLE.** Before any paid call: say the cost and wait for a yes; keep the running total in `HANDOFF.md`. Rough prices: a video about 56 cents, a picture about 15 cents (25 at 4K), a voice line about a cent, a music piece about 8 cents. Save in this order: do it in code first; reuse frames we have; draft on the cheaper image model; show a still before any video; get two clips from one video (backwards, back and forth); write video prompts that pass the safety filter first time (plain words: "wading", "thick sticky mud", never "drowning" or "desperate"). Free sources first: OpenGameArt for sounds (CC0 preferred, credit anything CC-BY), Wikimedia Commons originals for photographs (public domain or CC0; fetch slowly, it answers 429).
 - **Keep `CLAUDE.md` and `HANDOFF.md` updated after every change.** The repo is public: no names, emails or other personal details in notes, code or commits. The image and voice key is never printed and never in the repo.
 - **Players:** kids 7 to 10, mostly on an iPhone. Gentle: no lives, no game over, read-aloud words, short simple sentences.
