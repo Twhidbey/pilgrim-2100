@@ -193,20 +193,32 @@ const SL = (() => {
   function farThings() {
     const line = (k, pts, w) => { k.lineWidth = w; k.beginPath(); pts.forEach((q, i) => i ? k.lineTo(q[0], q[1]) : k.moveTo(q[0], q[1])); k.stroke(); };
     const poly = (k, pts) => { k.beginPath(); pts.forEach((q, i) => i ? k.lineTo(q[0], q[1]) : k.moveTo(q[0], q[1])); k.closePath(); k.fill(); };
-    // a farm machine: a small hull carried high on thin jointed legs, a long boom reaching down to the crop
+    // a farm machine (build 4, after the owner's picture for size): a COMBINE that walks. A heavy boxy harvester body
+    // carried high above the trees on thick jointed legs: grain tank, cab at the front, the unloading pipe swung out
+    // behind, the feeder throat slanting down to the header and its reel low over the crop. Our own design.
     const machine = (stopped) => k => {
-      const hy = stopped ? -385 : -420, tilt = stopped ? .07 : 0;
-      k.save(); k.rotate(tilt);
-      // legs: hip on the hull, a knee, a foot on the ground
-      [[-58, -150, -118], [-22, -64, -30], [30, 78, 52], [62, 150, 128]].forEach((L, i) => { const far = i === 1 || i === 2;
-        line(k, [[L[0], hy + 14], [L[1], hy + 150 + (far ? 16 : 0)], [L[2], 6]], far ? 7 : 10); k.beginPath(); k.arc(L[1], hy + 150 + (far ? 16 : 0), far ? 7 : 9, 0, 7); k.fill(); poly(k, [[L[2] - 16, 8], [L[2] + 16, 8], [L[2] + 6, -8], [L[2] - 6, -8]]); });
-      // the hull: a long low body, rounded, a hump of housing on its back
-      k.beginPath(); k.moveTo(-92, hy + 18); k.quadraticCurveTo(-104, hy - 20, -62, hy - 30); k.lineTo(40, hy - 34); k.quadraticCurveTo(104, hy - 30, 112, hy + 2); k.quadraticCurveTo(100, hy + 24, 60, hy + 24); k.closePath(); k.fill();
-      k.beginPath(); k.moveTo(-60, hy - 28); k.quadraticCurveTo(-44, hy - 66, -6, hy - 62); k.lineTo(14, hy - 32); k.closePath(); k.fill();
-      line(k, [[-30, hy - 60], [-36, hy - 118]], 3); line(k, [[-36, hy - 104], [-20, hy - 104]], 3);
-      // the boom: from the hull's nose out and down, an elbow, the cutter bar low over the field (hanging slack when stopped)
-      if (stopped) { line(k, [[96, hy], [150, hy + 40], [158, hy + 210]], 8); line(k, [[158, hy + 210], [150, hy + 300]], 5); poly(k, [[128, hy + 296], [172, hy + 296], [166, hy + 312], [134, hy + 312]]); }
-      else { line(k, [[96, hy], [196, hy - 44], [262, hy + 250]], 8); k.beginPath(); k.arc(196, hy - 44, 8, 0, 7); k.fill(); line(k, [[262, hy + 250], [258, -40]], 5); poly(k, [[214, -44], [304, -44], [298, -26], [220, -26]]); for (let i = 0; i < 6; i++) line(k, [[224 + i * 14, -26], [224 + i * 14, -10]], 3); }
+      const hy = stopped ? -330 : -370;
+      k.save(); k.rotate(stopped ? .13 : 0);
+      const leg = (hx, kx, ky, fx, w) => { line(k, [[hx, hy + 10], [kx, ky]], w * 1.25); line(k, [[kx, ky], [fx, -4]], w); k.beginPath(); k.arc(kx, ky, w * .85, 0, 7); k.fill();
+        poly(k, [[fx - w * 1.5, 8], [fx + w * 1.9, 8], [fx + w * 1.2, -16], [fx - w * .9, -16]]); };
+      // far pair first (thinner), then the near pair
+      leg(-70, -20, hy + 170, -64, 17); leg(74, 132, hy + 180, 96, 17);
+      leg(-112, -168, hy + 160, -128, 26); leg(36, 92, hy + 170, 40, 26);
+      // the body: one long box, stepped: the grain tank high at the back, the engine deck, the cab forward
+      poly(k, [[-178, hy + 22], [-190, hy - 96], [-176, hy - 176], [-30, hy - 184], [-22, hy - 150], [58, hy - 150], [64, hy - 118], [150, hy - 116], [188, hy - 66], [192, hy - 10], [150, hy + 22]]);
+      // tank extensions and a stack on top, the under-slung chaffer at the back
+      poly(k, [[-170, hy - 176], [-182, hy - 206], [-24, hy - 212], [-34, hy - 184]]); line(k, [[20, hy - 150], [20, hy - 206]], 9); line(k, [[12, hy - 206], [34, hy - 210]], 6);
+      poly(k, [[-178, hy + 16], [-232, hy + 60], [-214, hy + 78], [-150, hy + 22]]);
+      line(k, [[-96, hy - 208], [-100, hy - 258]], 3);
+      // the unloading pipe: a long tube swung out behind, a little down at its end
+      if (stopped) line(k, [[-150, hy - 190], [-250, hy - 150], [-330, hy - 40]], 20); else { line(k, [[-150, hy - 196], [-400, hy - 214]], 20); line(k, [[-400, hy - 214], [-424, hy - 196]], 16); }
+      // the feeder throat down to the header; the header a long low wedge, its reel a wheel of bars above it
+      const fy = stopped ? -6 : -58, fx = stopped ? 318 : 300;
+      poly(k, [[150, hy - 40], [190, hy - 14], [fx + 6, fy - 36], [fx - 34, fy - 52]]);
+      poly(k, [[fx - 62, fy + 4], [fx - 50, fy - 56], [fx + 6, fy - 60], [fx + 96, fy - 8], [fx + 96, fy + 4]]);
+      const rx = fx + 62, ry = fy - 62, R = 44; k.lineWidth = 5; k.beginPath(); k.arc(rx, ry, R, 0, 7); k.stroke();
+      for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3 + .3; line(k, [[rx, ry], [rx + Math.cos(a) * R, ry + Math.sin(a) * R]], 3); }
+      line(k, [[fx - 20, fy - 56], [rx, ry]], 7);
       k.restore();
     };
     // leaning posts with wire sagging between them
@@ -221,12 +233,12 @@ const SL = (() => {
     const wreck = k => { k.save(); k.rotate(-.13); k.beginPath(); k.moveTo(-190, 30); k.lineTo(-170, -34); k.quadraticCurveTo(-150, -52, -110, -52); k.lineTo(-64, -92); k.lineTo(34, -96); k.lineTo(70, -54); k.lineTo(150, -50); k.quadraticCurveTo(196, -44, 214, 30); k.closePath(); k.fill(); line(k, [[-20, -94], [-30, -150]], 3); k.restore(); };
     // a trunk broken off, its top splintered
     const stump = k => { poly(k, [[-22, 6], [-15, -120], [-9, -168], [-4, -132], [3, -186], [8, -140], [14, -158], [17, -110], [24, 6]]); line(k, [[12, -96], [58, -128], [84, -122]], 6); line(k, [[-14, -74], [-52, -98]], 5); };
-    const M = (x, p, b, kind, sc) => ({ x, p, b, kind, sc: sc || 1 });
+    const M = (x, p, b, kind, sc, k) => ({ x, p, b, kind, sc: sc || 1, k: k || 1 });
     const t = v => tone(v);
     return [
-      M(-1010, .44, bakeSil(-180, -560, 520, 590, t(.8), machine(false)), 'farm'),
-      M(-560, .3, bakeSil(-180, -560, 520, 590, t(.88), machine(false)), 'farm', -1),
-      M(-205, .4, bakeSil(-200, -520, 460, 550, t(.83), machine(true)), 'still'),
+      M(-700, .44, bakeSil(-450, -650, 900, 680, t(.78), machine(false)), 'farm', 1, 1.2),
+      M(-150, .2, bakeSil(-450, -650, 900, 680, t(.91), machine(false)), 'farm', -1, 1.1),
+      M(-215, .36, bakeSil(-450, -650, 900, 680, t(.84), machine(true)), 'war', 1, 1.05),
       M(-405, .4, bakeSil(-350, -100, 760, 115, t(.76), wire), 'war'),
       M(-120, .5, bakeSil(-70, -90, 140, 100, t(.74), hog), 'war'), M(-30, .5, bakeSil(-70, -90, 140, 100, t(.74), hog), 'war', -.9),
       M(110, .46, bakeSil(-210, -190, 440, 240, t(.8), wreck), 'war'),
@@ -1086,7 +1098,7 @@ const SL = (() => {
     // the far things of our age (build 3): machines over the fields, fading as the mire begins; the war's leavings in the mire
     { const aF = 1 - smooth(-1300, -1000, cx), aW = smooth(-1350, -1050, cx);
       for (const m of FARS) { const a = m.kind === 'farm' ? aF : m.kind === 'war' ? aW : 1; if (a <= .01) continue;
-        const s = z * m.p * .9, gx = (m.x - cx * m.p) * z + VW / 2, gy = hor + (wl - hor) * m.p * .55; if (gx < -320 || gx > VW + 320) continue;
+        const s = z * m.p * .9 * m.k, gx = (m.x - cx * m.p) * z + VW / 2, gy = hor + (wl - hor) * m.p * .55; if (gx < -420 || gx > VW + 420) continue;
         ctx.save(); ctx.translate(gx, gy); ctx.scale(m.sc, 1); ctx.globalAlpha = a; putTree(ctx, m.b, 0, 0, s); ctx.globalAlpha = a * .25; putTree(ctx, m.b, 0, 0, s, -s * .6); ctx.restore(); } }
     // the mire running back behind them (FARMUD): nearer rows slide more with the camera, are taller and darker
     for (const row of FARMUD) {
