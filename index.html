@@ -202,7 +202,7 @@ body.portrait:not(.playing) #rot{display:none}
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 20 · Nov 27 2026</div>
+  <div id="build">build 21 · Nov 27 2026</div>
   <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
@@ -2982,15 +2982,21 @@ function drawDream(c, u, fire) {
 // THE EYES ARE A VIDEO (build 19; owner, after the code-drawn eyes: "That's awful - think I need to go more realistic"): a 1930s farm hand,
 // about 35, close-cropped hair, a hard squint (two Google pictures, shut and open, and a video between them: sources/eyes/). Loaded with the page
 // (muted, inline, so phones play it), drawn into the opening's canvas, cropped to the band round his eyes.
-const EYEVID = (() => { try { const v = document.createElement('video'); v.src = 'assets/eyes-open.' + (v.canPlayType('video/mp4; codecs="avc1.640028"') ? 'mp4' : 'webm') + '?v=19';      /* H.264 where it plays, else VP9 */ v.muted = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('muted', ''); v.preload = 'auto'; v.load(); return v; } catch (e) { return null; } })();
+// THE DREAM IS A VIDEO TOO (build 21; owner: "The nuclear bomb needs an animation to make it realistic"): a photo-real dusk skyline after the
+// traced one (no Space Needle; sources/dream/skyline.png), then a video from it: the flash behind the towers at about 2 s, the fireball and
+// the cloud rising, the camera tilting up after it (sources/dream/blast.mp4, 10 s). Silent. The code-drawn dream stays as the fallback.
+const DREAMVID = (() => { try { const v = document.createElement('video'); v.src = 'assets/dream.' + (v.canPlayType('video/mp4; codecs="avc1.640028"') ? 'mp4' : 'webm') + '?v=21'; v.muted = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('muted', ''); v.preload = 'auto'; v.load(); return v; } catch (e) { return null; } })();
+const EYEVID = (() => { try { const v = document.createElement('video'); v.src = 'assets/eyes-open.' + (v.canPlayType('video/mp4; codecs="avc1.640028"') ? 'mp4' : 'webm') + '?v=21';      /* H.264 where it plays, else VP9 */ v.muted = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('muted', ''); v.preload = 'auto'; v.load(); return v; } catch (e) { return null; } })();
 function wakeEyes(then) {
   const ec = document.getElementById('eyes'); if (!ec) { setTimeout(then, 1700); return; }
   if (!DREAM) bakeDream();
   const c = ec.getContext('2d'), run = runN, t0 = performance.now();
   // the dream: in from black, calm, the flash, the cloud, white, black
-  const FL = 3600, DR = FL + 6700;
-  // build 19: his eyes are a real video now (assets/eyes-open.mp4, 8 s: shut to 2 s, opening 2 to 4 s, then the squint held); D.inn..D.hold span it
-  const D = { black: 400, inn: 1000, shut: 1000, open: 2000, hold: 2500, out: 1500 };
+  const dv = DREAMVID && DREAMVID.readyState >= 2 ? DREAMVID : null;      // build 21: the dream is a real video when it has loaded (else the code-drawn one)
+  if (dv) { try { dv.pause(); dv.currentTime = 0; const pr = dv.play(); if (pr && pr.catch) pr.catch(() => {}); } catch (e) {} }
+  const FL = 3600, DR = dv ? 10300 : FL + 6700;
+  // build 21: his eyes are a real video (assets/eyes-open.mp4, 7.5 s: asleep in bed to 2 s, waking 2.5 to 4.5 s, a blink near 6 s, awake); D.inn..D.hold span it
+  const D = { black: 400, inn: 1200, shut: 1000, open: 2500, hold: 2300, out: 1500 };
   const vid = EYEVID; if (vid) { try { vid.pause(); vid.currentTime = 0; } catch (e) {} } let vidOn = false;
   const T = [D.black, D.inn, D.shut, D.open, D.hold, D.out].reduce((a, v) => (a.push(a[a.length - 1] + v), a), [0]).map(v => v + DR);
   const ease = u => u * u * (3 - 2 * u), cl = v => Math.max(0, Math.min(1, v));
@@ -3000,7 +3006,11 @@ function wakeEyes(then) {
     const t = now - t0, d = Math.min(2, window.devicePixelRatio || 1), W = Math.round(innerWidth * d), H = Math.round(innerHeight * d);
     if (ec.width !== W || ec.height !== H) { ec.width = W; ec.height = H; }
     c.setTransform(1, 0, 0, 1, 0, 0); c.fillStyle = '#000'; c.fillRect(0, 0, W, H);
-    if (t < DR) {
+    if (t < DR && dv) {      // the video: in from black, its own flash and cloud, out to black
+      const sc = Math.max(W / dv.videoWidth, H / dv.videoHeight); c.drawImage(dv, (W - dv.videoWidth * sc) / 2, (H - dv.videoHeight * sc) / 2, dv.videoWidth * sc, dv.videoHeight * sc);
+      const black = t < 1000 ? 1 - t / 1000 : t > DR - 1300 ? cl((t - (DR - 1300)) / 1000) : 0;
+      if (black > 0) { c.fillStyle = `rgba(0,0,0,${black})`; c.fillRect(0, 0, W, H); }
+    } else if (t < DR) {
       const k = t - FL, u = k > 300 ? cl((k - 300) / 5200) : 0, fire = k > 0 ? 1 : 0, dc = DREAM.can.getContext('2d');
       drawDream(dc, u, fire);
       const sc = Math.max(W / DW, H / DH); c.imageSmoothingEnabled = true; c.drawImage(DREAM.can, (W - DW * sc) / 2, (H - DH * sc) / 2, DW * sc, DH * sc);
