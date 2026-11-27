@@ -12,6 +12,7 @@
 - **Build 4:** the machine redrawn as a huge walking combine at the size of the owner's reference picture (see `CLAUDE.md`). Asked by the owner: can public things live in one repo and most code in a private one (answered in chat; no change made).
 - **Build 5:** the fields' machines are now two copies of one painted walking combine (`assets/mech.webp`), far off in the mist behind the trees (see `CLAUDE.md`).
 - **Build 6:** the two machines darker; the mire's war things removed (see `CLAUDE.md`). The no man's land is still to be designed.
+- **Build 7:** the plain's trees are darker than the machines behind them (see `CLAUDE.md`).
 - **Next, in this order (each waits on the owner):**
   1. The world: one of the old concept page's four directions (A Fallen towers, B Rust and ash, C The green return, D Glass age) or a new one, redrawn to the art direction in `CLAUDE.md`. Show stills; build nothing first.
   2. The retelling: who and what each person and place becomes in 2100, and a first draft of the first scene's words, checked against the book file.

@@ -205,7 +205,7 @@ const SL = (() => {
     // land stays one clean silhouette; beyond where people stand it swells and dips gently, and the oak's foot flares.
     SHORE = true;
     GHOSTS = [[-760, .5, 3, .8], [-1500, .36, 5, .88], [560, .46, 8, .84], [-230, .3, 9, .9], [-2300, .42, 12, .86], [-3100, .4, 14, .85], [-1950, .52, 15, .83]]
-      .map(g => ({ x: g[0], p: g[1], b: bakeTree(oak(g[2], false, 3), tone(g[3]), .7) }));
+      .map(g => { const t = oak(g[2], false, 3); return { x: g[0], p: g[1], b: bakeTree(t, tone(g[3]), .7), d: bakeTree(t, tone(.74 - g[1] * .42), .7) }; });   // d (build 7): a darker copy for the plain, where the trees stand in front of the far machines
     // 2100: two farm machines far off over the fields (build 5), see loadMech
     loadMech();
     // two skies baked once (misty and clear) and mixed by the mist; the far light is drawn over them live
@@ -1042,7 +1042,9 @@ const SL = (() => {
     for (const g of GHOSTS) {
       const s = z * g.p * .9, gx = (g.x - cx * g.p) * z + VW / 2, gy = hor + (wl - hor) * g.p * .55;
       if (gx < -260 || gx > VW + 260) continue;
-      putTree(ctx, g.b, gx, gy, s); ctx.globalAlpha = .3; putTree(ctx, g.b, gx, gy, s, -s * .7); ctx.globalAlpha = 1;
+      const dk = 1 - smooth(-1300, -1000, cx);
+      putTree(ctx, g.b, gx, gy, s); if (dk > .01) { ctx.globalAlpha = dk; putTree(ctx, g.d, gx, gy, s); }
+      ctx.globalAlpha = .3; putTree(ctx, g.b, gx, gy, s, -s * .7); ctx.globalAlpha = 1;
     }
     // the mire running back behind them (FARMUD): nearer rows slide more with the camera, are taller and darker
     for (const row of FARMUD) {
