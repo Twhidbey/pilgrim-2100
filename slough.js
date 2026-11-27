@@ -192,7 +192,7 @@ const SL = (() => {
   // build 5: the two farm machines are ONE painted picture (assets/mech.webp, a walking combine), toned flat and pale
   // twice, far off in the mist BEHIND the ghost trees: [x, parallax, size, tone]
   // build 9: flat SILHOUETTES (one tone, no inner detail), two poses (mech.webp header down, mech2.webp header lifted)
-  function loadMech() { MECHS = []; [['mech', -455, .2, 1.85, .7, 1], ['mech2', -60, .13, 1.75, .8, 1]].forEach(m => { const im = new Image(); im.onload = () => { const c = mk(im.width, im.height), k = c.getContext('2d');
+  function loadMech() { MECHS = []; [['mech', -298, .2, 1.85, .7, 1], ['mech2', 128, .13, 1.75, .8, 1]].forEach(m => { const im = new Image(); im.onload = () => { const c = mk(im.width, im.height), k = c.getContext('2d');
       k.drawImage(im, 0, 0); k.globalCompositeOperation = 'source-in'; k.fillStyle = css(tone(m[4])); k.fillRect(0, 0, c.width, c.height);
       MECHS.push({ x: m[1], p: m[2], s: m[3], b: { c, k: im.height / 560, x0: -530, y0: -556 } }); MECHS.sort((u, v) => u.p - v.p); }; im.src = 'assets/' + m[0] + '.webp?v=9'; }); }
   // build 9: a diffuse mist of its own (soft blobs, wrapping sideways), laid over the feet of the far things
@@ -212,8 +212,9 @@ const SL = (() => {
     // reeds: "too busy - I liked old clean lines - I meant right shore was just too flat (vs contoured slightly)"): the
     // land stays one clean silhouette; beyond where people stand it swells and dips gently, and the oak's foot flares.
     SHORE = true;
-    GHOSTS = [[-760, .5, 3, .8], [-1500, .36, 5, .88], [560, .46, 8, .84], [-230, .3, 9, .9], [-2300, .42, 12, .86], [-3100, .4, 14, .85], [-1950, .52, 15, .83]]
-      .map(g => { const t = oak(g[2], false, 3); return { x: g[0], p: g[1], b: bakeTree(t, tone(g[3]), .7), d: bakeTree(t, tone(.74 - g[1] * .42), .7) }; });   // d (build 7): a darker copy for the plain, where the trees stand in front of the far machines
+    // build 10: a 5th entry marks a tree of the PLAIN's composition (one, framing the left; it never crosses a machine); the others belong to the mire and come in as the machines go
+    GHOSTS = [[-760, .5, 3, .8], [-1500, .36, 5, .88], [560, .46, 8, .84], [-230, .3, 9, .9], [-2300, .42, 12, .86], [-3100, .4, 14, .85], [-1950, .52, 15, .83], [-1075, .5, 21, .8, 1]]
+      .map(g => { const t = oak(g[2], false, 3); return { x: g[0], p: g[1], pl: !!g[4], b: bakeTree(t, tone(g[3]), .7), d: bakeTree(t, tone(.74 - g[1] * .42), .7) }; });   // d (build 7): a darker copy for the plain, where the trees stand in front of the far machines
     // 2100: two farm machines far off over the fields (build 5), see loadMech
     loadMech();
     // two skies baked once (misty and clear) and mixed by the mist; the far light is drawn over them live
@@ -1059,8 +1060,9 @@ const SL = (() => {
       const s = z * g.p * .9, gx = (g.x - cx * g.p) * z + VW / 2, gy = hor + (wl - hor) * g.p * .55;
       if (gx < -260 || gx > VW + 260) continue;
       const dk = 1 - smooth(-1300, -1000, cx);
-      putTree(ctx, g.b, gx, gy, s); if (dk > .01) { ctx.globalAlpha = dk; putTree(ctx, g.d, gx, gy, s); }
-      if (dk < .99) { ctx.globalAlpha = .3 * (1 - dk); putTree(ctx, g.b, gx, gy, s, -s * .7); } ctx.globalAlpha = 1;
+      if (g.pl) { if (dk > .01) { ctx.globalAlpha = dk; putTree(ctx, g.d, gx, gy, s); ctx.globalAlpha = 1; } continue; }
+      if (dk > .99) continue;
+      ctx.globalAlpha = 1 - dk; putTree(ctx, g.b, gx, gy, s); ctx.globalAlpha = .3 * (1 - dk); putTree(ctx, g.b, gx, gy, s, -s * .7); ctx.globalAlpha = 1;
     }
     // build 9: the diffuse mist over the far things' feet: two layers drifting against each other
     { const M = farMist(), w = VW * 1.5, h = 120 * z, y = hor - 62 * z; ctx.globalAlpha = .55 + .3 * look.mist;

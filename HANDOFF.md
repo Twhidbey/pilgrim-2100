@@ -15,6 +15,7 @@
 - **Build 7:** the plain's trees are darker than the machines behind them (see `CLAUDE.md`).
 - **Build 8:** the city in the sky over the far light is gone from the Slough's plain.
 - **Build 9:** the machines are flat silhouettes in two poses; the wavy rows are ground texture under everything; a new diffuse mist layer (see `CLAUDE.md`).
+- **Build 10:** the plain composed: one framing tree, the near machine, the light, the far machine; nothing overlaps through the walk (see `CLAUDE.md`).
 - **Next, in this order (each waits on the owner):**
   1. The world: one of the old concept page's four directions (A Fallen towers, B Rust and ash, C The green return, D Glass age) or a new one, redrawn to the art direction in `CLAUDE.md`. Show stills; build nothing first.
   2. The retelling: who and what each person and place becomes in 2100, and a first draft of the first scene's words, checked against the book file.
