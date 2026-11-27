@@ -202,7 +202,8 @@ body.portrait:not(.playing) #rot{display:none}
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 12 · Nov 27 2026</div>
+  <div id="build">build 13 · Nov 27 2026</div>
+  <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
 <div id="opening"><div class="ot">The Pilgrim&#8217;s Progress<div class="os">Touch to open the book</div></div></div>
@@ -351,6 +352,40 @@ function house(x, gy, w, h, s, tall) {
     for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++)
       L.wins.push([x + (c + .5) * w / cols - 3 * s + ln * (1 - r / rows), top + 12 * s + r * 32 * s, 6 * s, 8.5 * s, R()]);
   }
+}
+// SEATTLE (build 13; owner: "The city should look like Seattle ... change townhouses in background for skyscrapers"). The two
+// far rows of the city are towers now, drawn from the shapes of Seattle's skyline: plain glass towers of many heights and
+// widths, flat tops with a box or a mast; among them, once each, a tall dark tower with rounded steps (in the manner of
+// Columbia Center), a tower under a stepped pointed crown, an old slender tower under a pyramid, and the needle (a tall
+// tripod waisted in the middle, a wide disc at its top, a mast). The power comes and goes: few windows are lit.
+// kind: 'col', 'crown', 'old', 'needle' or a plain tower. Only a few lit windows are stored (L.wins), never the dark ones.
+function tower(x, gy, w, h, s, kind) {
+  const b = gy + 60, top = gy - h, m = x + w / 2;
+  if (kind === 'needle') {
+    const lw = w * .42, wy = gy - h * .55, dy = gy - h * .86, dw = w * 1.05, st = 2.6 * s;
+    poly([[m - lw, b], [m - lw, gy], [m - w * .08, wy], [m - w * .14, dy + 14 * s], [m - dw * .7, dy + 9 * s], [m - dw, dy + 3 * s], [m - dw, dy - 3 * s], [m - dw * .75, dy - 9 * s], [m - w * .3, dy - 13 * s], [m - st, dy - 16 * s], [m - st * .5, top], [m + st * .5, top], [m + st, dy - 16 * s], [m + w * .3, dy - 13 * s], [m + dw * .75, dy - 9 * s], [m + dw, dy - 3 * s], [m + dw, dy + 3 * s], [m + dw * .7, dy + 9 * s], [m + w * .14, dy + 14 * s], [m + w * .08, wy], [m + lw, gy], [m + lw, b]]);
+    poly([[m - w * .16, wy + 2 * s], [m + w * .16, wy + 2 * s], [m + w * .16, wy + 5 * s], [m - w * .16, wy + 5 * s]]);      // the ring at its waist
+    return;
+  }
+  if (kind === 'col') {                    // three rounded steps, the tallest in the middle
+    const q = w / 6, sx = [[x, gy - h * .7], [x + q, gy - h * .86], [x + 2 * q, gy - h]], pts = [[x, b]];
+    for (const [xx, yy] of sx) { pts.push([xx, yy + 4 * s]); pts.push([xx + q * .4, yy]); }
+    for (let i = sx.length - 1; i >= 0; i--) { const xx = x + w - (sx[i][0] - x), yy = sx[i][1]; pts.push([xx - q * .4, yy]); pts.push([xx, yy + 4 * s]); }
+    pts.push([x + w, b]); poly(pts);
+  } else if (kind === 'crown') {           // a stepped pointed crown and a thin spike
+    const cy = gy - h * .84; poly([[x, b], [x, cy], [x + w * .12, cy], [x + w * .12, cy - h * .05], [x + w * .26, cy - h * .05], [x + w * .26, cy - h * .1], [m - w * .06, cy - h * .13], [m, top - h * .05], [m + w * .06, cy - h * .13], [x + w * .74, cy - h * .1], [x + w * .74, cy - h * .05], [x + w * .88, cy - h * .05], [x + w * .88, cy], [x + w, cy], [x + w, b]]);
+  } else if (kind === 'old') {             // an old slender tower under a pyramid
+    const py = gy - h * .78; poly([[x, b], [x, py], [x - 1.5 * s, py], [m, top], [x + w + 1.5 * s, py], [x + w, py], [x + w, b]]);
+  } else {                                 // a plain tower: sometimes a setback, a box or a mast on the roof
+    const k = R(), sb = k < .3 ? w * rr(.15, .3) : 0, sy = gy - h * rr(.75, .9), pts = [[x, b]];
+    if (sb) pts.push([x, sy], [x + sb, sy], [x + sb, top]); else pts.push([x, top]);
+    if (R() < .45) { const bx = x + w * rr(.25, .55), bw = w * rr(.2, .35), bh = rr(5, 11) * s; pts.push([bx, top], [bx, top - bh], [bx + bw, top - bh], [bx + bw, top]); }
+    else if (R() < .35) { const mx = x + w * rr(.3, .7); pts.push([mx - 1, top], [mx - .6 * s, top - h * rr(.08, .16)], [mx + .6 * s, top - h * rr(.08, .16)], [mx + 1, top]); }
+    if (sb && R() < .5) pts.push([x + w - sb, top], [x + w - sb, sy], [x + w, sy]); else pts.push([x + w, top]);
+    pts.push([x + w, b]); poly(pts);
+  }
+  const lit = .012;                        // windows: rows of floors, few lit (the power is spotty)
+  for (let y = top + 8 * s; y < gy - 6 * s; y += 7.5 * s) for (let xx = x + 3 * s; xx < x + w - 5 * s; xx += 6 * s) if (R() < lit) L.wins.push([xx, y, 2.6 * s, 3.6 * s, 0]);
 }
 function tree(x, gy, s, kind) {
   const p = new Path2D(), ln = rr(-5, 5) * s;
@@ -634,6 +669,7 @@ function buildScenery() {
       return base - amp * v * cityFlat - woods * cityFlat - lift * (62 + 26 * v);
     };
     L = { d, par, W, base, s, gy, field, shapes: [], wins: [], steeples: [], trees: [] };
+    if (first) { const rx = 300, rw = 420, rh = 158; poly([[rx - rw, VH + 20], [rx - rw, base - 10], ...Array.from({ length: 81 }, (_, k) => { k /= 2; const u = k / 20 - 1, a = Math.min(1, Math.sqrt(u * u + .006) - .077); return [rx + u * rw, base - 10 - rh * Math.pow(1 - a, 1.9) / Math.pow(1 - (Math.sqrt(.006) - .077), 1.9)]; }), [rx + rw, base - 10], [rx + rw, VH + 20]]); }      // build 13: a great lone volcano far off, in the manner of Mount Rainier (the burning mountain to come)
     if (first) { const bp = [[-30, VH + 20]]; for (let x = -30; x <= W + 6; x += 2.5) bp.push([x, base - 34 - amp * 1.25 * range(x * .8 + 4321, 1000, 1.5)]); bp.push([W + 6, VH + 20]); poly(bp); L.back = L.shapes.pop(); }
     const hp = [[-30, VH + 20]]; for (let x = -30; x <= W + 6; x += 2.5) hp.push([x, gy(x)]); hp.push([W + 6, VH + 20]);
     poly(hp);
@@ -642,19 +678,16 @@ function buildScenery() {
       // Build 57 (owner: "building in background too tall - they didn't have skyscrapers back then ... want a 16th (or
       // appropriate) century look but not too much detail"): low houses of one or two floors under steep roofs, wider
       // than they are tall; only the church spires stand high; few windows, and few of them lit.
-      const hh = lerp(62, 118, d) * (near ? .9 : .72);
-      let nextSteeple = rr(300, 700) * s; let prevW = null;
-      // build 521 (owner: "there's white edges to the houses between them"): two houses side by side left a hairline of
-      // pale sky between their walls (a small gap, or the two soft edges meeting); now a narrow gap is filled with wall
-      // under the lower of the two eaves, so neighbours read as one row. Wider gaps (alleys) stay open.
-      const join = () => { const w2 = L.wall; if (w2 && prevW && w2[0] - prevW[1] < 12 * s) { const y0 = Math.max(prevW[2], w2[2]), y1 = Math.max(prevW[3], w2[3]), x0 = Math.min(prevW[1], w2[0]) - 1.5, x1 = Math.max(prevW[1], w2[0]) + 1.5; poly([[x0, y1], [x0, y0], [x1, y0], [x1, y1]]); } prevW = w2; };
+      // Build 13: Seattle's towers in place of the old town's low houses and spires (see tower()). The far row (i = 1) holds the
+      // tall towers and, once each, the four special shapes; the near row (i = 2), mostly hidden behind the street, lower blocks.
+      const far = i === 1, specials = far ? { 560: 'needle', 905: 'col', 1240: 'crown', 1395: 'old' } : {}, done = {};
       for (let x = near ? field : -50 * s - R() * 50 * s; x < edge;) {
-        const tp = clamp((edge - x) / (300 * s), .5, 1) * clamp(.55 + (x - field) / 260, .55, 1);
-        const w = rr(58, 112) * s, h = rr(.55, 1) * hh * tp;
-        if (d < .55 && x > nextSteeple) { nextSteeple = x + rr(480, 1050) * s; const tw = rr(18, 27) * s; L.wall = null; house(x, gy(x + tw / 2), tw, lerp(62, 118, d) * rr(1.05, 1.6), s, true); join(); x += tw * .9; continue; }
-        L.wall = null; house(x, gy(x + w / 2), w, h, s);
-        join();
-        x += w + rr(-9, 5) * s; if (R() < .1) x += rr(14, 50) * s;
+        const tp = clamp((edge - x) / (260 * s), .35, 1) * clamp(.55 + (x - field) / 260, .55, 1);
+        const sp = Object.keys(specials).find(k => !done[k] && x > +k - 40);
+        if (sp) { done[sp] = true; const kind = specials[sp], w = { needle: 44, col: 66, crown: 50, old: 22 }[kind] * s, h = { needle: 560, col: 600, crown: 470, old: 330 }[kind] * s; tower(x, gy(x + w / 2), w, h, s, kind); x += (kind === 'needle' ? w * 1.4 : w) + rr(4, 10) * s; continue; }
+        const w = rr(36, 82) * s, h = (far ? rr(150, 430) * (R() < .25 ? .5 : 1) : rr(70, 170)) * s * tp;
+        tower(x, gy(x + w / 2), w, h, s);
+        x += w + (far ? rr(-6, 8) : rr(-8, -1)) * s; if (far && R() < .12) x += rr(14, 50) * s;      // the near row stands shoulder to shoulder (a gap showed the bright mist as a pale slot)
       }
       // countryside beyond the gate: trees gather in groves, with open fields between
       // Since build 68 every tree is a painted picture (L.trees, drawTrees), not a code-drawn blob: here only their places
@@ -677,7 +710,9 @@ function buildScenery() {
     // soft stencil (farther = softer), lit windows, and the mist that settles in front of this layer
     // (the nearest layer is baked sharp since build 65: the owner found its trees "a little blurry")
     const q = near ? 1 : Math.min(1, 1.3 / (1 + LOOK.soft * (5 * Math.pow(1 - d, 1.3) + .5)));
-    bake(L, q, layerCol(d));
+    // build 13: the towers stand high into the sky, where the golden bake of a layer showed as a pale slab against the rain's
+    // sky at the weather's edge; toward the light they now stay nearly as dark as in the rain (a thing lit from behind is in shadow)
+    { const lc = layerCol(d); bake(L, q, first ? lc : [lc[0], mix(lc[1], lc[0], .7)]); }
     for (const [m, k] of [[L.cool, 1], [L.warm, .25]]) {
       const c = m.getContext('2d'); c.scale(q, q);
       for (const w of L.wins) {
@@ -1142,7 +1177,7 @@ function musCue() {
   // strings, building) while the neighbours watch him run by; it fades before the lights of the hymn's third phrase (x 6250)
   // build 502 (owner: "music should start when he chooses to run past family 'life life eternal life'"): no beat before his door;
   // the run piece begins as his fingers go in his ears (G.ears, either choice at the door) and fades before the hymn's third phrase
-  if (G.ears && G.runZone && P.x < RUN_END - 150) return 'past';
+  if (G.fam === 2 && G.runZone && P.x < RUN_END - 150) return 'past';      // build 13: no family, so the run piece begins as he passes his own door
   return null;
 }
 function musTick() {
@@ -1214,7 +1249,8 @@ function reset() {
   Object.assign(P, { x: START_X, y: GY, vx: 0, face: TEST_X ? 1 : -1, anim: 1, stand: { t: QUIET[0] }, turn: 0, run: false, ranim: 0, blend: null, weep: null, turnTo: 0, turnV: null, lookUp: 0, lookA: 0, wantBack: false, bk: 0 });
   Object.assign(G, { cam: Math.max(0, Math.min(LEVEL_W - VW, TEST_X ? START_X - VW * .38 + 40 : START_X - VW * .62 - 40)), t: 0, got: 0, extra: 0, motes: [], flyers: [], ripples: [], glints: [], taps: [], litw: [], capQ: [], cap: 0, hint: null,
     pli: null, obst: null, flare: 0, gloom: 0, gloomTo: 0, gateOpen: 0, act: null, actT: 0, ring: null, auto: null, finale: null, guard: 0, idle: 0, wins: 0,
-    evanDone: !!TEST_X, evanGone: TEST_X ? 1 : 0, neigh: TEST_X > NEIGH_X + 300, gateSeen: false, walked: false, touched: false, leaving: false, fam: TEST_X > HOME_X ? 2 : 0, door: TEST_X ? (TEST_X > HOME_X ? 1 : 0) : 1, doorShut: false, roll: TEST_X ? { t: 999, x: 0, y: 0 } : null, runZone: !!TEST_X && TEST_X < RUN_END, outSaid: false, watched: TEST_X > WATCH_X, ears: TEST_X > HOME_X });
+    evanDone: !!TEST_X, evanGone: TEST_X ? 1 : 0, neigh: TEST_X > NEIGH_X + 300, gateSeen: false, walked: false, touched: false, leaving: false, fam: TEST_X > HOME_X ? 2 : 0, door: 0,      // build 13 (owner: "as far as we know pilgrim has no family, for now"): his door stays shut
+    doorShut: false, roll: TEST_X ? { t: 999, x: 0, y: 0 } : null, runZone: !!TEST_X && TEST_X < RUN_END, outSaid: false, watched: TEST_X > WATCH_X, ears: TEST_X > HOME_X });
   G.sunUp = 0; G.through = false; G.homeTo = null; G.autoRun = 0; G.calm = 0; G.doorSaid = false; G.choiceKind = null; G.sawLight = !!TEST_X && TEST_X > EVAN_X; G.nchose = false;
   G.zoom = 1 - (1 - ZOOM_GATE) * smooth(GATE - 1300, GATE - 380, START_X);      // starting near the gate (?at=gate): already drawn back
   G.evan.pt = TEST_X ? 239 : 0; G.evan.go = false; G.evan.st = EVS_META.frames * 100; downs.clear(); pushing = false; keys.r = keys.push = false;
@@ -1605,7 +1641,7 @@ function narrStop() {
   if (!G.evanDone) return { lo: EVAN_X + 202 };      // walking out: Evangelist waits until the words in the field are done
   if (G.homeTo) return null;
   let hi = Infinity;
-  for (const [x, on] of [[HOME_X - DOOR_STOP, G.fam < 2], [WATCH_X, !G.watched], [RUN_END, G.runZone], [NEIGH_X, !G.neigh], [GATE_STOP, !G.gateSeen]]) if (on && x > P.x - 1 && x < hi) hi = x;
+  for (const [x, on] of [[WATCH_X, !G.watched], [RUN_END, G.runZone], [NEIGH_X, !G.neigh], [GATE_STOP, !G.gateSeen]]) if (on && x > P.x - 1 && x < hi) hi = x;
   return hi < Infinity ? { hi: hi - 1 } : null;
 }
 function walkTick(dir, max) {
@@ -1778,7 +1814,7 @@ function update() {
   if (SL.on) { SL.update(); capTick(); return; }
   // Level 3 (hill.js) likewise
   if (HL.on || HL.show) { HL.update(); if (HL.on) capTick(); return; }
-  G.flare *= .975; G.gloom += (G.gloomTo - G.gloom) * .02; if (G.fam) G.door = Math.min(1, G.door + .05); else if (G.doorShut) G.door = Math.max(0, G.door - .02);      // the door is flung open (and, at the start, shut behind him)
+  G.flare *= .975; G.gloom += (G.gloomTo - G.gloom) * .02; G.door = Math.max(0, G.door - .02);      // the door is flung open (and, at the start, shut behind him)
   // Evangelist: only the calm start of his video while he waits (a slow breath). On "Do you see that shining light?"
   // he turns all the way round toward the light and raises his arm (video 46..239 at its own pace), and stays pointing.
   // Evangelist waits facing right (Christian comes to him from the right since build 50), breathing: his standing video
@@ -1829,16 +1865,17 @@ function story() {
   if (!G.touched && !G.hintT && !G.evanDone && P.x < START_X - 50) { G.hintT = true; const hx = P.x - 190; hint('touch', 'Touch the road. The world answers when you touch it.'); G.ring = () => [hx - G.cam, GY + 60]; }
   if (G.hint !== 'touch' && G.ring && G.state === 'play') G.ring = null;
   if (G.hint === 'touch' && P.x < START_X - 470) clearHint('touch');
-  if (!G.doorSaid && G.runZone && P.x > HOME_X - DOOR_SAY) { G.doorSaid = true; caption(DOOR_WORDS); }      // said as he runs toward it
-  if (!G.fam && G.evanDone && P.x > HOME_X - DOOR_OPEN) { G.fam = 1; sweep(170, 120, .5, .03); hiss(140, .8, .09, .16, 'lowpass'); sfx.lamp(); }      // the door of his house is flung open as he comes running
+  // BUILD 13: NO FAMILY (owner: "as far as we know pilgrim has no family, for now"). His door no longer opens, nobody calls
+  // after him and there is no choice there; he runs straight past (G.fam = 2 marks him past it). DOOR_WORDS, FAMILY, FAMILY_RUN
+  // and LIFE are unused (kept until the new words replace the old).
+  if (!G.fam && G.evanDone && P.x > HOME_X - DOOR_OPEN) G.fam = 2;      // the door of his house is flung open as he comes running
   // AT HIS DOOR (build 110, owner: "no need to force him to walk before seeing wife, but maybe an option (run past or stop -
   // worded in a nice way)"): he comes to his door, his wife cries after him (heard clearly: his fingers are not yet in his
   // ears), and the child chooses: "Stop and look back" (the framed picture in the lit door, then hold to run on) or "Run
   // on" (fingers in his ears, as in the book: hold to run). Either way "Life! Life! Eternal life!" follows.
-  if (G.fam === 1 && P.x > HOME_X - DOOR_STOP) { G.fam = 2; talk(FAMILY.slice(0, 1).map(l => [l[0], l[1]]), () => { G.choiceKind = 'door'; document.getElementById('chHome').textContent = 'Stop and look back'; document.getElementById('chOn').textContent = 'Run on'; choose(); }); return; }
   // {10}: "standing ... with his face from his own house". We know the house is his because his door stands open behind
   // him with his wife and children in its light (owner, build 60: "how do we know it's his?"); it shuts as he walks away.
-  if (!G.doorShut && !G.evanDone && P.x < START_X - 45) { G.doorShut = true; sweep(150, 95, .5, .03); hiss(140, .8, .06, .14, 'lowpass', .45); }
+
   if (!G.outSaid && !G.evanDone && P.x < FIELD_END - 60) { G.outSaid = true; caption(FIELDS); }      // out of the street, into the field
   if (!G.evanDone && P.x < EVAN_X + 200) { G.evanDone = true; talk(EVAN, () => { G.evanGone = 1; talk(RUNS.map(l => [l[0], l[1]]), () => { G.runZone = true; G.idle = 0; }); }); return; }      // build 109 (owner): "began to run" is said in full before the child can run   // "So I saw in my dream that the man began to run"
   if (G.runZone && !P.run && G.idle === 110) hint('walk', 'Hold to run.');
@@ -2071,6 +2108,34 @@ const NB_META = {
 };
 const NB = {}, ROW = [];
 const rowMeta = key => key === 'h' ? HOUSE_META : NB_META[key], rowPic = key => key === 'h' ? HOUSE : NB[key];      // ROW: { key, x (left edge on the level), flip, lit: which windows show a lit room }
+// THE STREET (build 13; owner: "change townhouses ... [for] city street foreground"). The painted cottages of his row are
+// replaced by plain city buildings drawn here, one per old painting and at its width: a shopfront floor at the street
+// (the old door and window holes kept exactly where they were, so the doors, the lit rooms and the people in doorways
+// work as before) and floors of dark windows above, a cornice, a box, a tank or a mast on the roof. Each is made once
+// as a grey picture and baked like the paintings were (bakeTint). floors = how many floors above the shop.
+const STREET = { h: { floors: 2, roof: 'box' }, b: { floors: 3, roof: 'tank', esc: true }, c: { floors: 1, roof: 'mast' } };
+function streetFront(key) {
+  const M = rowMeta(key), F = STREET[key], FL = 104, shop = 196, H0 = Math.round(M.h), E = shop + F.floors * FL + 26 - H0, H = H0 + E, W = Math.ceil(M.w);
+  const sh = v => [v[0], v[1] + E, v[2], v[3]];
+  M.door = sh(M.door); M.wins = M.wins.map(sh); M.h = H;
+  const m = mk(W, H + 40), c = m.getContext('2d'), Rr = rng(key.charCodeAt(0) * 31 + 7), r = (a, b) => a + (b - a) * Rr(), T = 40;      // T: room above for the roof things
+  c.fillStyle = '#8c8c8c'; c.fillRect(0, T, W, H);
+  for (let i = 0; i < 900; i++) { c.fillStyle = `rgba(${Rr() < .5 ? '255,255,255' : '0,0,0'},${r(.02, .06)})`; c.fillRect(r(0, W), T + r(0, H), r(2, 9), r(1, 3)); }      // a little grain, so the bake keeps some life
+  c.fillStyle = '#6a6a6a'; c.fillRect(-2, T, W + 4, 14); c.fillStyle = '#777'; c.fillRect(0, T + 14, W, 5);      // cornice
+  const sy = T + H - shop; c.fillStyle = '#5e5e5e'; c.fillRect(0, sy - 12, W, 16);                              // the sign band over the shops
+  const cols = Math.max(2, Math.round(W / 74)), cw = W / cols;
+  for (let f = 0; f < F.floors; f++) { const y = T + 30 + f * FL; for (let i = 0; i < cols; i++) { c.fillStyle = '#4c4c4c'; c.fillRect(i * cw + cw * .24, y + 14, cw * .52, FL * .56); c.fillStyle = '#9a9a9a'; c.fillRect(i * cw + cw * .2, y + 14 + FL * .56, cw * .6, 4); } }
+  if (F.esc) { c.strokeStyle = '#3e3e3e'; c.lineWidth = 3; const ex = W * .62, ew = W * .3; for (let f = 0; f < F.floors; f++) { const y = T + 30 + f * FL + FL * .78; c.strokeRect(ex, y, ew, 3); c.beginPath(); c.moveTo(ex + (f % 2 ? 6 : ew - 6), y); c.lineTo(ex + (f % 2 ? ew - 6 : 6), y + FL); c.stroke(); } }
+  c.fillStyle = '#626262'; for (let i = 0; i <= cols; i++) c.fillRect(i * cw - 3, sy + 4, 6, shop - 4);      // piers between the shopfronts
+  if (F.roof === 'box') { c.fillStyle = '#7a7a7a'; c.fillRect(W * .58, T - 22, W * .2, 22); c.fillRect(W * .2, T - 9, W * .08, 9); }
+  else if (F.roof === 'tank') { c.fillStyle = '#6e6e6e'; const tx = W * .28; c.fillRect(tx, T - 34, 44, 22); c.beginPath(); c.moveTo(tx - 2, T - 34); c.lineTo(tx + 22, T - 40); c.lineTo(tx + 46, T - 34); c.fill(); for (const lx of [4, 20, 36]) c.fillRect(tx + lx, T - 12, 3, 12); }
+  else { c.fillStyle = '#6e6e6e'; c.fillRect(W * .66, T - 16, W * .12, 16); c.fillRect(W * .7, T - 30, 6, 14); c.fillRect(W * .3, T - 10, W * .1, 10); }      // vents and boxes (a mast with a crossbar read as a cross)
+  for (const v of key === 'h' ? [M.door, ...M.wins] : M.wins) c.clearRect(v[0], T + v[1], v[2], v[3]);      // the old holes, where they were
+  if (key !== 'h') { const [dx, dy, dw, dh] = M.door; c.fillStyle = '#3c3c3c'; c.fillRect(dx, T + dy, dw, dh); c.fillStyle = '#555'; c.fillRect(dx + dw * .12, T + dy + dh * .1, dw * .76, dh * .4); }      // a shut glass-paned door
+  M.h = H + T; M.door = sh2(M.door, T); M.wins = M.wins.map(v => sh2(v, T)); if (M.ch) M.ch = [M.ch[0], T + 2];      // ch: where a touch on the roof sends up smoke
+  return m;
+}
+const sh2 = (v, T) => [v[0], v[1] + T, v[2], v[3]];
 function buildRow() {
   const p = LEVELS.home.par, k = p * HOUSE_K, D = lineUp(HOME_X, p), left = D - (HOUSE_META.door[0] + HOUSE_META.door[2] / 2) * k, right = left + HOUSE_META.w * k;
   ROW.length = 0;
@@ -2238,10 +2303,7 @@ function home(cam) {                       // drawn in screen units, before the 
   c.drawImage(HOUSE.cool, x, y, M.w * k, M.h * k); if (wm > .01) { c.globalAlpha = wm; c.drawImage(HOUSE.warm, x, y, M.w * k, M.h * k); c.globalAlpha = 1; }
   c.save(); c.translate(x, 0); sills(c, M.wins, k, y, dark); c.restore();
   const stepY = L.base;      // the top of the doorstep: whoever is in the door stands on it
-  const alone = !G.fam && WIFE && WIFE_META;      // at the opening only his wife stands in the door (owner, build 62)
-  TALKM = talkMove(W);
-  if (e > .3) drawFrame(alone ? WIFE : FAM, alone ? WIFE_META : FAM_META, doorX(cam) + (alone ? WIFE_DX : 2), stepY + 2 - FEET_SINK, G.fam ? 1 : -1, smooth(.3, 1, e),      // at the start they look after him, to the left
-    CHR_K * DOOR_FIG * HOUSE_K * L.k, breath(7));   // on the step, in front of the wall
+  // (build 13: nobody stands in his door now: he has no family)
   TALKM = null;
 }
 // THE GATE IS PAINTED (owner, build 74, asked "does gate look good enough?": it was the last code-drawn block beside
@@ -2736,7 +2798,31 @@ function start() {
   hush(); if (audio()) { AC.resume(); setTimeout(() => sfx.bell(.6), 300); fetchVoices(); }
   const wasAt = TEST_X; dropPlace();
   if (wasAt) { G.state = 'play'; return; }
-  const run = ++runN; G.state = 'wait'; setTimeout(() => { if (run === runN && G.state === 'wait') talk(INTRO); }, 1700);   // the bell, then the story
+  const run = ++runN; G.state = 'wait'; wakeEyes(() => { if (run === runN && G.state === 'wait') talk(INTRO); });   // his eyes open (build 13), then the story
+}
+// HE WAKES (build 13; owner: "Add my eyes please"): Level 1 opens on black, then the pilgrim's eyes, shut, then opening (the owner's
+// eyes lab, eyes.js), and the eyes fade into the rainy street. Skipped when a link starts the level at a place (?x=, ?at=).
+// The bomb dream that comes before it is not built yet.
+function wakeEyes(then) {
+  const ec = document.getElementById('eyes'); if (!window.EYESWAKE || !ec) { setTimeout(then, 1700); return; }
+  const c = ec.getContext('2d'), run = runN, t0 = performance.now(), D = { black: 900, inn: 1300, shut: 900, open: 2600, hold: 1100, out: 1500 };
+  const T = [D.black, D.inn, D.shut, D.open, D.hold, D.out].reduce((a, v) => (a.push(a[a.length - 1] + v), a), [0]);
+  const ease = u => u * u * (3 - 2 * u);
+  ec.style.display = 'block'; ec.style.opacity = 1; let told = false;
+  const frame = now => {
+    if (run !== runN) { ec.style.display = 'none'; return; }
+    const t = now - t0, d = Math.min(2, window.devicePixelRatio || 1), W = Math.round(innerWidth * d), H = Math.round(innerHeight * d);
+    if (ec.width !== W || ec.height !== H) { ec.width = W; ec.height = H; }
+    c.setTransform(1, 0, 0, 1, 0, 0); c.fillStyle = '#000'; c.fillRect(0, 0, W, H);
+    const bw = Math.min(W, H * 2.6), bh = Math.round(bw * 520 / 1650), f = t < T[3] ? 12 : 12 + 54 * ease(Math.min(1, (t - T[3]) / D.open));
+    if (t > T[1]) { if (!frame.band || frame.band.width !== Math.round(bw)) { frame.band = document.createElement('canvas'); frame.band.width = Math.round(bw); frame.band.height = bh; }
+      EYESWAKE.draw(frame.band.getContext('2d'), frame.band.width, bh, f, 'dusk');
+      c.globalAlpha = Math.min(1, (t - T[1]) / D.inn); c.drawImage(frame.band, (W - frame.band.width) / 2, (H - bh) / 2); c.globalAlpha = 1; }
+    if (t > T[5]) ec.style.opacity = Math.max(0, 1 - (t - T[5]) / D.out);
+    if (!told && t > T[5] + D.out * .5) { told = true; then(); }
+    if (t < T[6]) requestAnimationFrame(frame); else ec.style.display = 'none';
+  };
+  requestAnimationFrame(frame);
 }
 for (const b of document.querySelectorAll('#levels .lv')) { b.classList.toggle('dim', +b.dataset.lv !== LV); b.onclick = () => +b.dataset.lv === 5 ? go5() : +b.dataset.lv === 4 ? goRoom('door') : +b.dataset.lv === 3 ? go3() : +b.dataset.lv === 2 ? go2() : start(); }
 // THE GAME'S RETURNING PICTURE AT NIGHT (build 663), for the opening screen and the cover's window: a great dusk-blue
@@ -2933,7 +3019,8 @@ document.getElementById('on2').onclick = () => SL.on ? go3() : HL.on ? go5() : g
   const chr = Promise.all([loadPack('christian-walk', CHR), loadPack('christian-stand', STD), 
     // build 89 (owner: "when I first open link house isn't there then flickers there"): what the first picture shows (his
     // house and its row, the trees, his wife in the door) now loads before "Open the book" appears, not after
-    loadImg('house.webp').then(im => { HOUSE = im && bakeTint(im, HOUSE_DEPTH, HOUSE_DETAIL); }), ...['b', 'c'].map(key => loadImg('house-' + key + '.webp').then(im => { if (im) NB[key] = bakeTint(im, HOUSE_DEPTH, HOUSE_DETAIL); })), ...Object.keys(TREE_META).map(key => loadImg('tree-' + key + '.webp').then(im => { if (im) for (const i of [1, 2]) (TREE[i] = TREE[i] || {})[key] = bakeTree(im, SCN[i].d); })), loadImg('wife.webp').then(im => { WIFE = im; if (im) WIFE_SH = mkShadow(im); }), ...Object.keys(PROP_META).map(k => loadImg('prop-' + k + '.webp').then(im => { PROP[k] = im; }))]);
+    Promise.resolve().then(() => { HOUSE = bakeTint(streetFront('h'), HOUSE_DEPTH, HOUSE_DETAIL); for (const key of ['b', 'c']) NB[key] = bakeTint(streetFront(key), HOUSE_DEPTH, HOUSE_DETAIL); buildRow(); }),      // build 13: city buildings drawn in code, not the cottage paintings
+    ...Object.keys(TREE_META).map(key => loadImg('tree-' + key + '.webp').then(im => { if (im) for (const i of [1, 2]) (TREE[i] = TREE[i] || {})[key] = bakeTree(im, SCN[i].d); })), loadImg('wife.webp').then(im => { WIFE = im; if (im) WIFE_SH = mkShadow(im); }), ...Object.keys(PROP_META).map(k => loadImg('prop-' + k + '.webp').then(im => { PROP[k] = im; }))]);
   buildScenery(); buildWheat(); buildFog(); buildRow(); seed = 99; buildLevel(); bakeFinish();
   await chr; bookLoaded('CHR'); bookLoaded('STD');      // his pictures with the book, kept for Level 1 (see bookless)
   { const im = Object.assign({}, PROP); for (const k in PROP) delete PROP[k];
@@ -2960,6 +3047,7 @@ document.getElementById('on2').onclick = () => SL.on ? go3() : HL.on ? go5() : g
   for (const [who, txt] of INTRO) vox(who, txt);          // the first words, ready before Begin is pressed
 })();
 </script>
+<script src="eyes.js?v=13"></script>
 <script src="slough.js?v=12"></script>
 <script src="hill.js?v=662"></script>
 <script src="rooms.js?v=2"></script>
