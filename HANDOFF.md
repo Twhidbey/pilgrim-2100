@@ -13,6 +13,7 @@
 - **Build 5:** the fields' machines are now two copies of one painted walking combine (`assets/mech.webp`), far off in the mist behind the trees (see `CLAUDE.md`).
 - **Build 6:** the two machines darker; the mire's war things removed (see `CLAUDE.md`). The no man's land is still to be designed.
 - **Build 7:** the plain's trees are darker than the machines behind them (see `CLAUDE.md`).
+- **Build 8:** the city in the sky over the far light is gone from the Slough's plain.
 - **Next, in this order (each waits on the owner):**
   1. The world: one of the old concept page's four directions (A Fallen towers, B Rust and ash, C The green return, D Glass age) or a new one, redrawn to the art direction in `CLAUDE.md`. Show stills; build nothing first.
   2. The retelling: who and what each person and place becomes in 2100, and a first draft of the first scene's words, checked against the book file.
