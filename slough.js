@@ -191,9 +191,17 @@ const SL = (() => {
   let MECHS = [];
   // build 5: the two farm machines are ONE painted picture (assets/mech.webp, a walking combine), toned flat and pale
   // twice, far off in the mist BEHIND the ghost trees: [x, parallax, size, tone]
-  function loadMech() { const im = new Image(); im.onload = () => { MECHS = [[-455, .2, 1.85, .7], [-60, .13, 1.75, .82]].map(m => { const c = mk(im.width, im.height), k = c.getContext('2d');
-      k.drawImage(im, 0, 0); k.globalCompositeOperation = 'source-atop'; k.globalAlpha = .78; k.fillStyle = css(tone(m[3])); k.fillRect(0, 0, c.width, c.height);
-      return { x: m[0], p: m[1], s: m[2], b: { c, k: im.height / 560, x0: -530, y0: -556 } }; }); }; im.src = 'assets/mech.webp?v=5'; }
+  // build 9: flat SILHOUETTES (one tone, no inner detail), two poses (mech.webp header down, mech2.webp header lifted)
+  function loadMech() { MECHS = []; [['mech', -455, .2, 1.85, .7, 1], ['mech2', -60, .13, 1.75, .8, 1]].forEach(m => { const im = new Image(); im.onload = () => { const c = mk(im.width, im.height), k = c.getContext('2d');
+      k.drawImage(im, 0, 0); k.globalCompositeOperation = 'source-in'; k.fillStyle = css(tone(m[4])); k.fillRect(0, 0, c.width, c.height);
+      MECHS.push({ x: m[1], p: m[2], s: m[3], b: { c, k: im.height / 560, x0: -530, y0: -556 } }); MECHS.sort((u, v) => u.p - v.p); }; im.src = 'assets/' + m[0] + '.webp?v=9'; }); }
+  // build 9: a diffuse mist of its own (soft blobs, wrapping sideways), laid over the feet of the far things
+  let FARMIST = null;
+  function farMist() { if (FARMIST) return FARMIST; const c = mk(512, 96), k = c.getContext('2d'); let sd = 41; const rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
+    for (let i = 0; i < 46; i++) { const x = rnd() * 512, y = 30 + rnd() * 44, r = 34 + rnd() * 54, a = .1 + rnd() * .13;
+      for (const dx of [-512, 0, 512]) { const g = k.createRadialGradient(x + dx, y, 0, x + dx, y, r); g.addColorStop(0, `rgba(255,255,255,${a})`); g.addColorStop(1, 'rgba(255,255,255,0)'); k.fillStyle = g; k.save(); k.translate(x + dx, y); k.scale(2.6, .5); k.translate(-x - dx, -y); k.fillRect(x + dx - r, y - r, 2 * r, 2 * r); k.restore(); } }
+    // tinted to the level's light once
+    k.globalCompositeOperation = 'source-in'; k.fillStyle = css(LIGHT); k.fillRect(0, 0, 512, 96); return FARMIST = c; }
   const putTree = (c, b, x, y, s, sy = s) => c.drawImage(b.c, x + b.x0 * s, y + b.y0 * sy, b.c.width / b.k * s, b.c.height / b.k * sy);
   let SHB = null, FARMUD = [], mudDk = null, mudLt = null, shC = null, mistC = null, fogC = null, SHN = [], SH0 = [];
   let SHORE = null, OAK = null, GHOSTS = null, skyMist = null, skyClear = null, paper = null, threads = null, puff = null, fogBank = null, mudMap = null, built = false;
@@ -1037,15 +1045,7 @@ const SL = (() => {
     // flat band with a hard top; it is a low haze that thickens down to the water line and melts into it
     { const g = ctx.createLinearGradient(0, hor - 16 * z, 0, hor + 8 * z), c0 = tone(.86); g.addColorStop(0, css(c0, 0)); g.addColorStop(.6, css(c0, .55)); g.addColorStop(.72, css(c0, .6)); g.addColorStop(1, css(c0, 0));
       ctx.fillStyle = g; ctx.fillRect(0, hor - 16 * z, VW, 24 * z); }
-    { const aF = 1 - smooth(-1300, -1000, cx); if (aF > .01) for (const m of MECHS) { const s = z * m.p * .9 * m.s, gx = (m.x - cx * m.p) * z + VW / 2, gy = hor + (wl - hor) * m.p * .55;
-        ctx.globalAlpha = aF; putTree(ctx, m.b, gx, gy, s); ctx.globalAlpha = 1; } }
-    for (const g of GHOSTS) {
-      const s = z * g.p * .9, gx = (g.x - cx * g.p) * z + VW / 2, gy = hor + (wl - hor) * g.p * .55;
-      if (gx < -260 || gx > VW + 260) continue;
-      const dk = 1 - smooth(-1300, -1000, cx);
-      putTree(ctx, g.b, gx, gy, s); if (dk > .01) { ctx.globalAlpha = dk; putTree(ctx, g.d, gx, gy, s); }
-      ctx.globalAlpha = .3; putTree(ctx, g.b, gx, gy, s, -s * .7); ctx.globalAlpha = 1;
-    }
+    // build 9: the rows are the GROUND's texture, so they are drawn first; the machines and trees stand on them
     // the mire running back behind them (FARMUD): nearer rows slide more with the camera, are taller and darker
     for (const row of FARMUD) {
       const q = row.q, p = .3 + .7 * q, gy = hor + (wl - hor) * q, hz = (.2 + .8 * q) * z;
@@ -1053,6 +1053,19 @@ const SL = (() => {
       for (const m of row.ps) { const sx = (m.x - cx * p) * z + VW / 2, w = m.L * z; if (sx > VW + 20 || sx + w < -20) continue; wavy(ctx, sx, gy, w, m.h * hz, m.h * .35 * hz, m.s); }
       ctx.fill();
     }
+    { const aF = 1 - smooth(-1300, -1000, cx); if (aF > .01) for (const m of MECHS) { const s = z * m.p * .9 * m.s, gx = (m.x - cx * m.p) * z + VW / 2, gy = hor + (wl - hor) * m.p * .55;
+        ctx.globalAlpha = aF; putTree(ctx, m.b, gx, gy, s); ctx.globalAlpha = 1; } }
+    for (const g of GHOSTS) {
+      const s = z * g.p * .9, gx = (g.x - cx * g.p) * z + VW / 2, gy = hor + (wl - hor) * g.p * .55;
+      if (gx < -260 || gx > VW + 260) continue;
+      const dk = 1 - smooth(-1300, -1000, cx);
+      putTree(ctx, g.b, gx, gy, s); if (dk > .01) { ctx.globalAlpha = dk; putTree(ctx, g.d, gx, gy, s); }
+      if (dk < .99) { ctx.globalAlpha = .3 * (1 - dk); putTree(ctx, g.b, gx, gy, s, -s * .7); } ctx.globalAlpha = 1;
+    }
+    // build 9: the diffuse mist over the far things' feet: two layers drifting against each other
+    { const M = farMist(), w = VW * 1.5, h = 120 * z, y = hor - 62 * z; ctx.globalAlpha = .55 + .3 * look.mist;
+      for (const [sp, pp, dy] of [[.012, .16, 0], [-.008, .3, 22]]) { let x0 = (((G.t * sp - cx * pp * z) % w) + w) % w - w; for (let x = x0; x < VW; x += w) ctx.drawImage(M, x, y + dy * z, w, h); }
+      ctx.globalAlpha = 1; }
     // mist lying on the far water, hiding the horizon
     { const g = ctx.createLinearGradient(0, hor - 90, 0, wl + 20); g.addColorStop(0, css(LIGHT, 0)); g.addColorStop(.5, css(LIGHT, .3 + .45 * look.mist)); g.addColorStop(.75, css(LIGHT, .22 + .38 * look.mist)); g.addColorStop(1, css(LIGHT, 0));
       ctx.fillStyle = g; ctx.fillRect(0, hor - 90, VW, wl + 110 - hor); }
