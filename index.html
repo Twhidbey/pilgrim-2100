@@ -202,7 +202,7 @@ body.portrait:not(.playing) #rot{display:none}
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 14 · Nov 27 2026</div>
+  <div id="build">build 15 · Nov 27 2026</div>
   <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
@@ -2350,6 +2350,38 @@ let GATE_P = null, WALL_P = null;
 // top (especially for that height)"): the wall's battlements are cut away, so the wall ends in a plain straight top.
 // Rows above WALL_TOP of the picture (merlons and the gaps between them) are dropped from both baked copies.
 const WALL_TOP = 112;
+// THE BARRICADE (build 15; owner, with a photograph of a street barricade in a winter city: "How about this gate"): the city
+// gate and its wall are a barricade across the street now, drawn in code in the shapes of the old paintings, so the doorway,
+// the doors behind it and the push that opens them work as before. The wall: packed snow and earth, rows of sandbags, tyres,
+// sheets of corrugated metal, long banners hung along it (blank: no words, no country's colours). The gate: the same
+// barricade on either side of an opening framed by two scaffold poles with a banner strung across above it, and flags on
+// poles standing up out of the barricade. Grey pictures; baked like the paintings (bakeTint).
+function barricade() {
+  const Rb = rng(1500), r = (a, b) => a + (b - a) * Rb();
+  const body = (c, x0, x1, top, bot, seed) => {      // a stretch of barricade from x0 to x1, its top near 'top', standing on 'bot'
+    const prof = []; for (let x = x0; x <= x1 + 8; x += 8) prof.push([Math.min(x, x1), top + 16 * Math.sin(x * .013 + seed) + 9 * Math.sin(x * .041 + seed * 3) + r(-4, 4)]);
+    c.save(); c.beginPath(); c.moveTo(x0, bot); for (const [x, y] of prof) c.lineTo(x, y); c.lineTo(x1, bot); c.closePath(); c.fillStyle = '#8e8e8e'; c.fill(); c.clip();
+    for (let i = 0; i < 260; i++) { c.fillStyle = `rgba(${Rb() < .5 ? '255,255,255' : '0,0,0'},${r(.03, .08)})`; c.beginPath(); c.ellipse(r(x0, x1), r(top - 20, bot), r(6, 22), r(3, 8), r(-.3, .3), 0, 7); c.fill(); }      // snow and earth packed in
+    for (let y = bot - 18, row = 0; y > bot - (bot - top) * .5; y -= 17, row++) for (let x = x0 - 30 + (row % 2) * 24; x < x1 + 30; x += 48) { c.fillStyle = '#6c6c6c'; c.beginPath(); c.ellipse(x + r(-3, 3), y, 23, 8.5, 0, 0, 7); c.fill(); c.fillStyle = '#7c7c7c'; c.beginPath(); c.ellipse(x + r(-3, 3) - 4, y - 3, 15, 3.5, 0, 0, 7); c.fill(); }      // sandbags
+    for (let i = 0; i < (x1 - x0) / 120; i++) { const x = r(x0, x1), y = r(top + 30, bot - (bot - top) * .45); c.fillStyle = '#3e3e3e'; c.beginPath(); c.ellipse(x, y, 24, 22, 0, 0, 7); c.fill(); c.fillStyle = '#7a7a7a'; c.beginPath(); c.ellipse(x, y, 10, 9, 0, 0, 7); c.fill(); }      // tyres
+    for (let i = 0; i < (x1 - x0) / 260; i++) { const x = r(x0, x1 - 90), w = r(60, 110), y = r(top + 10, top + 50), h = r(70, 120), sk = r(-8, 8); c.fillStyle = '#757575'; c.beginPath(); c.moveTo(x + sk, y); c.lineTo(x + w + sk, y + r(-6, 6)); c.lineTo(x + w, y + h); c.lineTo(x, y + h); c.fill(); c.fillStyle = 'rgba(0,0,0,.18)'; for (let k = x + 4; k < x + w; k += 7) c.fillRect(k + sk * .5, y + 2, 2, h - 4); }      // corrugated sheets
+    for (let i = 0; i < (x1 - x0) / 420; i++) { const x = r(x0, x1 - 220), w = r(180, 300), y = r(top + 40, top + 80), h = r(38, 56); c.fillStyle = '#a8a8a8'; c.beginPath(); c.moveTo(x, y); c.quadraticCurveTo(x + w / 2, y + 7, x + w, y); c.lineTo(x + w, y + h); c.quadraticCurveTo(x + w / 2, y + h + 5, x, y + h); c.fill(); c.fillStyle = '#7e7e7e'; c.fillRect(x + 6, y + h * .42, w - 12, 3); }      // a long blank banner
+    c.restore();
+  };
+  const wall = mk(1047, 288); body(wall.getContext('2d'), 0, 1047, 70, 288, 1);
+  const gate = mk(646, 700), c = gate.getContext('2d'), [h0, ht, h1] = GATE_META.hole;
+  body(c, 0, h0 - 4, 462, 700, 2); body(c, h1 + 4, 646, 462, 700, 5);
+  c.fillStyle = '#5a5a5a';
+  for (const x of [h0 - 12, h1]) { c.fillRect(x, 330, 12, 370); c.fillRect(x - 3, 326, 18, 6); }      // two scaffold poles framing the way through
+  c.fillStyle = '#a4a4a4'; c.beginPath(); c.moveTo(h0 - 6, 352); c.quadraticCurveTo((h0 + h1) / 2, 362, h1 + 6, 352); c.lineTo(h1 + 6, 412); c.quadraticCurveTo((h0 + h1) / 2, 420, h0 - 6, 412); c.fill();      // the banner across, blank
+  c.fillStyle = '#808080'; c.fillRect(h0 + 10, 380, h1 - h0 - 20, 3);
+  for (const [x, top, w, wave] of [[70, 150, 78, 1], [150, 250, 62, -1], [500, 190, 70, 1], [584, 290, 58, 1]]) {      // flags on poles, plain, hanging in the rain
+    c.fillStyle = '#545454'; c.fillRect(x - 2.5, top, 5, 480 - top);
+    c.fillStyle = '#6e6e6e'; c.beginPath(); c.moveTo(x + 2, top + 4); c.quadraticCurveTo(x + w * .5, top + 4 + 10 * wave, x + w, top + 10); c.quadraticCurveTo(x + w * .8, top + w * .45, x + w * .9, top + w * .72); c.quadraticCurveTo(x + w * .45, top + w * .62 + 10 * wave, x + 2, top + w * .66); c.fill();
+    c.fillStyle = '#8a8a8a'; c.beginPath(); c.moveTo(x + 2, top + w * .33); c.quadraticCurveTo(x + w * .5, top + w * .3 + 8 * wave, x + w * .86, top + w * .4); c.lineTo(x + w * .85, top + w * .52); c.quadraticCurveTo(x + w * .45, top + w * .45 + 8 * wave, x + 2, top + w * .5); c.fill();      // a band of a second tone
+  }
+  return { gate, wall };
+}
 function wallTop(B) {
   // build 110 (owner: "wall top is a bit plain"): the top is no longer a ruled line but old worn coping: it dips and rises a
   // little along the wall, with here and there a stone gone (a small square notch), the same in both baked copies
@@ -2377,7 +2409,7 @@ function gatePainted() {
   // build 112 (owner: "the wall flickers there and then disappears"): the last piece on the left reached up to a whole
   // piece further left than W0, and was only drawn while the gate was near the screen, so it came and went as the
   // camera moved. Now the wall is cut off cleanly at W0, and drawn whenever any of it is on the screen (see draw()).
-  c.save(); c.beginPath(); c.rect(W0, -5000, 1e5, 10000); c.clip();
+  c.save(); c.beginPath(); c.moveTo(W0, GY + 10); c.quadraticCurveTo(W0 + 90, GY - 200, W0 + 260, GY - 420); c.lineTo(W0 + 260, -5000); c.lineTo(1e5, -5000); c.lineTo(1e5, 5000); c.lineTo(W0, 5000); c.clip();      // build 15: the barricade begins in a slope of rubble, not a cut
   for (let x = f.x + 14 - ww; x + ww > W0; x -= ww - 1, n++) if (x < cam + VW + 40 && x + ww > cam - 40) both(WALL_P, x, GY + 2 - wh, ww, wh, n % 2);
   c.restore();
   n = 0;
@@ -2862,41 +2894,47 @@ function bakeDream() {
   const tone = (src, col) => { const m = mk(DW, DH), g = m.getContext('2d'); g.drawImage(src, 0, 0); g.globalCompositeOperation = 'source-in'; g.fillStyle = col; g.fillRect(0, 0, DW, DH); return m; };
   DREAM = { cityDusk: tone(city, '#252833'), cityBlack: tone(city, '#07070a'), hillDusk: tone(hills, '#3b4050'), hillBlack: tone(hills, '#0d0c0e'), lit: lit.map(([x, y]) => [330 * .4 + x * .6, SEA * .4 + y * .6]), can: mk(DW, DH), puffs: [], bands: [] };
   for (let i = 0; i < 46; i++) DREAM.bands.push([r(-40, DW + 40), [120, 170, 215, 248][i % 4] + r(-10, 10), r(50, 130), r(8, 16), r(.5, 1)]);      // long soft bands of cloud at dusk
-  const P2 = DREAM.puffs;      // the cloud, as soft puffs: [kind, a, b, size, shade]
-  for (let i = 0; i < 70; i++) P2.push(['cap', r(0, 6.283), r(.2, 1), r(.22, .42), r(0, 1)]);
-  for (let i = 0; i < 26; i++) P2.push(['stem', i / 26, r(-.5, .5), r(.12, .2), r(0, 1)]);
-  for (let i = 0; i < 22; i++) P2.push(['skirt', r(-1, 1), r(0, 1), r(.15, .3), r(0, 1)]);
+  // the cloud (build 15; owner, with two photographs of a fiery mushroom cloud): many small puffs, so the cap boils like a
+  // cauliflower: [kind, x, y (in the cap's own units), size, heat, dark]. Hottest low in the cap and in its middle; dark
+  // smoke in the folds; a thick glowing stem; a collar under the cap; a skirt along the ground.
+  const P2 = DREAM.puffs;
+  for (let i = 0; i < 240; i++) { const a = r(0, 6.283), d = Math.sqrt(R2()), x = Math.cos(a) * d, y = Math.sin(a) * d * .78; P2.push(['cap', x, y, r(.09, .2), .35 + .45 * (y + .78) / 1.56 + .25 * (1 - d) + r(-.15, .15), 0]); }
+  for (let i = 0; i < 40; i++) { const a = r(0, 6.283), d = Math.sqrt(R2()) * .85, x = Math.cos(a) * d, y = Math.sin(a) * d * .7 - .18; P2.push(['cap', x, y, r(.1, .18), 0, r(.25, .5)]); }      // the dark folds
+  for (let i = 0; i < 40; i++) P2.push(['stem', i / 40, r(-.6, .6), r(.1, .16), .7 + r(-.1, .2), 0]);
+  for (let i = 0; i < 34; i++) { const a = r(0, 6.283); P2.push(['collar', Math.cos(a), Math.sin(a), r(.08, .14), .6 + r(-.15, .2), 0]); }
+  for (let i = 0; i < 30; i++) P2.push(['skirt', r(-1, 1), r(0, 1), r(.15, .3), .5 + r(-.2, .2), 0]);
 }
 // u: 0 calm dusk .. the cloud's growth (0..1) once the flash has come; fl: the flash's white (0..1); fire: how much the
 // city is lit from behind (0 = dusk, 1 = black against the fire)
 function drawDream(c, u, fire) {
   const D = DREAM, W = DW, H = DH, mixc = (a, b, k) => a.map((v, i) => Math.round(v + (b[i] - v) * k)), rgb = (a, al = 1) => `rgba(${a[0]},${a[1]},${a[2]},${al})`;
-  const top = mixc([42, 48, 66], [34, 24, 26], fire), hor = mixc([140, 136, 142], [128, 82, 58], fire), g = c.createLinearGradient(0, 0, 0, SEA);
+  const top = mixc([42, 48, 66], [22, 10, 10], fire), hor = mixc([140, 136, 142], [214, 92, 36], fire), g = c.createLinearGradient(0, 0, 0, SEA);
   g.addColorStop(0, rgb(top)); g.addColorStop(.75, rgb(mixc(top, hor, .6))); g.addColorStop(1, rgb(hor)); c.fillStyle = g; c.fillRect(0, 0, W, H);
   if (fire < .5) { const gl = c.createRadialGradient(420, SEA - 10, 0, 420, SEA - 10, 260); gl.addColorStop(0, 'rgba(230,196,160,.22)'); gl.addColorStop(1, 'rgba(230,196,160,0)'); c.fillStyle = gl; c.fillRect(0, 0, W, H); }      // the last of the day
-  for (const [x, y, rw, rh, a] of D.bands) { const col = mixc(mixc([86, 90, 108], [205, 170, 140], Math.max(0, (y - 150) / 110)), [20, 14, 16], fire), q = c.createRadialGradient(0, 0, 0, 0, 0, 1);
+  for (const [x, y, rw, rh, a] of D.bands) { const col = mixc(mixc([86, 90, 108], [205, 170, 140], Math.max(0, (y - 150) / 110)), mixc([30, 12, 10], [236, 150, 70], Math.max(0, (y - 140) / 120)), fire), q = c.createRadialGradient(0, 0, 0, 0, 0, 1);
     c.save(); c.translate(x, y); c.scale(rw, rh); q.addColorStop(0, rgb(col, .55 * a)); q.addColorStop(1, rgb(col, 0)); c.fillStyle = q; c.fillRect(-1, -1, 2, 2); c.restore(); }
   const cx = 420, base = SEA - 6, e = 1 - Math.pow(1 - u, 2.2);
   if (fire > 0) {
-    const capY = base - 16 - 150 * e, R = 12 + 112 * e, glow = c.createRadialGradient(cx, capY, 0, cx, capY, R * 3);
-    glow.addColorStop(0, `rgba(255,190,120,${.35 * fire})`); glow.addColorStop(1, 'rgba(255,150,90,0)'); c.fillStyle = glow; c.fillRect(0, 0, W, H);
-    for (const [k, a, b, sz, sh] of D.puffs) {
-      let x, y, rr, hot;
-      if (k === 'cap') { x = cx + Math.cos(a) * R * b * 1.05; y = capY + Math.sin(a) * R * b * .42 - R * .12; rr = R * sz; hot = Math.max(0, Math.sin(a)) * .7 + (1 - b) * .3; }
-      else if (k === 'stem') { const yy = base - (base - capY) * a; x = cx + b * (5 + 10 * e) * (1 + (1 - a) * .8); y = yy; rr = (7 + 14 * e) * sz * 6; hot = .55 + .45 * a; }
-      else { x = cx + a * (40 + 140 * e); y = base - 4 - b * 14 * e; rr = (12 + 40 * e) * sz * 2.4; hot = .2; }
-      if (u <= 0 && k !== 'cap') continue;
-      const heat = Math.max(0, 1 - u * 1.4) * .8 + hot * (.5 + .25 * u), col = mixc([70, 58, 58], [250, 172, 100], Math.min(1, heat * (.5 + .5 * sh))), q = c.createRadialGradient(x, y, 0, x, y, rr);
-      q.addColorStop(0, rgb(col, .9)); q.addColorStop(.55, rgb(col, .5)); q.addColorStop(1, rgb(col, 0)); c.fillStyle = q; c.fillRect(x - rr, y - rr, rr * 2, rr * 2);
+    const capY = base - 50 - 150 * e, R = 12 + 92 * e, glow = c.createRadialGradient(cx, capY + R * .3, 0, cx, capY, R * 3.2);
+    glow.addColorStop(0, `rgba(255,150,60,${.55 * fire})`); glow.addColorStop(.4, `rgba(200,70,30,${.3 * fire})`); glow.addColorStop(1, 'rgba(120,30,20,0)'); c.fillStyle = glow; c.fillRect(0, 0, W, H);
+    const cool = Math.max(0, (u - .55) / .45) * .45, ramp = h => { h = Math.max(0, Math.min(1, h - cool)); const S = [[0, [58, 26, 20]], [.45, [196, 74, 28]], [.72, [250, 150, 58]], [.9, [255, 214, 130]], [1, [255, 244, 210]]]; for (let k = 1; k < S.length; k++) if (h <= S[k][0]) { const t = (h - S[k - 1][0]) / (S[k][0] - S[k - 1][0]); return mixc(S[k - 1][1], S[k][1], t); } return S[S.length - 1][1]; };
+    const puff = (x, y, rr, col, al) => { const q = c.createRadialGradient(x, y, 0, x, y, rr); q.addColorStop(0, rgb(col, al)); q.addColorStop(.6, rgb(col, al * .55)); q.addColorStop(1, rgb(col, 0)); c.fillStyle = q; c.fillRect(x - rr, y - rr, rr * 2, rr * 2); };
+    const order = ['skirt', 'stem', 'collar', 'cap'];
+    for (const kind of order) for (const [k, a, b, sz, ht, dk] of D.puffs) {
+      if (k !== kind) continue;
+      if (k === 'cap') { const x = cx + a * R, y = capY + b * R, rr = sz * R * 1.25; if (dk) puff(x, y, rr, mixc([70, 26, 14], ramp(.3), .3), .4 * dk); else puff(x, y, rr, ramp(ht + .15 * (1 - u)), .85); }
+      else if (k === 'stem') { if (u <= 0) continue; const y = base - (base - capY - R * .55) * a, x = cx + b * (6 + 9 * e) * (1.3 - a * .6); puff(x, y, (6 + 12 * e) * sz * 6, ramp(ht + .1 * a), .9); }
+      else if (k === 'collar') { if (u <= 0) continue; puff(cx + a * R * .75, capY + R * .6 + b * R * .12, sz * R, ramp(ht), .7); }
+      else { if (u <= 0) continue; const x = cx + a * (40 + 150 * e), y = base - 2 - b * 12 * e; puff(x, y, (12 + 36 * e) * sz * 2.4, ramp(ht * (1 - Math.abs(a) * .5)), .7); }
     }
-    if (u < .35) { const fb = c.createRadialGradient(cx, base - 30 * e / .35 * .35, 0, cx, base - 10, 40); fb.addColorStop(0, `rgba(255,246,226,${1 - u / .35})`); fb.addColorStop(1, 'rgba(255,200,140,0)'); c.fillStyle = fb; c.fillRect(0, 0, W, H); }      // the fireball, at first
+    { const q = c.createLinearGradient(0, base - 6, 0, base + 6); q.addColorStop(0, 'rgba(255,220,160,0)'); q.addColorStop(.5, `rgba(255,226,170,${.8 * (1 - u * .6)})`); q.addColorStop(1, 'rgba(255,220,160,0)'); c.fillStyle = q; c.fillRect(cx - 160 - 60 * e, base - 6, 320 + 120 * e, 12); }      // the flash along the ground
   }
   c.drawImage(D.hillDusk, 0, 0); if (fire > 0) { c.globalAlpha = fire; c.drawImage(D.hillBlack, 0, 0); c.globalAlpha = 1; }
   c.drawImage(D.cityDusk, 0, 0); if (fire > 0) { c.globalAlpha = fire; c.drawImage(D.cityBlack, 0, 0); c.globalAlpha = 1; }
   if (fire < 1) { c.fillStyle = `rgba(236,196,130,${.85 * (1 - fire)})`; for (const [x, y] of D.lit) c.fillRect(x, y, 1, 1.3); }      // a few lit windows, before
-  const w = c.createLinearGradient(0, SEA, 0, H); w.addColorStop(0, rgb(mixc([70, 74, 88], [96, 62, 46], fire))); w.addColorStop(1, rgb(mixc([22, 25, 32], [20, 14, 14], fire))); c.fillStyle = w; c.fillRect(0, SEA, W, H - SEA);      // the bay
+  const w = c.createLinearGradient(0, SEA, 0, H); w.addColorStop(0, rgb(mixc([70, 74, 88], [150, 60, 26], fire))); w.addColorStop(1, rgb(mixc([22, 25, 32], [20, 14, 14], fire))); c.fillStyle = w; c.fillRect(0, SEA, W, H - SEA);      // the bay
   c.save(); c.globalAlpha = .28; c.translate(0, SEA * 2 + 1); c.scale(1, -1); c.drawImage(fire > .5 ? D.cityBlack : D.cityDusk, 0, 0); c.restore();      // the city in the water
-  if (fire > 0) { c.save(); c.translate(cx, SEA + 26); c.scale(130, 24); const q = c.createRadialGradient(0, 0, 0, 0, 0, 1); q.addColorStop(0, `rgba(240,160,100,${.22 * fire})`); q.addColorStop(1, 'rgba(240,160,100,0)'); c.fillStyle = q; c.fillRect(-1, -1, 2, 2); c.restore(); }      // light on the ripples
+  if (fire > 0) { c.save(); c.translate(cx, SEA + 26); c.scale(130, 24); const q = c.createRadialGradient(0, 0, 0, 0, 0, 1); q.addColorStop(0, `rgba(255,170,80,${.4 * fire})`); q.addColorStop(1, 'rgba(240,160,100,0)'); c.fillStyle = q; c.fillRect(-1, -1, 2, 2); c.restore(); }      // light on the ripples
 }
 function wakeEyes(then) {
   const ec = document.getElementById('eyes'); if (!window.EYESWAKE || !ec) { setTimeout(then, 1700); return; }
@@ -3150,7 +3188,7 @@ document.getElementById('on2').onclick = () => SL.on ? go3() : HL.on ? go5() : g
   // the weeping (second opening line) is no longer waited for before "Open the book": a third less to fetch first.
   // If it is not ready by its line he simply stands (WEEP.ready is checked there).
   loadPack('christian-weep', WEEP).catch(() => {}).then(() => loadPack('christian-turn', TURN)).then(() => bookLoaded('TURN')).catch(() => {}).then(nbLoad);
-  Promise.all([loadPack('evangelist', EVA), loadPack('evangelist-stand', EVS)]).then(() => Promise.all([loadImg('family.webp').then(im => { FAM = im; if (im) FAM_SH = mkShadow(im); }), loadImg('gate.webp').then(im => { if (im) GATE_P = bakeTint(im, .42, .4); }), loadImg('wall.webp').then(im => { if (im) WALL_P = wallTop(bakeTint(im, .42, .4)); }), ...['a', 'b', 'c'].map(key => loadImg('neighbor-' + key + '.webp').then(im => { WATCH_IM[key] = im; })), ...['a', 'b', 'c'].map(key => loadPack('neighbor-' + key, WATCH_PACK[key]).catch(() => {})), loadImg('christian-back.webp').then(im => { BACK = im; }), loadPack('christian-run', RUN), loadPack('christian-run-plain', RUNP)]))
+  Promise.all([loadPack('evangelist', EVA), loadPack('evangelist-stand', EVS)]).then(() => Promise.all([loadImg('family.webp').then(im => { FAM = im; if (im) FAM_SH = mkShadow(im); }), Promise.resolve().then(() => { const B = barricade(); GATE_P = bakeTint(B.gate, .42, .4); WALL_P = bakeTint(B.wall, .42, .4); }), ...['a', 'b', 'c'].map(key => loadImg('neighbor-' + key + '.webp').then(im => { WATCH_IM[key] = im; })), ...['a', 'b', 'c'].map(key => loadPack('neighbor-' + key, WATCH_PACK[key]).catch(() => {})), loadImg('christian-back.webp').then(im => { BACK = im; }), loadPack('christian-run', RUN), loadPack('christian-run-plain', RUNP)]))
     .then(() => Promise.all([loadPack('obstinate', OBS), loadPack('pliable', PLI), loadImg('obstinate-stand.webp').then(im => { OBS_ST = im; }), loadImg('pliable-stand.webp').then(im => { PLI_ST = im; })]));
   for (const [who, txt] of INTRO) vox(who, txt);          // the first words, ready before Begin is pressed
 })();
