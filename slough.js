@@ -194,7 +194,7 @@ const SL = (() => {
   // build 9: flat SILHOUETTES (one tone, no inner detail), two poses (mech.webp header down, mech2.webp header lifted)
   function loadMech() { MECHS = []; [['mech', -298, .2, 1.85, .7, 1], ['mech2', 128, .13, 1.75, .8, 1]].forEach(m => { const im = new Image(); im.onload = () => { const c = mk(im.width, im.height), k = c.getContext('2d');
       k.drawImage(im, 0, 0); k.globalCompositeOperation = 'source-in'; k.fillStyle = css(tone(m[4])); k.fillRect(0, 0, c.width, c.height);
-      MECHS.push({ x: m[1], p: m[2], s: m[3], b: { c, k: im.height / 560, x0: -530, y0: -556 } }); MECHS.sort((u, v) => u.p - v.p); }; im.src = 'assets/' + m[0] + '.webp?v=9'; }); }
+      MECHS.push({ x: m[1], p: m[2], s: m[3], b: { c, k: im.height / 560, x0: -530, y0: -556 } }); MECHS.sort((u, v) => u.p - v.p); }; im.src = 'assets/' + m[0] + '.webp?v=11'; }); }
   // build 9: a diffuse mist of its own (soft blobs, wrapping sideways), laid over the feet of the far things
   let FARMIST = null;
   function farMist() { if (FARMIST) return FARMIST; const c = mk(512, 96), k = c.getContext('2d'); let sd = 41; const rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
