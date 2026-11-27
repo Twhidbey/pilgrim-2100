@@ -10,6 +10,7 @@
 - **Build 2 (Nov 27 2026): the old engine and Levels 1, 2, 3 and 5 are here and play through** (the house, Level 4, was left behind; `rooms.js` is a stand-in). Nothing is changed in them yet. The owner's answers: the dream wakes him; he keeps his book in his hand; the burden is a pack of his civilization's stuff, not shown inside. His coded eyes are an uncommitted lab in the chat "Whole game: gamewide recommendations"; that chat was asked to push them to a branch `eyes` of the old repository. **First real piece to build: the owner chooses** (proposed: the fields and no man's land in the Slough, or the steeple and graveyard at the Cross).
 - **Build 3 (Nov 27 2026): the Slough has its first signs of our age** (farm machines over the fields, wire, hedgehogs, a wreck and broken trunks in the mire; `farThings()` in `slough.js`; see `CLAUDE.md`). Before and after stills were sent; waiting on the owner's eyes. **The eyes for the opening:** the "Whole game" chat holds them but will not push them without the owner's plain yes, because their shapes are tracked from the owner's own face and this repository is public.
 - **Build 4:** the machine redrawn as a huge walking combine at the size of the owner's reference picture (see `CLAUDE.md`). Asked by the owner: can public things live in one repo and most code in a private one (answered in chat; no change made).
+- **Build 5:** the fields' machines are now two copies of one painted walking combine (`assets/mech.webp`), far off in the mist behind the trees (see `CLAUDE.md`).
 - **Next, in this order (each waits on the owner):**
   1. The world: one of the old concept page's four directions (A Fallen towers, B Rust and ash, C The green return, D Glass age) or a new one, redrawn to the art direction in `CLAUDE.md`. Show stills; build nothing first.
   2. The retelling: who and what each person and place becomes in 2100, and a first draft of the first scene's words, checked against the book file.
@@ -19,7 +20,7 @@
 
 ## Spending
 
-Running total for this project: **$0.00**.
+Running total for this project: **about $0.15** (build 5: one picture of the two machines).
 
 ## Voices
 
