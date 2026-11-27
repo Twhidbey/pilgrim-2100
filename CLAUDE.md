@@ -24,7 +24,28 @@ What follows from it:
 - **The machines:** tall quiet working machines in farmland, in the spirit of Jakub Różalski's paintings (machines in a pastoral land, painted, not science fiction). He is a living artist: take the idea, never copy his designs, his world or any picture of his. Draw ours as plain quiet silhouettes in the layered look (the art direction's "no fantasy illustration" still rules: real places, real weather, the machine one strange thing in the picture).
 - **Allegory by subtle strokes:** no names like Obstinate or Worldly Wiseman, no meanings explained; people and places are real and of 2100, and carry the book's ideas underneath, as Narnia and The Lord of the Rings do. Never state the moral.
 - **The Cross level is open:** the owner will come back to it. Do not design it.
-- **To ask the owner (raised Nov 26):** who plays this game now. The old one was for children of 7 to 10; a bomb, a war and "debauchery" told for that age need his ruling on how gently (the old rule: the dark parts are ruled level by level), or the audience is now older.
+- **Answered Nov 27:** still for children, PG (see the next section).
+
+## THE OWNER'S SECOND WORD: KEEP THE OLD LOOK, ADD OUR AGE TO IT (Nov 27 2026)
+
+"Still for kids - gotta keep it PG. the opening scene looks good as a sketch--but we'll have to do some work. I'd like to keep a lot of the look I've developed for the slough and mountain and cross scenes, esp the colors and landscape ... but of course add modern elements if applicable (once he goes into nature, it'll look pretty similar) - the big things are sign of civilization, farm fields at start of slough could have mechs, the slough itself could be a no man's land of war (think Ukraine), beelzebub's castle can use drones, legality's city could be modern bomb shelter at foot of volcanic mt, the walls at start of Cross scene could be a tunnel or trench (maybe trench) - the cross itself could be the steeple of an old church sticking out of the ground. With graveyard below it. The burden could be all the books of his civilization and some personal belonging linking to his sinful self."
+
+**So this is no longer a clean break in its pictures.** The players are still children of 7 to 10, and it stays PG: war is shown by what it leaves (wire, wrecks, broken trees, empty trenches), never by bodies, wounds or killing on screen; "debauchery" is told as a town that does not care, at a distance. The landscapes, colours and light of the old game's Slough (Level 2), burning mountain (Level 3) and Cross (Level 5) are KEPT, with signs of our age added where people have been; out in nature it looks much as it did. **To build, bring over the old game's engine and those three levels' code (`index.html`'s engine, `slough.js`, `hill.js`, `cross.js`, their assets) as the starting point and change them here**; the opening, the first level (the city at war) and the words are new.
+
+| The book | In the old game | In 2100 (the owner's idea) |
+|---|---|---|
+| The wrath to come, foreseen | his book, his weeping | the bomb, dreamed; his eyes open |
+| The City of Destruction | a rainy 1600s town | a city at war, not yet ended; a town that does not care |
+| The plain before the Slough | a gold field | farm fields worked by tall machines |
+| The Slough of Despond | a grey mire, one great oak | a no man's land of war (the owner: "think Ukraine"): mud, wire, wrecks |
+| Mr. Legality's village | a village at the hill's foot | a bomb shelter at the foot of the volcanic mountain: safety by our own works |
+| Beelzebub's castle and its arrows | a painted castle, four arrows | a far fortress that sends drones |
+| The walls called Salvation | a low wall either side of the highway | a trench |
+| The Cross | a plain cross on a hill | the steeple of an old church sticking out of the ground |
+| The sepulchre | a cave at the hill's foot | the graveyard below the steeple |
+| The burden | a sack on his back | all the books of his civilization, and something of his own that ties him to his sin |
+
+**Raised with the owner, not yet answered:** (1) in the book it is a BOOK that wakes him, and now books are the burden: what wakes him in 2100 (the dream alone, or one small book among the many, the one he keeps)? (2) what the personal belonging is; (3) the machines at the start still work, and by which level they have stopped; (4) the eyes he coded: where they are. **Shown Nov 27:** a sheet of his six ideas sketched in code onto stills of the old levels (not in the repo).
 
 ## Decisions waiting on the owner (nothing is built until these are settled)
 
