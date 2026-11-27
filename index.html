@@ -202,7 +202,7 @@ body.portrait:not(.playing) #rot{display:none}
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 13 · Nov 27 2026</div>
+  <div id="build">build 14 · Nov 27 2026</div>
   <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
@@ -361,6 +361,11 @@ function house(x, gy, w, h, s, tall) {
 // kind: 'col', 'crown', 'old', 'needle' or a plain tower. Only a few lit windows are stored (L.wins), never the dark ones.
 function tower(x, gy, w, h, s, kind) {
   const b = gy + 60, top = gy - h, m = x + w / 2;
+  if (kind === 'mast') {                   // a radio mast on the hill: a thin lattice, tapering, a few braces
+    const bw = w / 2; poly([[m - bw, b], [m - bw, gy], [m - .7 * s, top], [m + .7 * s, top], [m + bw, gy], [m + bw, b]]);
+    for (let k = 1; k < 6; k++) { const y = gy - h * k / 6, hw = bw * (1 - k / 6) + .7 * s; poly([[m - hw - .6 * s, y], [m + hw + .6 * s, y], [m + hw + .6 * s, y + 1.1 * s], [m - hw - .6 * s, y + 1.1 * s]]); }
+    return;
+  }
   if (kind === 'needle') {
     const lw = w * .42, wy = gy - h * .55, dy = gy - h * .86, dw = w * 1.05, st = 2.6 * s;
     poly([[m - lw, b], [m - lw, gy], [m - w * .08, wy], [m - w * .14, dy + 14 * s], [m - dw * .7, dy + 9 * s], [m - dw, dy + 3 * s], [m - dw, dy - 3 * s], [m - dw * .75, dy - 9 * s], [m - w * .3, dy - 13 * s], [m - st, dy - 16 * s], [m - st * .5, top], [m + st * .5, top], [m + st, dy - 16 * s], [m + w * .3, dy - 13 * s], [m + dw * .75, dy - 9 * s], [m + dw, dy - 3 * s], [m + dw, dy + 3 * s], [m + dw * .7, dy + 9 * s], [m + w * .14, dy + 14 * s], [m + w * .08, wy], [m + lw, gy], [m + lw, b]]);
@@ -680,11 +685,11 @@ function buildScenery() {
       // than they are tall; only the church spires stand high; few windows, and few of them lit.
       // Build 13: Seattle's towers in place of the old town's low houses and spires (see tower()). The far row (i = 1) holds the
       // tall towers and, once each, the four special shapes; the near row (i = 2), mostly hidden behind the street, lower blocks.
-      const far = i === 1, specials = far ? { 560: 'needle', 905: 'col', 1240: 'crown', 1395: 'old' } : {}, done = {};
+      const far = i === 1, specials = far ? { 470: 'mast', 515: 'mast', 600: 'needle', 905: 'col', 1240: 'crown', 1395: 'old' } : {}, done = {};
       for (let x = near ? field : -50 * s - R() * 50 * s; x < edge;) {
         const tp = clamp((edge - x) / (260 * s), .35, 1) * clamp(.55 + (x - field) / 260, .55, 1);
         const sp = Object.keys(specials).find(k => !done[k] && x > +k - 40);
-        if (sp) { done[sp] = true; const kind = specials[sp], w = { needle: 44, col: 66, crown: 50, old: 22 }[kind] * s, h = { needle: 560, col: 600, crown: 470, old: 330 }[kind] * s; tower(x, gy(x + w / 2), w, h, s, kind); x += (kind === 'needle' ? w * 1.4 : w) + rr(4, 10) * s; continue; }
+        if (sp) { done[sp] = true; const kind = specials[sp], w = { mast: 16, needle: 44, col: 66, crown: 50, old: 22 }[kind] * s, h = { mast: 360, needle: 560, col: 600, crown: 470, old: 330 }[kind] * s * (sp === '515' ? .85 : 1); tower(x, gy(x + w / 2), w, h, s, kind); x += (kind === 'needle' ? w * 1.4 : w) + rr(4, 10) * s; continue; }
         const w = rr(36, 82) * s, h = (far ? rr(150, 430) * (R() < .25 ? .5 : 1) : rr(70, 170)) * s * tp;
         tower(x, gy(x + w / 2), w, h, s);
         x += w + (far ? rr(-6, 8) : rr(-8, -1)) * s; if (far && R() < .12) x += rr(14, 50) * s;      // the near row stands shoulder to shoulder (a gap showed the bright mist as a pale slot)
@@ -2113,21 +2118,28 @@ const rowMeta = key => key === 'h' ? HOUSE_META : NB_META[key], rowPic = key => 
 // (the old door and window holes kept exactly where they were, so the doors, the lit rooms and the people in doorways
 // work as before) and floors of dark windows above, a cornice, a box, a tank or a mast on the roof. Each is made once
 // as a grey picture and baked like the paintings were (bakeTint). floors = how many floors above the shop.
-const STREET = { h: { floors: 2, roof: 'box' }, b: { floors: 3, roof: 'tank', esc: true }, c: { floors: 1, roof: 'mast' } };
+// Build 14 (owner, with photographs of Queen Anne: "Queen Anne for street view"): brick, a low shop strip with an awning and a tall
+// blade sign (unlit: the power is spotty; no neon, by the art direction), paired windows, a corbelled cornice.
+const STREET = { h: { floors: 3, roof: 'box', pairs: true }, b: { floors: 3, roof: 'tank', esc: true, blade: 'side' }, c: { floors: 0, roof: 'step', awning: true, blade: 'tall' } };
 function streetFront(key) {
   const M = rowMeta(key), F = STREET[key], FL = 104, shop = 196, H0 = Math.round(M.h), E = shop + F.floors * FL + 26 - H0, H = H0 + E, W = Math.ceil(M.w);
   const sh = v => [v[0], v[1] + E, v[2], v[3]];
   M.door = sh(M.door); M.wins = M.wins.map(sh); M.h = H;
-  const m = mk(W, H + 40), c = m.getContext('2d'), Rr = rng(key.charCodeAt(0) * 31 + 7), r = (a, b) => a + (b - a) * Rr(), T = 40;      // T: room above for the roof things
+  const T = 130, m = mk(W, H + T), c = m.getContext('2d'), Rr = rng(key.charCodeAt(0) * 31 + 7), r = (a, b) => a + (b - a) * Rr();      // T: room above for the roof things and the tall sign
   c.fillStyle = '#8c8c8c'; c.fillRect(0, T, W, H);
-  for (let i = 0; i < 900; i++) { c.fillStyle = `rgba(${Rr() < .5 ? '255,255,255' : '0,0,0'},${r(.02, .06)})`; c.fillRect(r(0, W), T + r(0, H), r(2, 9), r(1, 3)); }      // a little grain, so the bake keeps some life
-  c.fillStyle = '#6a6a6a'; c.fillRect(-2, T, W + 4, 14); c.fillStyle = '#777'; c.fillRect(0, T + 14, W, 5);      // cornice
+  for (let y = T + 20; y < T + H; y += 5) { c.fillStyle = `rgba(0,0,0,${r(.05, .1)})`; c.fillRect(0, y, W, 1); for (let x = (y / 5 % 2) * 7; x < W; x += 14) c.fillRect(x, y - 4, 1, 4); }      // brick courses
+  for (let i = 0; i < 700; i++) { c.fillStyle = `rgba(${Rr() < .5 ? '255,255,255' : '0,0,0'},${r(.02, .07)})`; c.fillRect(r(0, W), T + r(0, H), r(3, 9), r(1, 3)); }      // and weather on them
+  c.fillStyle = '#6a6a6a'; c.fillRect(-4, T, W + 8, 12); c.fillStyle = '#777'; c.fillRect(0, T + 12, W, 4); for (let x = 6; x < W - 6; x += 16) c.fillRect(x, T + 16, 6, 6);      // a corbelled cornice
   const sy = T + H - shop; c.fillStyle = '#5e5e5e'; c.fillRect(0, sy - 12, W, 16);                              // the sign band over the shops
   const cols = Math.max(2, Math.round(W / 74)), cw = W / cols;
-  for (let f = 0; f < F.floors; f++) { const y = T + 30 + f * FL; for (let i = 0; i < cols; i++) { c.fillStyle = '#4c4c4c'; c.fillRect(i * cw + cw * .24, y + 14, cw * .52, FL * .56); c.fillStyle = '#9a9a9a'; c.fillRect(i * cw + cw * .2, y + 14 + FL * .56, cw * .6, 4); } }
+  for (let f = 0; f < F.floors; f++) { const y = T + 30 + f * FL; for (let i = 0; i < cols; i++) { const ws = F.pairs ? [[.16, .3], [.54, .3]] : [[.24, .52]]; for (const [a, ww] of ws) { c.fillStyle = '#4a4a4a'; c.fillRect(i * cw + cw * a, y + 12, cw * ww, FL * .6); c.fillStyle = '#5a5a5a'; c.fillRect(i * cw + cw * a, y + 12 + FL * .3, cw * ww, 2); c.fillStyle = '#9a9a9a'; c.fillRect(i * cw + cw * (a - .03), y + 12 + FL * .6, cw * (ww + .06), 4); } } }
   if (F.esc) { c.strokeStyle = '#3e3e3e'; c.lineWidth = 3; const ex = W * .62, ew = W * .3; for (let f = 0; f < F.floors; f++) { const y = T + 30 + f * FL + FL * .78; c.strokeRect(ex, y, ew, 3); c.beginPath(); c.moveTo(ex + (f % 2 ? 6 : ew - 6), y); c.lineTo(ex + (f % 2 ? ew - 6 : 6), y + FL); c.stroke(); } }
   c.fillStyle = '#626262'; for (let i = 0; i <= cols; i++) c.fillRect(i * cw - 3, sy + 4, 6, shop - 4);      // piers between the shopfronts
-  if (F.roof === 'box') { c.fillStyle = '#7a7a7a'; c.fillRect(W * .58, T - 22, W * .2, 22); c.fillRect(W * .2, T - 9, W * .08, 9); }
+  if (F.awning) { c.fillStyle = '#4e4e4e'; c.beginPath(); c.moveTo(-4, sy - 8); c.lineTo(W + 4, sy - 8); c.lineTo(W + 4, sy + 6); c.lineTo(-4, sy + 6); c.fill(); for (let x = 0; x < W; x += 30) { c.fillStyle = '#585858'; c.fillRect(x, sy - 8, 15, 14); } }      // a long awning over the shops
+  if (F.blade === 'tall') { const bx = W * .22; c.fillStyle = '#3e3e3e'; c.fillRect(bx, T - 96, 30, sy - T + 70); c.beginPath(); c.moveTo(bx - 4, T - 96); c.lineTo(bx + 15, T - 118); c.lineTo(bx + 34, T - 96); c.fill(); c.fillStyle = '#4a4a4a'; for (let y = T - 84; y < sy - 40; y += 24) c.fillRect(bx + 7, y, 16, 15); }      // a tall blade sign, its letters dark
+  if (F.blade === 'side') { c.fillStyle = '#3e3e3e'; c.fillRect(W - 26, T + 40, 22, 150); c.fillRect(W - 30, T + 54, 6, 4); c.fillRect(W - 30, T + 170, 6, 4); }
+  if (F.roof === 'step') { c.fillStyle = '#8c8c8c'; c.fillRect(W * .55, T - 18, W * .3, 18); c.fillRect(W * .62, T - 30, W * .16, 12); }
+  else if (F.roof === 'box') { c.fillStyle = '#7a7a7a'; c.fillRect(W * .58, T - 22, W * .2, 22); c.fillRect(W * .2, T - 9, W * .08, 9); }
   else if (F.roof === 'tank') { c.fillStyle = '#6e6e6e'; const tx = W * .28; c.fillRect(tx, T - 34, 44, 22); c.beginPath(); c.moveTo(tx - 2, T - 34); c.lineTo(tx + 22, T - 40); c.lineTo(tx + 46, T - 34); c.fill(); for (const lx of [4, 20, 36]) c.fillRect(tx + lx, T - 12, 3, 12); }
   else { c.fillStyle = '#6e6e6e'; c.fillRect(W * .66, T - 16, W * .12, 16); c.fillRect(W * .7, T - 30, 6, 14); c.fillRect(W * .3, T - 10, W * .1, 10); }      // vents and boxes (a mast with a crossbar read as a cross)
   for (const v of key === 'h' ? [M.door, ...M.wins] : M.wins) c.clearRect(v[0], T + v[1], v[2], v[3]);      // the old holes, where they were
@@ -2170,6 +2182,26 @@ function drawSmoke(cam) {
     const u = m.t / 320, r = (3 + 22 * Math.sqrt(u)) * m.s, a = .2 * Math.min(1, m.t / 20) * (1 - u) * (1 - u);
     const tone = mix(mix(PAL.hazeC, [226, 228, 232], .45), mix(PAL.hazeW, [240, 232, 214], .45), warm(x / VW)), g = c.createRadialGradient(x, m.y, 0, x, m.y, r);
     g.addColorStop(0, css(tone, a)); g.addColorStop(1, css(tone, 0)); c.fillStyle = g; c.fillRect(x - r, m.y - r, r * 2, r * 2);
+  }
+}
+// UTILITY POLES (build 14; Queen Anne's streets): wooden poles along the kerb, a little nearer than the buildings, with two
+// wires sagging between them. Each pole has a one-sided bracket with insulators, never a symmetric crossarm (it would read as a
+// cross). Places on the road, clear of the doors. Drawn at the 'mid' level, after the buildings.
+const POLES = [1700, 2560, 3200, 3860, 4570, 5060, 5560, 6080, 6560];
+function drawPoles(cam) {
+  const L = LEVELS.mid, p = L.par, k = L.k, c = ctx, top = 330 * k;
+  const pts = POLES.map(a => [lineUp(a, p) - cam * p, L.base + 4]);
+  if (pts[0][0] > VW + 60 || pts[pts.length - 1][0] < -60) return;
+  const wm = warm(.5), dark = css(mix(layerCol(.95)[0], layerCol(.95)[1], wm));
+  c.strokeStyle = dark; c.lineWidth = 1.1;
+  for (let i = 0; i + 1 < pts.length; i++) { const [x0, y0] = pts[i], [x1] = pts[i + 1]; if (x1 < -20 || x0 > VW + 20) continue;
+    for (const [dy, sag] of [[top - 6 * k, 18 * k], [top - 26 * k, 24 * k]]) { c.beginPath(); c.moveTo(x0 + 16 * k, y0 - dy); c.quadraticCurveTo((x0 + x1) / 2 + 8 * k, y0 - dy + sag * 2, x1 + 16 * k, y0 - dy); c.stroke(); } }
+  c.fillStyle = dark;
+  for (const [i, [x, y]] of pts.entries()) { if (x < -40 || x > VW + 40) continue;
+    c.beginPath(); c.moveTo(x - 4.5 * k, y); c.lineTo(x - 3 * k, y - top - 8 * k); c.lineTo(x + 3 * k, y - top - 8 * k); c.lineTo(x + 4.5 * k, y); c.fill();
+    c.fillRect(x, y - top + 2 * k, 20 * k, 3 * k); c.fillRect(x, y - top + 22 * k, 20 * k, 3 * k); c.fillRect(x + 1, y - top + 2 * k, 2 * k, 24 * k);      // one-sided brackets
+    for (const yy of [y - top - 2 * k, y - top + 18 * k]) c.fillRect(x + 14 * k, yy, 4 * k, 5 * k);      // insulators
+    if (i % 3 === 1) { c.fillRect(x - 15 * k, y - top + 50 * k, 11 * k, 24 * k); c.fillRect(x - 6 * k, y - top + 58 * k, 4 * k, 2 * k); }      // a transformer on every third
   }
 }
 function drawRow(cam) {
@@ -2493,7 +2525,7 @@ function drawWorld() {
   const gcol = layerCol(1), wAt = x => warm((x - cam) / VW), on = (x, w = 0, m = 80) => x < cam + VW + m && x + w > cam - m;
   // the lane just behind the road: a low bank a little paler than the road, with his house and a few things on it
   ctx.fillStyle = hGrad(ctx, ...layerCol(.93)); ctx.fillRect(0, LEVELS.home.base, VW, GY - LEVELS.home.base + 2);
-  drawRow(cam); home(cam); drawSmoke(cam); drawLevel('mid', cam); drawWatchers(cam); drawWheat(false);          // the wheat behind him
+  drawRow(cam); home(cam); drawSmoke(cam); drawPoles(cam); drawLevel('mid', cam); drawWatchers(cam); drawWheat(false);          // the wheat behind him
   ctx.setTransform(1, 0, 0, 1, 0, OYD); drawFog('lane'); ctx.setTransform(DPR, 0, 0, DPR, 0, OYD);      // mist lying along the lane, round the houses' feet and in the wheat
   ctx.save(); ctx.translate(-cam, 0);
   const grad = hGrad(ctx, gcol[0], gcol[1], 1, 1, cam);
@@ -2800,20 +2832,96 @@ function start() {
   if (wasAt) { G.state = 'play'; return; }
   const run = ++runN; G.state = 'wait'; wakeEyes(() => { if (run === runN && G.state === 'wait') talk(INTRO); });   // his eyes open (build 13), then the story
 }
-// HE WAKES (build 13; owner: "Add my eyes please"): Level 1 opens on black, then the pilgrim's eyes, shut, then opening (the owner's
-// eyes lab, eyes.js), and the eyes fade into the rainy street. Skipped when a link starts the level at a place (?x=, ?at=).
-// The bomb dream that comes before it is not built yet.
+// THE DREAM AND THE WAKING. Level 1 opens on black. First the dream (build 14; owner, with two photographs of Seattle's
+// skyline across the water: "city pics for nuclear at start"): the city at dusk across the bay, the needle on the left and
+// the towers gathered to the right, still; then a silent flash behind the towers, every tower black against it; then the
+// cloud rising slowly, vast over the small city (John Martin: awe before fear); no people, no sound, nothing broken shown;
+// it goes to white, then black. Then he wakes (build 13; owner: "Add my eyes please"): the pilgrim's eyes, shut, then
+// opening (the owner's eyes lab, eyes.js), fading into the rainy street. Skipped when a link starts the level at a place
+// (?x=, ?at=). The dream is painted small (640 x 360) and stretched up to cover the screen, so it is soft.
+const DW = 640, DH = 360, SEA = 292;
+let DREAM = null;
+function bakeDream() {
+  const R2 = rng(2100), r = (a, b) => a + (b - a) * R2(), city = mk(DW, DH), hills = mk(DW, DH), lit = [];
+  const small = g => g.setTransform(.6, 0, 0, .6, 330 * .4, SEA * .4);      // the city small and low across the water, most of the picture sky
+  let c = hills.getContext('2d'); small(c); c.fillStyle = '#000';
+  c.beginPath(); c.moveTo(-300, SEA); for (let x = -300; x <= 300; x += 4) c.lineTo(x, SEA - 6 - 26 * Math.exp(-Math.pow((x - 105) / 85, 2)) - 5 * Math.exp(-Math.pow((x - 230) / 50, 2))); c.lineTo(300, SEA); c.fill();      // the hill behind the needle
+  for (const mx of [84, 98, 122]) { c.beginPath(); c.moveTo(mx - 1.6, SEA - 28); c.lineTo(mx - .5, SEA - 28 - (mx === 98 ? 48 : 40)); c.lineTo(mx + .5, SEA - 28 - (mx === 98 ? 48 : 40)); c.lineTo(mx + 1.6, SEA - 28); c.fill(); }      // the radio masts on it
+  c.beginPath(); c.moveTo(560, SEA); for (let x = 560; x <= DW + 300; x += 4) c.lineTo(x, SEA - 6 - 12 * Math.exp(-Math.pow((x - 700) / 90, 2))); c.lineTo(DW + 300, SEA); c.fill();
+  c = city.getContext('2d'); small(c); c.fillStyle = '#000';
+  c.fillRect(-300, SEA - 7, DW + 600, 8); for (let x = -300; x < DW + 300; x += r(5, 14)) c.fillRect(x, SEA - r(6, 12), r(4, 12), 14);      // the low shore
+  const T = (x, w, top) => { c.fillRect(x, top, w, SEA - top); for (let y = top + 3; y < SEA - 10; y += 3.2) for (let xx = x + 1; xx < x + w - 1; xx += 2.4) if (R2() < .025) lit.push([xx, y]); };
+  { const m = 152, top = 193; c.beginPath(); c.moveTo(m - 4, SEA - 6); c.lineTo(m - .8, SEA - 52); c.lineTo(m - 1.4, top + 12); c.lineTo(m - 8, top + 9); c.lineTo(m - 8.5, top + 6); c.lineTo(m - 3, top + 3); c.lineTo(m - .5, top - 6); c.lineTo(m + .5, top - 6); c.lineTo(m + 3, top + 3); c.lineTo(m + 8.5, top + 6); c.lineTo(m + 8, top + 9); c.lineTo(m + 1.4, top + 12); c.lineTo(m + .8, SEA - 52); c.lineTo(m + 4, SEA - 6); c.fill(); }      // the needle
+  for (let x = 190; x < 600;) {                               // the towers: low toward the edges, tallest a little right of the middle
+    const k = Math.exp(-Math.pow((x - 470) / 120, 2)), w = r(6, 15), top = SEA - (18 + 95 * k * r(.55, 1.05) + r(0, 14));
+    if (Math.abs(x - 482) < 7) { c.beginPath(); c.moveTo(x, SEA); c.lineTo(x, 182); c.quadraticCurveTo(x + 2, 176, x + 5, 176); c.lineTo(x + 5, 170); c.quadraticCurveTo(x + 8, 166, x + 11, 170); c.lineTo(x + 11, 176); c.quadraticCurveTo(x + 14, 176, x + 16, 182); c.lineTo(x + 16, SEA); c.fill(); x += 18; continue; }      // the tall dark one, in rounded steps
+    if (Math.abs(x - 446) < 7) { c.beginPath(); c.moveTo(x, SEA); c.lineTo(x, 186); c.lineTo(x + 2, 186); c.lineTo(x + 2, 181); c.lineTo(x + 6.5, 168); c.lineTo(x + 11, 181); c.lineTo(x + 11, 186); c.lineTo(x + 13, 186); c.lineTo(x + 13, SEA); c.fill(); x += 15; continue; }      // the one under a pointed crown
+    T(x, w, top); x += w + r(-2, 2.5);
+  }
+  for (let x = 200; x < 600; x += r(8, 18)) T(x, r(8, 16), SEA - r(14, 34));      // lower blocks in front
+  const tone = (src, col) => { const m = mk(DW, DH), g = m.getContext('2d'); g.drawImage(src, 0, 0); g.globalCompositeOperation = 'source-in'; g.fillStyle = col; g.fillRect(0, 0, DW, DH); return m; };
+  DREAM = { cityDusk: tone(city, '#252833'), cityBlack: tone(city, '#07070a'), hillDusk: tone(hills, '#3b4050'), hillBlack: tone(hills, '#0d0c0e'), lit: lit.map(([x, y]) => [330 * .4 + x * .6, SEA * .4 + y * .6]), can: mk(DW, DH), puffs: [], bands: [] };
+  for (let i = 0; i < 46; i++) DREAM.bands.push([r(-40, DW + 40), [120, 170, 215, 248][i % 4] + r(-10, 10), r(50, 130), r(8, 16), r(.5, 1)]);      // long soft bands of cloud at dusk
+  const P2 = DREAM.puffs;      // the cloud, as soft puffs: [kind, a, b, size, shade]
+  for (let i = 0; i < 70; i++) P2.push(['cap', r(0, 6.283), r(.2, 1), r(.22, .42), r(0, 1)]);
+  for (let i = 0; i < 26; i++) P2.push(['stem', i / 26, r(-.5, .5), r(.12, .2), r(0, 1)]);
+  for (let i = 0; i < 22; i++) P2.push(['skirt', r(-1, 1), r(0, 1), r(.15, .3), r(0, 1)]);
+}
+// u: 0 calm dusk .. the cloud's growth (0..1) once the flash has come; fl: the flash's white (0..1); fire: how much the
+// city is lit from behind (0 = dusk, 1 = black against the fire)
+function drawDream(c, u, fire) {
+  const D = DREAM, W = DW, H = DH, mixc = (a, b, k) => a.map((v, i) => Math.round(v + (b[i] - v) * k)), rgb = (a, al = 1) => `rgba(${a[0]},${a[1]},${a[2]},${al})`;
+  const top = mixc([42, 48, 66], [34, 24, 26], fire), hor = mixc([140, 136, 142], [128, 82, 58], fire), g = c.createLinearGradient(0, 0, 0, SEA);
+  g.addColorStop(0, rgb(top)); g.addColorStop(.75, rgb(mixc(top, hor, .6))); g.addColorStop(1, rgb(hor)); c.fillStyle = g; c.fillRect(0, 0, W, H);
+  if (fire < .5) { const gl = c.createRadialGradient(420, SEA - 10, 0, 420, SEA - 10, 260); gl.addColorStop(0, 'rgba(230,196,160,.22)'); gl.addColorStop(1, 'rgba(230,196,160,0)'); c.fillStyle = gl; c.fillRect(0, 0, W, H); }      // the last of the day
+  for (const [x, y, rw, rh, a] of D.bands) { const col = mixc(mixc([86, 90, 108], [205, 170, 140], Math.max(0, (y - 150) / 110)), [20, 14, 16], fire), q = c.createRadialGradient(0, 0, 0, 0, 0, 1);
+    c.save(); c.translate(x, y); c.scale(rw, rh); q.addColorStop(0, rgb(col, .55 * a)); q.addColorStop(1, rgb(col, 0)); c.fillStyle = q; c.fillRect(-1, -1, 2, 2); c.restore(); }
+  const cx = 420, base = SEA - 6, e = 1 - Math.pow(1 - u, 2.2);
+  if (fire > 0) {
+    const capY = base - 16 - 150 * e, R = 12 + 112 * e, glow = c.createRadialGradient(cx, capY, 0, cx, capY, R * 3);
+    glow.addColorStop(0, `rgba(255,190,120,${.35 * fire})`); glow.addColorStop(1, 'rgba(255,150,90,0)'); c.fillStyle = glow; c.fillRect(0, 0, W, H);
+    for (const [k, a, b, sz, sh] of D.puffs) {
+      let x, y, rr, hot;
+      if (k === 'cap') { x = cx + Math.cos(a) * R * b * 1.05; y = capY + Math.sin(a) * R * b * .42 - R * .12; rr = R * sz; hot = Math.max(0, Math.sin(a)) * .7 + (1 - b) * .3; }
+      else if (k === 'stem') { const yy = base - (base - capY) * a; x = cx + b * (5 + 10 * e) * (1 + (1 - a) * .8); y = yy; rr = (7 + 14 * e) * sz * 6; hot = .55 + .45 * a; }
+      else { x = cx + a * (40 + 140 * e); y = base - 4 - b * 14 * e; rr = (12 + 40 * e) * sz * 2.4; hot = .2; }
+      if (u <= 0 && k !== 'cap') continue;
+      const heat = Math.max(0, 1 - u * 1.4) * .8 + hot * (.5 + .25 * u), col = mixc([70, 58, 58], [250, 172, 100], Math.min(1, heat * (.5 + .5 * sh))), q = c.createRadialGradient(x, y, 0, x, y, rr);
+      q.addColorStop(0, rgb(col, .9)); q.addColorStop(.55, rgb(col, .5)); q.addColorStop(1, rgb(col, 0)); c.fillStyle = q; c.fillRect(x - rr, y - rr, rr * 2, rr * 2);
+    }
+    if (u < .35) { const fb = c.createRadialGradient(cx, base - 30 * e / .35 * .35, 0, cx, base - 10, 40); fb.addColorStop(0, `rgba(255,246,226,${1 - u / .35})`); fb.addColorStop(1, 'rgba(255,200,140,0)'); c.fillStyle = fb; c.fillRect(0, 0, W, H); }      // the fireball, at first
+  }
+  c.drawImage(D.hillDusk, 0, 0); if (fire > 0) { c.globalAlpha = fire; c.drawImage(D.hillBlack, 0, 0); c.globalAlpha = 1; }
+  c.drawImage(D.cityDusk, 0, 0); if (fire > 0) { c.globalAlpha = fire; c.drawImage(D.cityBlack, 0, 0); c.globalAlpha = 1; }
+  if (fire < 1) { c.fillStyle = `rgba(236,196,130,${.85 * (1 - fire)})`; for (const [x, y] of D.lit) c.fillRect(x, y, 1, 1.3); }      // a few lit windows, before
+  const w = c.createLinearGradient(0, SEA, 0, H); w.addColorStop(0, rgb(mixc([70, 74, 88], [96, 62, 46], fire))); w.addColorStop(1, rgb(mixc([22, 25, 32], [20, 14, 14], fire))); c.fillStyle = w; c.fillRect(0, SEA, W, H - SEA);      // the bay
+  c.save(); c.globalAlpha = .28; c.translate(0, SEA * 2 + 1); c.scale(1, -1); c.drawImage(fire > .5 ? D.cityBlack : D.cityDusk, 0, 0); c.restore();      // the city in the water
+  if (fire > 0) { c.save(); c.translate(cx, SEA + 26); c.scale(130, 24); const q = c.createRadialGradient(0, 0, 0, 0, 0, 1); q.addColorStop(0, `rgba(240,160,100,${.22 * fire})`); q.addColorStop(1, 'rgba(240,160,100,0)'); c.fillStyle = q; c.fillRect(-1, -1, 2, 2); c.restore(); }      // light on the ripples
+}
 function wakeEyes(then) {
   const ec = document.getElementById('eyes'); if (!window.EYESWAKE || !ec) { setTimeout(then, 1700); return; }
-  const c = ec.getContext('2d'), run = runN, t0 = performance.now(), D = { black: 900, inn: 1300, shut: 900, open: 2600, hold: 1100, out: 1500 };
-  const T = [D.black, D.inn, D.shut, D.open, D.hold, D.out].reduce((a, v) => (a.push(a[a.length - 1] + v), a), [0]);
-  const ease = u => u * u * (3 - 2 * u);
+  if (!DREAM) bakeDream();
+  const c = ec.getContext('2d'), run = runN, t0 = performance.now();
+  // the dream: in from black, calm, the flash, the cloud, white, black
+  const FL = 3600, DR = FL + 6700;
+  const D = { black: 400, inn: 1200, shut: 800, open: 2600, hold: 900, out: 1500 };
+  const T = [D.black, D.inn, D.shut, D.open, D.hold, D.out].reduce((a, v) => (a.push(a[a.length - 1] + v), a), [0]).map(v => v + DR);
+  const ease = u => u * u * (3 - 2 * u), cl = v => Math.max(0, Math.min(1, v));
   ec.style.display = 'block'; ec.style.opacity = 1; let told = false;
   const frame = now => {
     if (run !== runN) { ec.style.display = 'none'; return; }
     const t = now - t0, d = Math.min(2, window.devicePixelRatio || 1), W = Math.round(innerWidth * d), H = Math.round(innerHeight * d);
     if (ec.width !== W || ec.height !== H) { ec.width = W; ec.height = H; }
     c.setTransform(1, 0, 0, 1, 0, 0); c.fillStyle = '#000'; c.fillRect(0, 0, W, H);
+    if (t < DR) {
+      const k = t - FL, u = k > 300 ? cl((k - 300) / 5200) : 0, fire = k > 0 ? 1 : 0, dc = DREAM.can.getContext('2d');
+      drawDream(dc, u, fire);
+      const sc = Math.max(W / DW, H / DH); c.imageSmoothingEnabled = true; c.drawImage(DREAM.can, (W - DW * sc) / 2, (H - DH * sc) / 2, DW * sc, DH * sc);
+      const white = k < 0 ? 0 : k < 120 ? k / 120 : k < 500 ? 1 : k < 1400 ? 1 - (k - 500) / 900 : k < 4800 ? 0 : k < 6100 ? ease((k - 4800) / 1300) : 1;
+      if (white > 0) { c.fillStyle = `rgba(255,252,244,${white})`; c.fillRect(0, 0, W, H); }
+      const black = t < 1200 ? 1 - t / 1200 : k > 6100 ? cl((k - 6100) / 600) : 0;
+      if (black > 0) { c.fillStyle = `rgba(0,0,0,${black})`; c.fillRect(0, 0, W, H); }
+    }
     const bw = Math.min(W, H * 2.6), bh = Math.round(bw * 520 / 1650), f = t < T[3] ? 12 : 12 + 54 * ease(Math.min(1, (t - T[3]) / D.open));
     if (t > T[1]) { if (!frame.band || frame.band.width !== Math.round(bw)) { frame.band = document.createElement('canvas'); frame.band.width = Math.round(bw); frame.band.height = bh; }
       EYESWAKE.draw(frame.band.getContext('2d'), frame.band.width, bh, f, 'dusk');
@@ -3047,7 +3155,7 @@ document.getElementById('on2').onclick = () => SL.on ? go3() : HL.on ? go5() : g
   for (const [who, txt] of INTRO) vox(who, txt);          // the first words, ready before Begin is pressed
 })();
 </script>
-<script src="eyes.js?v=13"></script>
+<script src="eyes.js?v=14"></script>
 <script src="slough.js?v=12"></script>
 <script src="hill.js?v=662"></script>
 <script src="rooms.js?v=2"></script>
