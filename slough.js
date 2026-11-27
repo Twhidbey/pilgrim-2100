@@ -192,7 +192,7 @@ const SL = (() => {
   // build 5: the two farm machines are ONE painted picture (assets/mech.webp, a walking combine), toned flat and pale
   // twice, far off in the mist BEHIND the ghost trees: [x, parallax, size, tone]
   // build 9: flat SILHOUETTES (one tone, no inner detail), two poses (mech.webp header down, mech2.webp header lifted)
-  function loadMech() { MECHS = []; [['mech', -298, .2, 1.85, .7, 1], ['mech2', 128, .13, 1.75, .8, 1]].forEach(m => { const im = new Image(); im.onload = () => { const c = mk(im.width, im.height), k = c.getContext('2d');
+  function loadMech() { MECHS = []; [['mech', -217, .13, 1.71, .72, 1], ['mech2', 175, .085, 1.61, .81, 1]].forEach(m => { const im = new Image(); im.onload = () => { const c = mk(im.width, im.height), k = c.getContext('2d');
       k.drawImage(im, 0, 0); k.globalCompositeOperation = 'source-in'; k.fillStyle = css(tone(m[4])); k.fillRect(0, 0, c.width, c.height);
       MECHS.push({ x: m[1], p: m[2], s: m[3], b: { c, k: im.height / 560, x0: -530, y0: -556 } }); MECHS.sort((u, v) => u.p - v.p); }; im.src = 'assets/' + m[0] + '.webp?v=11'; }); }
   // build 9: a diffuse mist of its own (soft blobs, wrapping sideways), laid over the feet of the far things
