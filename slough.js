@@ -188,37 +188,12 @@ const SL = (() => {
     g.setTransform(k, 0, 0, k, (2 - x0 * k), (2 - y0 * k)); g.fillStyle = css(col); ribbons(g, tree);
     return { c, x0: x0 - 2 / k, y0: y0 - 2 / k, k };
   }
-  let FARS = [], MECHS = [];
+  let MECHS = [];
   // build 5: the two farm machines are ONE painted picture (assets/mech.webp, a walking combine), toned flat and pale
   // twice, far off in the mist BEHIND the ghost trees: [x, parallax, size, tone]
-  function loadMech() { const im = new Image(); im.onload = () => { MECHS = [[-455, .2, 1.85, .88], [-60, .13, 1.75, .93]].map(m => { const c = mk(im.width, im.height), k = c.getContext('2d');
-      k.drawImage(im, 0, 0); k.globalCompositeOperation = 'source-atop'; k.globalAlpha = .9; k.fillStyle = css(tone(m[3])); k.fillRect(0, 0, c.width, c.height);
+  function loadMech() { const im = new Image(); im.onload = () => { MECHS = [[-455, .2, 1.85, .7], [-60, .13, 1.75, .82]].map(m => { const c = mk(im.width, im.height), k = c.getContext('2d');
+      k.drawImage(im, 0, 0); k.globalCompositeOperation = 'source-atop'; k.globalAlpha = .78; k.fillStyle = css(tone(m[3])); k.fillRect(0, 0, c.width, c.height);
       return { x: m[0], p: m[1], s: m[2], b: { c, k: im.height / 560, x0: -530, y0: -556 } }; }); }; im.src = 'assets/mech.webp?v=5'; }
-  function bakeSil(x0, y0, w, h, col, fn) { const c = mk(w, h), k = c.getContext('2d'); k.translate(-x0, -y0); k.fillStyle = k.strokeStyle = css(col); k.lineCap = k.lineJoin = 'round'; fn(k); return { c, k: 1, x0, y0 }; }
-  function farThings() {
-    const line = (k, pts, w) => { k.lineWidth = w; k.beginPath(); pts.forEach((q, i) => i ? k.lineTo(q[0], q[1]) : k.moveTo(q[0], q[1])); k.stroke(); };
-    const poly = (k, pts) => { k.beginPath(); pts.forEach((q, i) => i ? k.lineTo(q[0], q[1]) : k.moveTo(q[0], q[1])); k.closePath(); k.fill(); };
-    // leaning posts with wire sagging between them
-    const wire = k => { const P = [[-330, -62, .1], [-205, -70, -.16], [-70, -58, .22], [60, -72, -.08], [190, -50, .3], [318, -66, -.12]];
-      const tops = P.map(q => { const tx = q[0] + Math.sin(q[2]) * -q[1], ty = q[1] * Math.cos(q[2]); line(k, [[q[0], 6], [tx, ty]], 6); return [tx, ty]; });
-      for (let r = 0; r < 3; r++) { k.lineWidth = 1.6; k.beginPath(); tops.forEach((t, i) => { const y = t[1] + 8 + r * 17, x = t[0] + (r - 1) * 2; if (!i) k.moveTo(x, y); else { const o = tops[i - 1], oy = o[1] + 8 + r * 17; k.quadraticCurveTo((o[0] + x) / 2, Math.max(oy, y) + 13 + (i * 7 + r * 5) % 11, x, y); } }); k.stroke(); }
-      // one strand broken, trailing to the ground
-      k.lineWidth = 1.6; k.beginPath(); k.moveTo(tops[5][0], tops[5][1] + 8); k.quadraticCurveTo(tops[5][0] + 40, -30, tops[5][0] + 74, 4); k.stroke(); };
-    // a steel hedgehog: three beams crossed
-    const hog = k => { line(k, [[-46, 4], [40, -74]], 9); line(k, [[46, 4], [-38, -70]], 9); line(k, [[-58, -30], [58, -40]], 9); };
-    // a wreck, half sunk and tilted: a long low hull, a housing, nothing else
-    const wreck = k => { k.save(); k.rotate(-.13); k.beginPath(); k.moveTo(-190, 30); k.lineTo(-170, -34); k.quadraticCurveTo(-150, -52, -110, -52); k.lineTo(-64, -92); k.lineTo(34, -96); k.lineTo(70, -54); k.lineTo(150, -50); k.quadraticCurveTo(196, -44, 214, 30); k.closePath(); k.fill(); line(k, [[-20, -94], [-30, -150]], 3); k.restore(); };
-    // a trunk broken off, its top splintered
-    const stump = k => { poly(k, [[-22, 6], [-15, -120], [-9, -168], [-4, -132], [3, -186], [8, -140], [14, -158], [17, -110], [24, 6]]); line(k, [[12, -96], [58, -128], [84, -122]], 6); line(k, [[-14, -74], [-52, -98]], 5); };
-    const M = (x, p, b, kind, sc, k) => ({ x, p, b, kind, sc: sc || 1, k: k || 1 });
-    const t = v => tone(v);
-    return [
-      M(-405, .4, bakeSil(-350, -100, 760, 115, t(.76), wire), 'war'),
-      M(-120, .5, bakeSil(-70, -90, 140, 100, t(.74), hog), 'war'), M(-30, .5, bakeSil(-70, -90, 140, 100, t(.74), hog), 'war', -.9),
-      M(110, .46, bakeSil(-210, -190, 440, 240, t(.8), wreck), 'war'),
-      M(-610, .46, bakeSil(-70, -200, 170, 215, t(.8), stump), 'war'), M(330, .34, bakeSil(-70, -200, 170, 215, t(.88), stump), 'war', -1),
-    ];
-  }
   const putTree = (c, b, x, y, s, sy = s) => c.drawImage(b.c, x + b.x0 * s, y + b.y0 * sy, b.c.width / b.k * s, b.c.height / b.k * sy);
   let SHB = null, FARMUD = [], mudDk = null, mudLt = null, shC = null, mistC = null, fogC = null, SHN = [], SH0 = [];
   let SHORE = null, OAK = null, GHOSTS = null, skyMist = null, skyClear = null, paper = null, threads = null, puff = null, fogBank = null, mudMap = null, built = false;
@@ -231,10 +206,8 @@ const SL = (() => {
     SHORE = true;
     GHOSTS = [[-760, .5, 3, .8], [-1500, .36, 5, .88], [560, .46, 8, .84], [-230, .3, 9, .9], [-2300, .42, 12, .86], [-3100, .4, 14, .85], [-1950, .52, 15, .83]]
       .map(g => ({ x: g[0], p: g[1], b: bakeTree(oak(g[2], false, 3), tone(g[3]), .7) }));
-    // 2100 (build 3): what our age has left out there, as pale shapes in the haze like the ghost trees. On the plain,
-    // tall farm machines on stilt legs (one working, one stopped for good); in the mire, a no man's land: leaning posts
-    // with sagging wire, steel hedgehogs, a sunk wreck, a shattered trunk. Nothing of people. Each is baked once in one tone.
-    FARS = farThings(); loadMech();
+    // 2100: two farm machines far off over the fields (build 5), see loadMech
+    loadMech();
     // two skies baked once (misty and clear) and mixed by the mist; the far light is drawn over them live
     const sky = (skyV, mistV) => { const c = mk(240, 135), k = c.getContext('2d'), d = k.createImageData(240, 135);
       for (let j = 0; j < 135; j++) for (let i = 0; i < 240; i++) {
@@ -1071,11 +1044,6 @@ const SL = (() => {
       if (gx < -260 || gx > VW + 260) continue;
       putTree(ctx, g.b, gx, gy, s); ctx.globalAlpha = .3; putTree(ctx, g.b, gx, gy, s, -s * .7); ctx.globalAlpha = 1;
     }
-    // the far things of our age (build 3): machines over the fields, fading as the mire begins; the war's leavings in the mire
-    { const aW = smooth(-1350, -1050, cx);
-      for (const m of FARS) { const a = aW; if (a <= .01) continue;
-        const s = z * m.p * .9 * m.k, gx = (m.x - cx * m.p) * z + VW / 2, gy = hor + (wl - hor) * m.p * .55; if (gx < -420 || gx > VW + 420) continue;
-        ctx.save(); ctx.translate(gx, gy); ctx.scale(m.sc, 1); ctx.globalAlpha = a; putTree(ctx, m.b, 0, 0, s); ctx.globalAlpha = a * .25; putTree(ctx, m.b, 0, 0, s, -s * .6); ctx.restore(); } }
     // the mire running back behind them (FARMUD): nearer rows slide more with the camera, are taller and darker
     for (const row of FARMUD) {
       const q = row.q, p = .3 + .7 * q, gy = hor + (wl - hor) * q, hz = (.2 + .8 * q) * z;
