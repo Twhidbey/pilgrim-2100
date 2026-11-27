@@ -152,7 +152,7 @@ body.portrait:not(.playing) #rot{display:none}
 <div id="wrap"><div id="stage">
   <canvas id="cv"></canvas>
   <div id="dlg"><div class="txt"><span class="who"></span><span class="t"></span></div><div class="more"></div></div>
-  <div id="choice"><button id="chHome">Go home</button><button id="chOn">Go on to the light</button></div>
+  <div id="choice"><button id="chHome">Go home</button><button id="chOn">Go on to the light</button><button id="chThird" style="display:none"></button></div>
   <div id="title" class="card">
     <!-- THE BOOK (build 187): the title page as first printed in 1678, alone on a dark ground; "Open the book" swings the
          contents page open beside it. Nothing of the world shows until a level is chosen. -->
@@ -202,7 +202,7 @@ body.portrait:not(.playing) #rot{display:none}
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 15 · Nov 27 2026</div>
+  <div id="build">build 16 · Nov 27 2026</div>
   <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
@@ -1256,7 +1256,8 @@ function reset() {
     pli: null, obst: null, flare: 0, gloom: 0, gloomTo: 0, gateOpen: 0, act: null, actT: 0, ring: null, auto: null, finale: null, guard: 0, idle: 0, wins: 0,
     evanDone: !!TEST_X, evanGone: TEST_X ? 1 : 0, neigh: TEST_X > NEIGH_X + 300, gateSeen: false, walked: false, touched: false, leaving: false, fam: TEST_X > HOME_X ? 2 : 0, door: 0,      // build 13 (owner: "as far as we know pilgrim has no family, for now"): his door stays shut
     doorShut: false, roll: TEST_X ? { t: 999, x: 0, y: 0 } : null, runZone: !!TEST_X && TEST_X < RUN_END, outSaid: false, watched: TEST_X > WATCH_X, ears: TEST_X > HOME_X });
-  G.sunUp = 0; G.through = false; G.homeTo = null; G.autoRun = 0; G.calm = 0; G.doorSaid = false; G.choiceKind = null; G.sawLight = !!TEST_X && TEST_X > EVAN_X; G.nchose = false;
+  G.sunUp = 0; G.waitFn = null; G.phGo = !!TEST_X && TEST_X > EVAN_X; G.phFade = G.phGo ? 1 : 0; if (ROW[0] && !ROW[0].who) ROW[0].open = 1;      // build 16: the party: the door of the building beside his (to the left), lit from the start
+  G.through = false; G.homeTo = null; G.autoRun = 0; G.calm = 0; G.doorSaid = false; G.choiceKind = null; G.sawLight = !!TEST_X && TEST_X > EVAN_X; G.nchose = false;
   G.zoom = 1 - (1 - ZOOM_GATE) * smooth(GATE - 1300, GATE - 380, START_X);      // starting near the gate (?at=gate): already drawn back
   G.evan.pt = TEST_X ? 239 : 0; G.evan.go = false; G.evan.st = EVS_META.frames * 100; downs.clear(); pushing = false; keys.r = keys.push = false;
   if (TEST_X) for (const l of LIGHTS) if (l.x < Math.max(TEST_X, 2000)) l.got = true;
@@ -1272,6 +1273,8 @@ const dlg = document.getElementById('dlg'), dWho = dlg.querySelector('.who'), dT
 let lines = [], li = 0, after = null;
 const HEARD = new Set();                   // lines already heard to the end (they can be skipped next time)
 const C = 'Christian', E = 'Evangelist', N = '', O = 'Obstinate', PL = 'Pliable', W = 'His wife';
+// build 16: the 2100 telling's people (the owner's script app; no narrator): the pilgrim, Phillip, the radio, the friend at the party
+const PG = 'Pilgrim', PH = 'Phillip', RD = 'Radio', FR = 'Friend';
 // TIP: a line that tells the child what to do (owner, build 108: "narrator should only say what's relevant to story - little
 // side messages can tell user what to do"). Shown like a hint (quiet italics, no name), never spoken, inside a talk.
 const TIP = 'tip';
@@ -1387,7 +1390,7 @@ async function say(who, txt) {
 }
 // fetch every line's recording quietly, in story order, while the child is already playing
 async function fetchVoices() {
-  const all = [...INTRO, ...FIELDS, ...EVAN, ...RUNS, ...DOOR_WORDS, ...FAMILY, ...LIFE, ...WATCH, ...FETCH, ...NEIGH_CALL]; for (const c of CAPS) all.push(...c.lines); all.push(...NEIGH, ...HOME, ...ONWARD, ...PART, ...GATEWORDS, ...END);
+  const all = [...INTRO, ...PARTY_NO, ...FIELDS, ...EVAN, ...ASK_GO, ...ASK_NO, ...EVAN2, ...NAME_ASK, ...NAME_THANKS, ...GONE, ...RUNS, ...DOOR_WORDS, ...FAMILY, ...LIFE, ...WATCH, ...FETCH, ...NEIGH_CALL]; for (const c of CAPS) all.push(...c.lines); all.push(...NEIGH, ...HOME, ...ONWARD, ...PART, ...GATEWORDS, ...END);
   for (const [who, txt] of all) { if (who === TIP) continue; const v = vox(who, txt); await v.raw; await voxBuf(v); }
 }
 function caption(arr) { for (const l of arr) G.capQ.push(l); }
@@ -1403,26 +1406,40 @@ function capTick() {
 
 // THE WORDS KEEP CLOSE TO BUNYAN'S (owner, build 56: "bring the words closer to book"): his sentences, shortened and with
 // the oldest words made plain for a child, in his order ({10} to {28} of book/pilgrims-progress-part-one.txt).
-const INTRO = [      // {10}
-  [N, 'I dreamed a dream. I saw a man clothed in rags, with a book in his hand and a great burden upon his back.'],
-  [N, 'He stood with his back to his own house. He read the book, and as he read, he wept and trembled.', 0, () => { if (WEEP.ready) P.weep = { t: 0 }; }],
-  [C, 'What shall I do?'],
+// BUILD 16: SCENE 2, HIS STREET (the owner's script app, approved; no narrator; 1 Peter 4:1-5: done with the wasted years, and
+// the party across the street thinks it strange he will not join). The party is the lit door of the building beside his
+// (ROW[0], opened in reset()). Then choice 1 (partyChoice).
+const INTRO = [
+  [PG, 'What am I to do?'],
+  [RD, 'Sdot launched another attack today. Troops have massed near Hillal.'],
+  [FR, 'There he is! Get in out of the rain. We saved you a seat.'],
+  [PG, 'Not tonight.'],
+  [FR, 'Not tonight? You\'ve never said that.'],
+  [PG, 'They all go on as if it will always be the same. I know how it\'s going to end.'],
+  [PG, '"It is appointed for us once to die, and after that, the judgment." I found it in this book. I\'m overcome with dread.', 0, () => { if (WEEP.ready) P.weep = { t: 0 }; }],
+  [PG, 'I\'ve wasted enough time. What should I do? Who should I go to?'],
 ];
+const PARTY_NO = [[PG, 'No. I can\'t.']];
 // {11}, {12}: "he would also walk solitarily in the fields, sometimes reading, and sometimes praying"
-const FIELDS = [[N, 'He walked alone in the fields, reading his book and praying.']];
-const EVAN = [       // {13} to {17}
-  [N, 'Then I saw a man named Evangelist come to him.'],      // build 500 (owner: "Evangelist needs a narrator introduction"): {13}, "I looked then, and saw a man named Evangelist coming to him"
-  [E, 'Why do you cry?'],
-  [C, 'Sir, this book tells me our city will be destroyed, and this burden on my back will sink me.'],      // vision chat: the why put back ({11}: "our city will be burned with fire from heaven")
-  // (cut in build 74 to shorten the talk, the owner asked: Evangelist's "why do you stand still?" and "Because I do not know where to go.", {16})
-  [N, 'Then Evangelist gave him a roll. On it was written: Flee from the wrath to come.', 0, () => { G.roll = { t: 0, x: G.evan.x - G.cam + 30, y: GY - 92 }; note(79, .035, 2.4); }],
-  [C, 'Where must I flee?'],
-  [E, 'Do you see that wicket gate, far over the wide field?', 0, () => { G.evan.go = true; turnToLight(); }],      // "pointing with his finger over a very wide field"
-  [C, 'No.'],
-  [E, 'Do you see that shining light?', 'light', () => { turnToLight(); P.lookUp = 1; }],      // build 109: he turns to look first; the light can be touched once he has turned
-  [C, 'I think I do.'],
-  [E, 'Keep that light in your eye, and go straight up to it. Then you will see the gate. Knock, and you will be told what to do.'],
+const FIELDS = [];      // build 16: no narrator
+// BUILD 16: SCENE 3, THE FIELDS (approved). Phillip (still drawn with the old Evangelist's pictures) gives him the
+// cylinder; choice 2 (ask: "Where do I go?" / "Leave me alone.", after which Phillip only waits); the gate and the
+// light; choice 3 (name: "And who are you?" / "Thank you." / say nothing); Phillip fades away (G.phFade).
+const EVAN = [
+  [PH, 'Why are you crying?'],
+  [PG, 'This book says I must die, and then be judged. I\'m not ready for either.'],
+  [PG, '"Flee from the wrath to come."', 0, () => { G.roll = { t: 0, x: G.evan.x - G.cam + 30, y: GY - 92 }; note(79, .035, 2.4); }],
 ];
+const ASK_GO = [[PG, 'Where do I go?']], ASK_NO = [[PG, 'Leave me alone.']];
+const EVAN2 = [
+  [PH, 'Do you see that gate over there?', 0, () => { G.evan.go = true; turnToLight(); }],
+  [PG, 'No.'],
+  [PH, 'Do you see that light?', 'light', () => { turnToLight(); P.lookUp = 1; }],
+  [PG, 'I think I do.'],
+  [PH, 'Keep it in your eye and go straight to it. Tikvaw keeps it burning. There you\'ll find the gate.'],
+];
+const NAME_ASK = [[PG, 'And who are you?'], [PH, 'Phillip.']], NAME_THANKS = [[PG, 'Thank you.']];
+const GONE = [[PG, '...Gone.'], [PG, 'Then I\'ll run.']];
 const RUNS = [[N, 'So I saw in my dream that the man began to run.', 'quick']];      // {18}
 // He is already running (from Evangelist, as in the book) when the door of his own house is flung open and his family
 // cry after him. THE CHILD CHOOSES (owner, build 49), without being asked: keep holding and he runs straight past, as in
@@ -1477,8 +1494,28 @@ const END = [[N, 'Christian and Pliable left the city behind. The shining light 
 // ---------- the choice: go home, or go on ----------
 const choiceEl = document.getElementById('choice');
 function choose() { G.state = 'choice'; choiceEl.className = 'on'; document.body.classList.add('talking'); }
+// build 16: a choice of two or three (labels for this choice; the third button shows only when given)
+function offer(kind, a, b, c) { G.choiceKind = kind; document.getElementById('chHome').textContent = a; document.getElementById('chOn').textContent = b; const t = document.getElementById('chThird'); t.textContent = c || ''; t.style.display = c ? '' : 'none'; choose(); }
+const later = (ticks, f) => { G.waitAt = G.t + ticks; G.waitFn = f; };      // a pause counted in the game's own ticks
+const partyChoice = () => offer('party', 'Go in, just for tonight', 'Walk away');
+const phGone = () => { G.evanGone = 1; G.phGo = true; G.state = 'wait'; later(110, () => talk(GONE, () => { G.runZone = true; G.idle = 0; })); };
+const nameChoice = () => offer('name', 'And who are you?', 'Thank you.', '(say nothing)');
 function pick(home) {
   if (G.state !== 'choice') return;
+  const kind = G.choiceKind;
+  if (kind === 'party' || kind === 'ask' || kind === 'name') {      // build 16: the new scenes' choices
+    choiceEl.className = ''; document.body.classList.remove('talking'); document.getElementById('chThird').style.display = 'none'; G.choiceKind = null;
+    if (kind === 'party') {
+      if (home === true) { P.wantBack = true; G.gloomTo = 1; G.state = 'wait'; sweep(300, 420, .6, .015); later(170, () => talk(PARTY_NO, () => { G.gloomTo = 0; P.wantBack = false; })); }      // he turns to the lit door, the light dims, then he turns away
+      else { G.state = 'play'; G.idle = 0; }
+    } else if (kind === 'ask') {
+      if (home === true) talk(ASK_GO.concat(EVAN2), nameChoice);
+      else talk(ASK_NO, () => { G.state = 'wait'; later(150, () => talk(EVAN2, nameChoice)); });      // Phillip only waits
+    } else {
+      if (home === true) talk(NAME_ASK, phGone); else if (home === false) talk(NAME_THANKS, phGone); else phGone();
+    }
+    return;
+  }
   if (!SL.on && G.choiceKind !== 'door') G.nchose = true;      // the neighbours' choice is made: the heartbeat is done
   choiceEl.className = ''; document.body.classList.remove('talking');
   if (SL.on) { SL.pick(home); return; }
@@ -1497,6 +1534,7 @@ function pick(home) {
 }
 document.getElementById('chHome').onclick = () => pick(true);
 document.getElementById('chOn').onclick = () => pick(false);
+document.getElementById('chThird').onclick = () => pick('third');
 
 // ---------- Christian and the others: the video frames ----------
 // walking pace = the pace in Christian's video (owner: "keep things slow, I'm going for an atmospheric feel")
@@ -1819,6 +1857,8 @@ function update() {
   if (SL.on) { SL.update(); capTick(); return; }
   // Level 3 (hill.js) likewise
   if (HL.on || HL.show) { HL.update(); if (HL.on) capTick(); return; }
+  if (G.waitFn && G.t >= G.waitAt) { const f = G.waitFn; G.waitFn = null; f(); }
+  if (G.phGo) G.phFade = Math.min(1, (G.phFade || 0) + .012);      // build 16: Phillip fades away
   G.flare *= .975; G.gloom += (G.gloomTo - G.gloom) * .02; G.door = Math.max(0, G.door - .02);      // the door is flung open (and, at the start, shut behind him)
   // Evangelist: only the calm start of his video while he waits (a slow breath). On "Do you see that shining light?"
   // he turns all the way round toward the light and raises his arm (video 46..239 at its own pace), and stays pointing.
@@ -1882,7 +1922,7 @@ function story() {
   // him with his wife and children in its light (owner, build 60: "how do we know it's his?"); it shuts as he walks away.
 
   if (!G.outSaid && !G.evanDone && P.x < FIELD_END - 60) { G.outSaid = true; caption(FIELDS); }      // out of the street, into the field
-  if (!G.evanDone && P.x < EVAN_X + 200) { G.evanDone = true; talk(EVAN, () => { G.evanGone = 1; talk(RUNS.map(l => [l[0], l[1]]), () => { G.runZone = true; G.idle = 0; }); }); return; }      // build 109 (owner): "began to run" is said in full before the child can run   // "So I saw in my dream that the man began to run"
+  if (!G.evanDone && P.x < EVAN_X + 200) { G.evanDone = true; talk(EVAN, () => offer('ask', 'Where do I go?', 'Leave me alone.')); return; }      // build 16: Phillip, choices 2 and 3 (pick), then he is gone (phGone)      // build 109 (owner): "began to run" is said in full before the child can run   // "So I saw in my dream that the man began to run"
   if (G.runZone && !P.run && G.idle === 110) hint('walk', 'Hold to run.');
   for (const c of CAPS) if (!c.done && P.x > c.x && (!c.pli || (G.pli && G.pli.mode === 'follow'))) { c.done = true; caption(c.lines); if (c.watch) G.watch = 520; }
   if (G.fam === 2 && !G.watched && P.x > WATCH_X) { G.watched = true; caption(WATCH); G.watch = 520; }      // the neighbours come out to see him run
@@ -2655,7 +2695,7 @@ function drawWorld() {
   ctx.restore();
   // the people
   TALKM = talkMove(E);
-  if (Math.abs(G.evan.x - cam - VW / 2) < VW) { const t = G.evan.pt ? (G.evan.pt < 239 ? G.evan.pt : 212 + 27 * (.5 + .5 * Math.sin(G.t / 50))) : G.evan.idle || 0; if (!G.evan.pt && EVS.ready) drawFrame(EVS[Math.floor(G.evan.st) % EVS_META.frames], EVS_META, G.evan.x - cam, GY, 1, 1); else drawFrame(EVA[atTime(EVA_META, t)], EVA_META, G.evan.x - cam, GY, 1, 1); }
+  if (Math.abs(G.evan.x - cam - VW / 2) < VW) { const t = G.evan.pt ? (G.evan.pt < 239 ? G.evan.pt : 212 + 27 * (.5 + .5 * Math.sin(G.t / 50))) : G.evan.idle || 0; const pa = 1 - (G.phFade || 0); if (pa > .01) { if (!G.evan.pt && EVS.ready) drawFrame(EVS[Math.floor(G.evan.st) % EVS_META.frames], EVS_META, G.evan.x - cam, GY, 1, pa); else drawFrame(EVA[atTime(EVA_META, t)], EVA_META, G.evan.x - cam, GY, 1, pa); } }
   // a walker: his walking frame, with his standing pose dissolving over it when he has stopped (first the standing pose
   // comes in on top, then the walking one goes: the background never shows through him)
   const walker = (w, fr, meta, stIm, stMeta, face, a) => { const st = w.st || 0; if (st < 1) drawFrame(fr, meta, w.x - cam, GY, face, a * (st < .5 ? 1 : 2 * (1 - st))); if (st > 0) drawFrame(stIm, stMeta, w.x - cam, GY, 1, a * (st < .5 ? 2 * st : 1)); };
@@ -2862,7 +2902,7 @@ function start() {
   hush(); if (audio()) { AC.resume(); setTimeout(() => sfx.bell(.6), 300); fetchVoices(); }
   const wasAt = TEST_X; dropPlace();
   if (wasAt) { G.state = 'play'; return; }
-  const run = ++runN; G.state = 'wait'; wakeEyes(() => { if (run === runN && G.state === 'wait') talk(INTRO); });   // his eyes open (build 13), then the story
+  const run = ++runN; G.state = 'wait'; wakeEyes(() => { if (run === runN && G.state === 'wait') talk(INTRO, partyChoice); });   // his eyes open (build 13), then the story
 }
 // THE DREAM AND THE WAKING. Level 1 opens on black. First the dream (build 14; owner, with two photographs of Seattle's
 // skyline across the water: "city pics for nuclear at start"): the city at dusk across the bay, the needle on the left and
