@@ -188,6 +188,51 @@ const SL = (() => {
     g.setTransform(k, 0, 0, k, (2 - x0 * k), (2 - y0 * k)); g.fillStyle = css(col); ribbons(g, tree);
     return { c, x0: x0 - 2 / k, y0: y0 - 2 / k, k };
   }
+  let FARS = [];
+  function bakeSil(x0, y0, w, h, col, fn) { const c = mk(w, h), k = c.getContext('2d'); k.translate(-x0, -y0); k.fillStyle = k.strokeStyle = css(col); k.lineCap = k.lineJoin = 'round'; fn(k); return { c, k: 1, x0, y0 }; }
+  function farThings() {
+    const line = (k, pts, w) => { k.lineWidth = w; k.beginPath(); pts.forEach((q, i) => i ? k.lineTo(q[0], q[1]) : k.moveTo(q[0], q[1])); k.stroke(); };
+    const poly = (k, pts) => { k.beginPath(); pts.forEach((q, i) => i ? k.lineTo(q[0], q[1]) : k.moveTo(q[0], q[1])); k.closePath(); k.fill(); };
+    // a farm machine: a small hull carried high on thin jointed legs, a long boom reaching down to the crop
+    const machine = (stopped) => k => {
+      const hy = stopped ? -385 : -420, tilt = stopped ? .07 : 0;
+      k.save(); k.rotate(tilt);
+      // legs: hip on the hull, a knee, a foot on the ground
+      [[-58, -150, -118], [-22, -64, -30], [30, 78, 52], [62, 150, 128]].forEach((L, i) => { const far = i === 1 || i === 2;
+        line(k, [[L[0], hy + 14], [L[1], hy + 150 + (far ? 16 : 0)], [L[2], 6]], far ? 7 : 10); k.beginPath(); k.arc(L[1], hy + 150 + (far ? 16 : 0), far ? 7 : 9, 0, 7); k.fill(); poly(k, [[L[2] - 16, 8], [L[2] + 16, 8], [L[2] + 6, -8], [L[2] - 6, -8]]); });
+      // the hull: a long low body, rounded, a hump of housing on its back
+      k.beginPath(); k.moveTo(-92, hy + 18); k.quadraticCurveTo(-104, hy - 20, -62, hy - 30); k.lineTo(40, hy - 34); k.quadraticCurveTo(104, hy - 30, 112, hy + 2); k.quadraticCurveTo(100, hy + 24, 60, hy + 24); k.closePath(); k.fill();
+      k.beginPath(); k.moveTo(-60, hy - 28); k.quadraticCurveTo(-44, hy - 66, -6, hy - 62); k.lineTo(14, hy - 32); k.closePath(); k.fill();
+      line(k, [[-30, hy - 60], [-36, hy - 118]], 3); line(k, [[-36, hy - 104], [-20, hy - 104]], 3);
+      // the boom: from the hull's nose out and down, an elbow, the cutter bar low over the field (hanging slack when stopped)
+      if (stopped) { line(k, [[96, hy], [150, hy + 40], [158, hy + 210]], 8); line(k, [[158, hy + 210], [150, hy + 300]], 5); poly(k, [[128, hy + 296], [172, hy + 296], [166, hy + 312], [134, hy + 312]]); }
+      else { line(k, [[96, hy], [196, hy - 44], [262, hy + 250]], 8); k.beginPath(); k.arc(196, hy - 44, 8, 0, 7); k.fill(); line(k, [[262, hy + 250], [258, -40]], 5); poly(k, [[214, -44], [304, -44], [298, -26], [220, -26]]); for (let i = 0; i < 6; i++) line(k, [[224 + i * 14, -26], [224 + i * 14, -10]], 3); }
+      k.restore();
+    };
+    // leaning posts with wire sagging between them
+    const wire = k => { const P = [[-330, -62, .1], [-205, -70, -.16], [-70, -58, .22], [60, -72, -.08], [190, -50, .3], [318, -66, -.12]];
+      const tops = P.map(q => { const tx = q[0] + Math.sin(q[2]) * -q[1], ty = q[1] * Math.cos(q[2]); line(k, [[q[0], 6], [tx, ty]], 6); return [tx, ty]; });
+      for (let r = 0; r < 3; r++) { k.lineWidth = 1.6; k.beginPath(); tops.forEach((t, i) => { const y = t[1] + 8 + r * 17, x = t[0] + (r - 1) * 2; if (!i) k.moveTo(x, y); else { const o = tops[i - 1], oy = o[1] + 8 + r * 17; k.quadraticCurveTo((o[0] + x) / 2, Math.max(oy, y) + 13 + (i * 7 + r * 5) % 11, x, y); } }); k.stroke(); }
+      // one strand broken, trailing to the ground
+      k.lineWidth = 1.6; k.beginPath(); k.moveTo(tops[5][0], tops[5][1] + 8); k.quadraticCurveTo(tops[5][0] + 40, -30, tops[5][0] + 74, 4); k.stroke(); };
+    // a steel hedgehog: three beams crossed
+    const hog = k => { line(k, [[-46, 4], [40, -74]], 9); line(k, [[46, 4], [-38, -70]], 9); line(k, [[-58, -30], [58, -40]], 9); };
+    // a wreck, half sunk and tilted: a long low hull, a housing, nothing else
+    const wreck = k => { k.save(); k.rotate(-.13); k.beginPath(); k.moveTo(-190, 30); k.lineTo(-170, -34); k.quadraticCurveTo(-150, -52, -110, -52); k.lineTo(-64, -92); k.lineTo(34, -96); k.lineTo(70, -54); k.lineTo(150, -50); k.quadraticCurveTo(196, -44, 214, 30); k.closePath(); k.fill(); line(k, [[-20, -94], [-30, -150]], 3); k.restore(); };
+    // a trunk broken off, its top splintered
+    const stump = k => { poly(k, [[-22, 6], [-15, -120], [-9, -168], [-4, -132], [3, -186], [8, -140], [14, -158], [17, -110], [24, 6]]); line(k, [[12, -96], [58, -128], [84, -122]], 6); line(k, [[-14, -74], [-52, -98]], 5); };
+    const M = (x, p, b, kind, sc) => ({ x, p, b, kind, sc: sc || 1 });
+    const t = v => tone(v);
+    return [
+      M(-1010, .44, bakeSil(-180, -560, 520, 590, t(.8), machine(false)), 'farm'),
+      M(-560, .3, bakeSil(-180, -560, 520, 590, t(.88), machine(false)), 'farm', -1),
+      M(-205, .4, bakeSil(-200, -520, 460, 550, t(.83), machine(true)), 'still'),
+      M(-405, .4, bakeSil(-350, -100, 760, 115, t(.76), wire), 'war'),
+      M(-120, .5, bakeSil(-70, -90, 140, 100, t(.74), hog), 'war'), M(-30, .5, bakeSil(-70, -90, 140, 100, t(.74), hog), 'war', -.9),
+      M(110, .46, bakeSil(-210, -190, 440, 240, t(.8), wreck), 'war'),
+      M(-610, .46, bakeSil(-70, -200, 170, 215, t(.8), stump), 'war'), M(330, .34, bakeSil(-70, -200, 170, 215, t(.88), stump), 'war', -1),
+    ];
+  }
   const putTree = (c, b, x, y, s, sy = s) => c.drawImage(b.c, x + b.x0 * s, y + b.y0 * sy, b.c.width / b.k * s, b.c.height / b.k * sy);
   let SHB = null, FARMUD = [], mudDk = null, mudLt = null, shC = null, mistC = null, fogC = null, SHN = [], SH0 = [];
   let SHORE = null, OAK = null, GHOSTS = null, skyMist = null, skyClear = null, paper = null, threads = null, puff = null, fogBank = null, mudMap = null, built = false;
@@ -200,6 +245,10 @@ const SL = (() => {
     SHORE = true;
     GHOSTS = [[-760, .5, 3, .8], [-1500, .36, 5, .88], [560, .46, 8, .84], [-230, .3, 9, .9], [-2300, .42, 12, .86], [-3100, .4, 14, .85], [-1950, .52, 15, .83]]
       .map(g => ({ x: g[0], p: g[1], b: bakeTree(oak(g[2], false, 3), tone(g[3]), .7) }));
+    // 2100 (build 3): what our age has left out there, as pale shapes in the haze like the ghost trees. On the plain,
+    // tall farm machines on stilt legs (one working, one stopped for good); in the mire, a no man's land: leaning posts
+    // with sagging wire, steel hedgehogs, a sunk wreck, a shattered trunk. Nothing of people. Each is baked once in one tone.
+    FARS = farThings();
     // two skies baked once (misty and clear) and mixed by the mist; the far light is drawn over them live
     const sky = (skyV, mistV) => { const c = mk(240, 135), k = c.getContext('2d'), d = k.createImageData(240, 135);
       for (let j = 0; j < 135; j++) for (let i = 0; i < 240; i++) {
@@ -1034,6 +1083,11 @@ const SL = (() => {
       if (gx < -260 || gx > VW + 260) continue;
       putTree(ctx, g.b, gx, gy, s); ctx.globalAlpha = .3; putTree(ctx, g.b, gx, gy, s, -s * .7); ctx.globalAlpha = 1;
     }
+    // the far things of our age (build 3): machines over the fields, fading as the mire begins; the war's leavings in the mire
+    { const aF = 1 - smooth(-1300, -1000, cx), aW = smooth(-1350, -1050, cx);
+      for (const m of FARS) { const a = m.kind === 'farm' ? aF : m.kind === 'war' ? aW : 1; if (a <= .01) continue;
+        const s = z * m.p * .9, gx = (m.x - cx * m.p) * z + VW / 2, gy = hor + (wl - hor) * m.p * .55; if (gx < -320 || gx > VW + 320) continue;
+        ctx.save(); ctx.translate(gx, gy); ctx.scale(m.sc, 1); ctx.globalAlpha = a; putTree(ctx, m.b, 0, 0, s); ctx.globalAlpha = a * .25; putTree(ctx, m.b, 0, 0, s, -s * .6); ctx.restore(); } }
     // the mire running back behind them (FARMUD): nearer rows slide more with the camera, are taller and darker
     for (const row of FARMUD) {
       const q = row.q, p = .3 + .7 * q, gy = hor + (wl - hor) * q, hz = (.2 + .8 * q) * z;
