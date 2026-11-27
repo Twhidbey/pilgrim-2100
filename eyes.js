@@ -151,7 +151,7 @@ function muscles(f) {
   // the cheeks rise with the mouth's smile too (a broad smile or a grimace with the eyes still open), which the eye readings alone miss
   return { cheek: Math.max(s(cl((v(0) - R[0]) / .13)) * (1 - s(cl((v(5) - .4) / .16))), A.length > 6 ? s(cl((v(6) - R[6] - .08) / .62)) : 0), inner: s(cl((v(1) - R[1]) / .26)), down: s(cl((v(2) - R[2]) / .3)), raise: s(cl((v(3) - R[3]) / .55)) };
 }
-const WRINKLE = .62;
+let WRINKLE = .62;      // (build 17: settable, EYESWAKE.setWrinkle)
 // A TEAR, after photographs of real ones: it gathers on the lower lid, creeps, then runs down the cheek in little starts,
 // leaving a thin wet track that glints (a bright thread with a faint dark edge) and dries behind it; the bead at its end
 // is a clear drop: dark at its lower rim, a sharp highlight above, a pale crescent of light inside below.
@@ -212,6 +212,8 @@ function drawEyes(c, W, H, f, lookName) {
   const th = t => { let i = 0; while (i < TH.length - 2 && t > TH[i + 1][0]) i++; const a = TH[i], b = TH[i + 1], u = Math.max(0, Math.min(1, (t - a[0]) / (b[0] - a[0]))); return [a[1] + (b[1] - a[1]) * u, a[2] + (b[2] - a[2]) * u]; };
   const ED = [];
   const MU = muscles(f), FX = drawEyes.fx || {};
+  // BUILD 17 (owner, with a still of a weathered man's squint: "Can you make eyes more like these"): FX.squint 0..1 narrows the lids, pulls the brows down and in, and deepens the creases
+  if (FX.squint) { MU.down = Math.max(MU.down, .9 * FX.squint); MU.cheek = Math.max(MU.cheek, .55 * FX.squint); }
   // an asked-for feeling laid over the clip: sorrow lifts the inner brows, lets the outer lids hang and tightens the cheeks a little
   if (FX.sorrow) { MU.inner = Math.max(MU.inner, FX.sorrow); MU.cheek = Math.max(MU.cheek, .22 * FX.sorrow); }
   for (const e of ['R', 'L']) {
@@ -219,9 +221,11 @@ function drawEyes(c, W, H, f, lookName) {
     // INNER BROWS: when they are drawn up, the brow's inner end lifts and its outer tail settles, so the brow slants (the
     // tracker's brow points hardly show it; its muscle reading does)
     { const k = MU.inner, lift = [.008, 0, -.004, -.017, -.034]; for (let i = 0; i < 5; i++) { bl[i] = [bl[i][0], bl[i][1] + lift[i] * k]; bu[i] = [bu[i][0], bu[i][1] + lift[i] * k * 1.1]; } }
+    if (FX.squint) { const k = FX.squint, low = [.008, .012, .017, .024, .032]; for (let i = 0; i < 5; i++) { bl[i] = [bl[i][0], bl[i][1] + low[i] * k]; bu[i] = [bu[i][0], bu[i][1] + low[i] * k * 1.1]; } }      // brows down, the inner ends most (index 4 is the inner end)
     const open0 = lo[4][1] - up[4][1], kO = (t => t * t * (3 - 2 * t))(Math.max(0, Math.min(1, (open0 - .026) / .046))) * .88;
     for (let i = 0; i < up.length; i++) { up[i] = [up[i][0], lo[i][1] + (up[i][1] - lo[i][1]) * kO]; }
     widen(up, open0); const tip0 = up[0].slice(), wideK = wideOf(open0); canthus(up, lo);
+    if (FX.squint) { const n = up.length - 1, k = FX.squint * Math.min(1, open0 / .06); for (let i = 1; i < n; i++) { const sn = Math.pow(Math.sin(Math.PI * i / n), .8); up[i] = [up[i][0], up[i][1] + .026 * k * sn]; lo[i] = [lo[i][0], lo[i][1] - .013 * k * sn]; } }      // the lids narrowed
     if (FX.sorrow) for (let i = 0; i < 5; i++) up[i] = [up[i][0], up[i][1] + FX.sorrow * (FX.droop == null ? .013 : FX.droop) * (1 - i / 5) * Math.min(1, open0 / .08)];
     const sgn = e === 'R' ? -1 : 1, outer = up[0], inner = up[up.length - 1], mid = [(outer[0] + inner[0]) / 2, (outer[1] + inner[1]) / 2], w = Math.abs(outer[0] - inner[0]);
     EC.push([mid[0], (up[4][1] + lo[4][1]) / 2, w]); const open = lo[4][1] - up[4][1], openK = Math.max(0, Math.min(1, open / .09));
@@ -441,8 +445,9 @@ function shadeDark(c, W, H, f, K, S, cx, cy) {
   const B = P([[-.9, -.172], [-.6, -.158], [-.37, -.13], [-.17, -.152], [0, -.168], [.17, -.14], [.37, -.107], [.6, -.118], [.9, -.112]]);
   c.globalCompositeOperation = 'multiply';
   const brim = (dy, k) => { c.beginPath(); c.moveTo(-20, -20); c.lineTo(B[0][0], B[0][1] + dy); curve(c, B.map(p => [p[0], p[1] + dy]), false); c.lineTo(W + 20, -20); c.closePath(); c.fillStyle = mulc(k); c.fill(); };
-  for (let i = 0; i < 6; i++) brim((i - 2.5) * .0024 * S, 1 / 6);
-  for (let i = 0; i < 5; i++) brim(-(.05 + i * .016) * S, .1);
+  const bu0 = -((drawEyes.fx && drawEyes.fx.brimUp) || 0) * S;      // build 17: the brim's shadow raised off the brows (the owner's reference shows the brows plainly)
+  for (let i = 0; i < 6; i++) brim(bu0 + (i - 2.5) * .0024 * S, 1 / 6);
+  for (let i = 0; i < 5; i++) brim(bu0 - (.05 + i * .016) * S, .1);
   c.globalCompositeOperation = 'source-over';
   // 4 the picture falls away to black round the eyes, sooner on the far side
   c.save(); if (drawEyes.cyK) { c.translate(X(-.18), Y(.03)); c.scale(1.04 * S, .5 * S); } else { c.translate(X(-.2), Y(-.02)); c.scale(1.04 * S, .42 * S); } const g = c.createRadialGradient(0, 0, 0, 0, 0, 1.5);
@@ -452,5 +457,5 @@ function shadeDark(c, W, H, f, K, S, cx, cy) {
   if (K.grain) c.drawImage(grain(W, H, K.grain), 0, 0);
   c.restore();
 }
-return { draw: drawEyes, n: EYES.n };
+return { draw: drawEyes, n: EYES.n, setWrinkle: v => { WRINKLE = v; } };
 })();
