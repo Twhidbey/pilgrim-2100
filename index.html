@@ -202,7 +202,7 @@ body.portrait:not(.playing) #rot{display:none}
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 19 · Nov 27 2026</div>
+  <div id="build">build 20 · Nov 27 2026</div>
   <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
@@ -685,7 +685,7 @@ function buildScenery() {
       // than they are tall; only the church spires stand high; few windows, and few of them lit.
       // Build 13: Seattle's towers in place of the old town's low houses and spires (see tower()). The far row (i = 1) holds the
       // tall towers and, once each, the four special shapes; the near row (i = 2), mostly hidden behind the street, lower blocks.
-      const far = i === 1, specials = far ? { 470: 'mast', 515: 'mast', 600: 'needle', 905: 'col', 1240: 'crown', 1395: 'old' } : {}, done = {};
+      const far = i === 1, specials = far ? { 470: 'mast', 515: 'mast', 905: 'col', 1240: 'crown', 1395: 'old' } : {}      /* build 20: no needle (owner) */, done = {};
       for (let x = near ? field : -50 * s - R() * 50 * s; x < edge;) {
         const tp = clamp((edge - x) / (260 * s), .35, 1) * clamp(.55 + (x - field) / 260, .55, 1);
         const sp = Object.keys(specials).find(k => !done[k] && x > +k - 40);
@@ -2923,14 +2923,17 @@ function bakeDream() {
   c = city.getContext('2d'); small(c); c.fillStyle = '#000';
   c.fillRect(-300, SEA - 7, DW + 600, 8); for (let x = -300; x < DW + 300; x += r(5, 14)) c.fillRect(x, SEA - r(6, 12), r(4, 12), 14);      // the low shore
   const T = (x, w, top) => { c.fillRect(x, top, w, SEA - top); for (let y = top + 3; y < SEA - 10; y += 3.2) for (let xx = x + 1; xx < x + w - 1; xx += 2.4) if (R2() < .025) lit.push([xx, y]); };
-  { const m = 152, top = 193; c.beginPath(); c.moveTo(m - 4, SEA - 6); c.lineTo(m - .8, SEA - 52); c.lineTo(m - 1.4, top + 12); c.lineTo(m - 8, top + 9); c.lineTo(m - 8.5, top + 6); c.lineTo(m - 3, top + 3); c.lineTo(m - .5, top - 6); c.lineTo(m + .5, top - 6); c.lineTo(m + 3, top + 3); c.lineTo(m + 8.5, top + 6); c.lineTo(m + 8, top + 9); c.lineTo(m + 1.4, top + 12); c.lineTo(m + .8, SEA - 52); c.lineTo(m + 4, SEA - 6); c.fill(); }      // the needle
-  for (let x = 190; x < 600;) {                               // the towers: low toward the edges, tallest a little right of the middle
-    const k = Math.exp(-Math.pow((x - 470) / 120, 2)), w = r(6, 15), top = SEA - (18 + 95 * k * r(.55, 1.05) + r(0, 14));
-    if (Math.abs(x - 482) < 7) { c.beginPath(); c.moveTo(x, SEA); c.lineTo(x, 182); c.quadraticCurveTo(x + 2, 176, x + 5, 176); c.lineTo(x + 5, 170); c.quadraticCurveTo(x + 8, 166, x + 11, 170); c.lineTo(x + 11, 176); c.quadraticCurveTo(x + 14, 176, x + 16, 182); c.lineTo(x + 16, SEA); c.fill(); x += 18; continue; }      // the tall dark one, in rounded steps
-    if (Math.abs(x - 446) < 7) { c.beginPath(); c.moveTo(x, SEA); c.lineTo(x, 186); c.lineTo(x + 2, 186); c.lineTo(x + 2, 181); c.lineTo(x + 6.5, 168); c.lineTo(x + 11, 181); c.lineTo(x + 11, 186); c.lineTo(x + 13, 186); c.lineTo(x + 13, SEA); c.fill(); x += 15; continue; }      // the one under a pointed crown
-    T(x, w, top); x += w + r(-2, 2.5);
-  }
-  for (let x = 200; x < 600; x += r(8, 18)) T(x, r(8, 16), SEA - r(14, 34));      // lower blocks in front
+  // BUILD 20 (owner: "map skyline of Seattle more closely but remove space needle"): the towers traced by hand, building by building, from the
+  // owner's photograph of the skyline across the bay (photo x 40..1170 and heights above the shore at y 295, scaled by k); the needle is left out.
+  // [left, right, top] in the photo; 'col' = the tall dark one in rounded steps, 'crown' = the one under a pointed crown.
+  const SKY = [[40, 62, 262], [60, 100, 245], [100, 140, 238], [160, 190, 240], [195, 215, 250], [222, 248, 248], [250, 275, 208], [280, 305, 210], [318, 345, 205], [355, 372, 205], [372, 400, 215],
+    [408, 450, 180], [455, 470, 222], [474, 508, 168], [512, 524, 214], [526, 554, 168], [555, 571, 200], [573, 619, 165], [624, 650, 203], [652, 674, 222], [677, 713, 165], [716, 721, 196],
+    [722, 789, 122], [790, 819, 180], [821, 868, 137], [906, 936, 130], [936, 970, 132], [972, 994, 160], [995, 1035, 100], [1035, 1070, 135], [1071, 1125, 90], [1126, 1170, 115], [1140, 1170, 140]];
+  const k = .41, X0 = 172, px = x => X0 + (x - 40) * k, py = y => SEA - (295 - y) * k * 1.12;
+  for (const [a, b, tp] of SKY) T(px(a), (b - a) * k, py(tp));
+  { const x = px(864), w = (905 - 864) * k, y = py(58); c.beginPath(); c.moveTo(x, SEA); c.lineTo(x, y + 12); c.quadraticCurveTo(x + w * .12, y + 7, x + w * .3, y + 7); c.lineTo(x + w * .3, y + 3); c.quadraticCurveTo(x + w * .5, y - 1, x + w * .7, y + 3); c.lineTo(x + w * .7, y + 7); c.quadraticCurveTo(x + w * .88, y + 7, x + w, y + 12); c.lineTo(x + w, SEA); c.fill(); }      // the tall dark tower in rounded steps
+  { const x = px(872), w = (932 - 872) * k, y = py(68); c.beginPath(); c.moveTo(x, SEA); c.lineTo(x, y + 9); c.lineTo(x + w * .15, y + 9); c.lineTo(x + w * .15, y + 5); c.lineTo(x + w * .5, y - 4); c.lineTo(x + w * .85, y + 5); c.lineTo(x + w * .85, y + 9); c.lineTo(x + w, y + 9); c.lineTo(x + w, SEA); c.fill(); }      // the one under a pointed crown
+  for (let x = px(40); x < px(1170); x += r(5, 11)) T(x, r(5, 10), SEA - r(10, 22));      // the low city along the shore in front
   const tone = (src, col) => { const m = mk(DW, DH), g = m.getContext('2d'); g.drawImage(src, 0, 0); g.globalCompositeOperation = 'source-in'; g.fillStyle = col; g.fillRect(0, 0, DW, DH); return m; };
   DREAM = { cityDusk: tone(city, '#252833'), cityBlack: tone(city, '#07070a'), hillDusk: tone(hills, '#3b4050'), hillBlack: tone(hills, '#0d0c0e'), lit: lit.map(([x, y]) => [330 * .4 + x * .6, SEA * .4 + y * .6]), can: mk(DW, DH), puffs: [], bands: [] };
   for (let i = 0; i < 46; i++) DREAM.bands.push([r(-40, DW + 40), [120, 170, 215, 248][i % 4] + r(-10, 10), r(50, 130), r(8, 16), r(.5, 1)]);      // long soft bands of cloud at dusk
