@@ -197,7 +197,7 @@ const SL = (() => {
       MECHS.push({ x: m[1], p: m[2], s: m[3], b: { c, k: im.height / 560, x0: -530, y0: -556 } }); MECHS.sort((u, v) => u.p - v.p); }; im.src = 'assets/' + m[0] + '.webp?v=11'; }); }
   // build 9: a diffuse mist of its own (soft blobs, wrapping sideways), laid over the feet of the far things
   let FARMIST = null;
-  // build 59: old oil drums in the mire: [x, parallax, kind ('u' upright, 'l' lying on its side), tilt, how far sunk, dented]
+  // build 60: old oil drums in the mire: [x, parallax, kind ('u' upright, 'l' lying on its side), tilt, how far sunk, dented]
   const OILD = [[-760, .66, 'u', -.1, 36, 1], [-380, .75, 'u', .14, 30, 0], [-337, .75, 'l', -.06, 36, 0]];
   // one drum in its own units (88 tall, 58 across, base at 0): the body, two rolling hoops standing a little proud, the rim
   function oilDrum(c, kind, dent, col) {
@@ -1108,7 +1108,7 @@ const SL = (() => {
     // build 395: the horizon back as one soft pale line across the mire (it had melted into the mist, so sky and mud were one grey)
     if (ph !== 'plain') { const h0 = hor - 5 * z, g = ctx.createLinearGradient(0, h0, 0, h0 + 12 * z), k = .28 * look.mist; g.addColorStop(0, css(LIGHT, 0)); g.addColorStop(.5, css(LIGHT, k)); g.addColorStop(1, css(LIGHT, 0)); ctx.fillStyle = g; ctx.fillRect(0, h0, VW, 12 * z); }
 
-    // build 59 (owner: "Can we put some old oil drums in slough poking out"): old steel drums half sunk in the mire, far off
+    // build 60 (owner: "Can we put some old oil drums in slough poking out"): old steel drums half sunk in the mire, far off
     // behind him, one tone each by depth (nearer darker), drawn in code; they come in with the mire's ghost trees, as the camera
     // reaches the mire. No reflection (the rows are mud, not water) and no pale ring (it read as a drawn line).
     { const aD = smooth(-1300, -1000, cx); if (aD > .01) for (const d of OILD) {
