@@ -53,7 +53,7 @@ const SL = (() => {
     [N, 'Then a man came to him, whose name was Help.'],
     [H, 'Why did you not look for the steps?'],      // build 368: "What are you doing there?" and Christian's answer cut
     [C, 'Fear followed me so hard that I fell in.'],
-    [H, 'Give me your hand.', 'hand', () => { mv = mv || { t: 0 }; mv.to = 150; C2.handGo = true; C2.handT = G.t; }],      // he is already down on his knee: now he holds out his hand
+    [H, 'Give me your hand.', 'hand', () => { mv = mv || { t: 0 }; mv.to = NEWR() ? KNEEL_REACH : 150; C2.handGo = true; C2.handT = G.t; }],      // he is already down on his knee: now he holds out his hand
   ];
   const DRAWN = [];      // {32}
   // THE SLOUGH'S HISTORY (build 417; owner: "When help explains the history of the slew can we do a flash to the efforts of
@@ -113,9 +113,9 @@ const SL = (() => {
   const WADE0 = FALL_X + 70;      // build 119: falling, Christian pitches on this much further, so the two are not on top of each other in the mire
   // Help kneels at the edge of the far bank; Christian must come to where his hand meets Help's (measured in slough-lab.html)
   // build 65: Help kneels in his boat's bow where he knelt on the bank before (the boat's deck at the old bank's height, DECK)
-  const HX = -126, GRASP = { dx: -(82 - 15 + 129), dy: 283 - 55 }, DECK = -8;
+  const HX = -126, GRASP = { dx: -(82 - 15 + 129), dy: 283 - 55 }, DECK = -6;      // build 76: the deck, where his standing picture matches the haul's end (stand-match.py)
   const HY = () => DECK + 4;
-  const STUCK_X = HX + GRASP.dx * CHR_K, STUCK_Y = () => HY() + GRASP.dy * CHR_K;
+  const STUCK_X = HX + (360 - 640) * (288 / 463 * CHR_K), STUCK_Y = () => HY() + GRASP.dy * CHR_K;
   const MD_IN = 16, MD_FAR = 28, REACH_F = 88, REACH_X = HX - 82;      // build 260: see DEEP IN THE MIRE in update()
   const SINK = 100, PLI_SINK = 76, DEEP = 8, OAK_X = 110 + WIDEN, OAK_S = 1.2;
   const C_SINK = 64;      // build 125 (owner: "Christian is too submerged at first ... it'd be nice to see more of him at start"): he falls in to the waist, and sinks from there to SINK + DEEP as he crosses
@@ -129,11 +129,23 @@ const SL = (() => {
   const sunk = t => .8 * smooth(0, 42, t) + .2 * smooth(30, 330, t);
   // where each man stands when the lift is over, in the lift picture's own pixels (measured from its last frame)
   const LIFT_CHR = 260, LIFT_HELP = 399;
+  // ---------- build 76 (owner: "Yes do it"): THE RESCUE IN 2100 ----------
+  // Four packs cut by sources/haul/cut-rescue.py into ONE picture space (the haul video's first frame), all drawn at one anchor, so the
+  // swimmer, his reach, Help's kneel and the haul meet with no fitting by eye: SWIM (a loop of strokes against the current, the 2100
+  // pilgrim chest-deep), REACHN (he stops and lifts his arm to Help's hand), KNEEL (Help standing by the console, then down on one knee in
+  // the bow, reaching), HAUL (Help hauls him up over the side; they stand). The videos' zooms are undone in the cut. RW: world units
+  // per pixel of that space; the anchor (its x 640, the pilgrim's water line) is drawn at (HX, 0).
+  const SWIM = [], REACHN = [], KNEEL = [], HAUL = [];
+  const NEWR = () => SWIM.ready && REACHN.ready && KNEEL.ready && HAUL.ready;
+  const RW = 288 / 463 * CHR_K, PIL_DX = (360 - 640) * RW;      // the swimmer's middle, from the anchor
+  const HAND = [(585 - 640) * RW, (507 - 679) * RW], HAUL_SPLIT = (622 - 640) * RW;      // where the hands meet; left of SPLIT is the pilgrim
+  const HAUL_END = 84, KNEEL_DOWN = 48, KNEEL_REACH = 119, SWIM_LEAVE = 28, PIL_STAND_DX = -54.1;      // pack frames; where he stands after the haul (sources/haul/stand-match.py)
   // ---------- build 65: THE MOTORBOAT (drawn in code, one dark silhouette like the banks) ----------
   // In its own units from where Help kneels (HX): the bow at -62 (he reaches over it), the stern and motor at STERN.
   // It comes in from the right out of the mist (BOAT_IN), the motor cut part way so it glides to a stop beside him; after the
   // lift it backs slowly (FERRY) until its stern lies against the far bank; when he goes on his way it leaves, bow first.
-  const BOAT_IN = 680, BOAT_T = 460, BOW = -62, STERN = 212, FERRY = BANK0 + 12 - (HX + STERN), FERRY_T = 640;
+  const BOAT_IN = 680, BOAT_T = 460, BOW = -132, STERN = 160,      // build 76: the bow left of where he climbs aboard
+    FERRY = BANK0 + 12 - (HX + STERN), FERRY_T = 640;
   let boatOff = 0, boatV = 0, ferryT = 0, leaveT = 0, motor = null;
   const inBoat = x => help && x > HX + boatOff + BOW + 10 && x < HX + boatOff + STERN - 2;
   const standY = x => inBoat(x) ? DECK : bankY(x);
@@ -153,7 +165,7 @@ const SL = (() => {
     n.save(); n.globalAlpha = a; n.fillStyle = css(col); n.translate(x, 0); n.beginPath();
     n.moveTo(BOW - 4, -36); n.lineTo(STERN, -34); n.lineTo(STERN, -31.5); n.lineTo(STERN - 1, 7); n.lineTo(BOW + 74, 7);      // the sheer (with its rail) and the transom, the flat bottom
     n.quadraticCurveTo(BOW + 64, 7, BOW + 58, 1); n.lineTo(BOW + 2, -30); n.quadraticCurveTo(BOW - 3, -32.5, BOW - 4, -36); n.closePath();      // the rake up to the square bow
-    n.moveTo(46, -33); n.lineTo(46, -52); n.lineTo(58, -54); n.lineTo(66, -48); n.lineTo(66, -33); n.closePath();      // the console
+    n.moveTo(84, -33); n.lineTo(84, -52); n.lineTo(96, -54); n.lineTo(104, -48); n.lineTo(104, -33); n.closePath();      // the console (just behind where Help stands)
     // the outboard: a tall boxy cowling sitting on the stern, leaning back, its leg slanting down into the water
     n.moveTo(STERN - 1, -36); n.lineTo(STERN - 3, -60); n.quadraticCurveTo(STERN - 2, -69, STERN + 8, -70); n.lineTo(STERN + 22, -68); n.quadraticCurveTo(STERN + 31, -66, STERN + 30, -56);
     n.lineTo(STERN + 27, -42); n.lineTo(STERN + 19, -38); n.lineTo(STERN + 22, 2); n.lineTo(STERN + 27, 4); n.lineTo(STERN + 26, 11); n.lineTo(STERN + 12, 12); n.lineTo(STERN + 11, 3); n.lineTo(STERN + 8, -2); n.lineTo(STERN + 6, -36); n.closePath();
@@ -361,6 +373,8 @@ const SL = (() => {
     // 0..5 settling, 6..58 heaving and straining on the spot, played back and forth, 60..119 lifting his head and raising his
     // right arm high for help, held). Both are cut at the video's own mud line, 122 pictures-pixels (63 units) above his feet.
     wade: { ax: 85, ground: 298 }, stuck: { ax: 120, ground: 299 },
+    // build 76 (THE RESCUE IN 2100): the new packs share one picture space (see RES below)
+    res: { ax: 280, ground: 397 },
     // Pliable coming to a stop (build 115, one video, about 56 cents: first frame his walk frame 0, last frame his standing
     // picture one step further on): pack frames 0..49 he slows over two or three steps and stops (video 0..98), 50..119 he
     // stands breathing (video 100..238, played back and forth). ax/ground = where walk frame 0's ax and ground fall in the
@@ -415,7 +429,7 @@ const SL = (() => {
   // line, top = how high the bank stands in the video (pack pixels), end = where his feet are in the last frame. Without the pack
   // he wades to his own bank and rises out of the water as he walks into the mist.
   function preload() {
-    if (!loading) loading = Promise.all([loadPack('help', HELPF), loadPack('help-walk', HWALK).catch(() => {}), loadPack('help-turn', HTURN).catch(() => {}), loadPack('christian-reach', REACH), loadPack('lift', LIFT), loadPack('pliable-climb', PLIC).catch(() => {}), loadPack('pliable-out', PLOUT).catch(() => {}), loadPack('christian-wade', WADE).catch(() => {}), loadPack('christian-stuck', STUCKP).catch(() => {}), loadPack('pliable-stop', PSTOP).catch(() => {})]).catch(() => {});
+    if (!loading) loading = Promise.all([loadPack('help', HELPF), loadPack('help-walk', HWALK).catch(() => {}), loadPack('help-turn', HTURN).catch(() => {}), loadPack('christian-reach', REACH), loadPack('lift', LIFT), loadPack('pliable-climb', PLIC).catch(() => {}), loadPack('pliable-out', PLOUT).catch(() => {}), loadPack('christian-wade', WADE).catch(() => {}), loadPack('christian-stuck', STUCKP).catch(() => {}), loadPack('pliable-stop', PSTOP).catch(() => {}), loadPack('pilgrim-swim', SWIM).catch(() => {}), loadPack('pilgrim-reach', REACHN).catch(() => {}), loadPack('help-kneel', KNEEL).catch(() => {}), loadPack('haul', HAUL).catch(() => {})]).catch(() => {});
     return loading;
   }
   // the middle of Pliable in a frame of his climbing video (measured once per frame, on a small copy), to mirror him about himself
@@ -438,7 +452,7 @@ const SL = (() => {
     return plTopC[f] = top * im.height / h;
   }
   // one tinted figure, feet at world (x, y); nothing below the water line when `cut` (each figure has its own small canvas)
-  const tintC = {}; let FIG_DIP = 0, HEADM = null;
+  const tintC = {}; let FIG_DIP = 0, HEADM = null, RCLIP = null;      // build 76: RCLIP clips a figure to part of the world (x0..x1, above y1)
   // the last row of a picture that has body in it (some packs keep a few blank rows at the bottom); found once per picture
   const lastRows = new WeakMap();
   function lastRow(im, fc) { let r = lastRows.get(im); if (r !== undefined) return r; r = { r: im.height - 1, x0: 0, x1: 0 };
@@ -468,6 +482,7 @@ const SL = (() => {
     f.globalCompositeOperation = 'destination-in'; f.drawImage(im, 0, 0); f.globalCompositeOperation = 'source-over';
     c.save(); c.globalAlpha = alpha;
     if (cut) { c.beginPath(); c.rect(-1e5, -1e5, 2e5, 1e5); c.clip(); }
+    if (RCLIP) { const x0 = RCLIP.x0 ?? -1e5, x1 = RCLIP.x1 ?? 1e5; c.beginPath(); c.rect(x0, -1e5, x1 - x0, (RCLIP.y1 ?? 1e5) + 1e5); c.clip(); }
     c.translate(x, y); if (TALKM) c.transform(1, 0, TALKM.sh, 1, 0, 0);      // build 118: whoever is speaking leans a hair with his own voice (talkMove in index.html)
     c.scale(face * CHR_K, CHR_K * (TALKM ? TALKM.sy : 1));
     if (!HEADM || meta !== META.stuck) c.drawImage(fc, -meta.ax, -meta.ground);
@@ -546,7 +561,7 @@ const SL = (() => {
     // the last words ended; a finger only walks him if it went down after that) still held Level 1's clock, thousands
     // of ticks ahead, so no finger counted until the clock caught up. Keys were never affected, so the tests passed.
     G.calm = 0;
-    C2.rt = 0; C2.sp = null; C2.handGo = false; C2.tv = null; C2.fy = null; C2.md = null; C2.rq0 = null; C2.q = 0; C2.hf = null; C2.hb = 0; C2.reachGo = false; C2.handT = 0; drops = []; churns = []; fReset(); strings = []; RECS = {}; for (const k in MS) delete MS[k]; C2.D = 0;
+    C2.rt = 0; C2.sp = null; C2.sw = 0; C2.rf = null; C2.handGo = false; C2.tv = null; C2.fy = null; C2.md = null; C2.rq0 = null; C2.q = 0; C2.hf = null; C2.hb = 0; C2.reachGo = false; C2.handT = 0; drops = []; churns = []; fReset(); strings = []; RECS = {}; for (const k in MS) delete MS[k]; C2.D = 0;
     ph = 'plain'; Object.assign(C2, { x: START, y: bankY(START) + 4, face: 1, anim: 12, alpha: 1, sink: 0, reach: 0, stand: 1, sd: QUIET[0], st: 0, faceA: 1, done: 0 });
     // build 69 (owner: "alone in level 2 if he doesn't get joined"): if the young man stayed in town at the end of Level 1
     // (pp-alone, set by index.html at choice 5), the pilgrim crosses the plain alone: no talk on the plain, no quarrel in the mire
@@ -626,7 +641,7 @@ const SL = (() => {
   function runsAt(a, row) { const out = []; if (!a.A || row < 0 || row >= a.h) return out; const o = row * a.w; let run = 0;
     for (let x = 0; x <= a.w; x++) { if (x < a.w && a.A[o + x]) run++; else { if (run >= 4 && run < a.w * .9) out.push([x - run, x]); run = 0; } } return out; }
   const wxOf = (r, c) => r.x + r.face * (c * 2 - r.meta.ax) * CHR_K, wyOf = (r, row) => r.y + (row * 2 - r.meta.ground) * CHR_K;
-  let MREC = null, FIG_WET = null, RECS = {}, strings = [], sndT = 0;
+  let haulLate = -1, MREC = null, FIG_WET = null, RECS = {}, strings = [], sndT = 0;
   const MS = {};      // per figure: the last picture's crossings, how hard he is moving (act), cool-downs
   // build 305 (owner: "decrease the drips a little or make them more mud like (it looks like water now)"): fewer of them, and
   // heavy: thrown lower and slower, thicker, falling back sooner (MUD_G), drawn as short round globs
@@ -722,7 +737,7 @@ const SL = (() => {
   // forth without body moving, could we use turns from other levels"): Level 1's turning video (TURN, left to right),
   // played backwards to turn him to the left. C2.tv = its clock; d = the way he will face; k = how fast (twice as fast in
   // the mire, where only his head and the sack show). Without the pack: the old dissolve.
-  function turnC(d, k = 1) { if (C2.face === d) return; if (NEWP() && C2.y <= 2) { C2.face = C2.faceA = d; return; } if (TURN.length) C2.tv = { t: d > 0 ? 0 : TURN.length - 1, d, k }; else C2.face = d; }
+  function turnC(d, k = 1) { if (C2.face === d) return; if ((NEWP() && C2.y <= 2) || (NEWR() && C2.y > 2)) { C2.face = C2.faceA = d; return; } if (TURN.length) C2.tv = { t: d > 0 ? 0 : TURN.length - 1, d, k }; else C2.face = d; }
   function finish() {
     G.state = 'end'; G.ended = false;
     const e = document.getElementById('endc');
@@ -732,13 +747,13 @@ const SL = (() => {
     document.getElementById('on2').style.display = '';
   }
   // a touch: on the water it makes rings; in the act, Help's hand takes his
-  const handPt = () => [HX - 82 * CHR_K, HY() - 55 * CHR_K];
+  const handPt = () => NEWR() ? [HX + HAND[0], HAND[1]] : [HX - 82 * CHR_K, HY() - 55 * CHR_K];
   // build 451 (owner: "he shouldn't reach out his hand till after help says and then it can just be the animation (the
   // still arm/hand seems a little long)"): Help's hand can be taken once it is out and "Give me your hand" has been said
   // (his recording over); only then does Christian reach, the stuck video playing on at its own pace, and the lift
   // follows the moment his hand is up: no held still pose with the arm out
   const helpSaid = () => !(SPK && SPK.who === H && AC && (AC.currentTime - SPK.t0) * 20 < SPK.env.length + 2) && G.t - (C2.handT || 0) > 40;
-  const handReady = () => !!(mv && mv.t >= 150 && C2.handGo && helpSaid() && !C2.reachGo && !lift);
+  const handReady = () => !!(mv && mv.t >= (NEWR() ? KNEEL_REACH - 6 : 150) && C2.handGo && helpSaid() && !C2.reachGo && !lift);
   function touch(sx, sy) {
     const wx = (sx - VW / 2) / cam.z + cam.cx, wy = (sy - cam.wl) / cam.z;
     if (G.act === 'hand') { const [hx, hy] = handPt(); if (handReady() && Math.hypot(wx - hx, wy - hy) * cam.z < 120) grip(); else G.actT = Math.max(G.actT, 60); return; }
@@ -830,6 +845,8 @@ const SL = (() => {
     { const p = clamp((C2.x - WADE0) / (STUCK_X - WADE0)), to = ph === 'wade' ? lerp(MD_IN, MD_FAR, smooth(0, .9, p)) : ph === 'stuck' || ph === 'help' ? MD_FAR : MD_IN;
       C2.md = C2.md == null ? to : C2.md + (to - C2.md) * .04; }
     const calm = !!(SPK && SPK.who !== N);      // one of the two is speaking: they hold nearly still
+    // build 76: his strokes against the current, at the video's own pace (slower while someone speaks or Help talks to him)
+    if (['fall', 'pli', 'back', 'backtalk', 'wade', 'stuck', 'help'].includes(ph)) C2.sw = (C2.sw || 0) + (calm || ph === 'help' ? .24 : .4);
     // build 121 (owner: "struggling feels a bit repetitive"): they struggle in bursts with a breath between, each at his own
     // changing pace (burst(k): 0 resting .. 1 heaving), so no two heaves fall alike; drops fly while they heave
     const burst = k => smooth(.3, .7, .5 + .5 * Math.sin(G.t / (52 + 9 * k) + 2.2 * Math.sin(G.t / (131 + 17 * k) + k)));
@@ -887,7 +904,7 @@ const SL = (() => {
         help.bt = (help.bt || 0) + 1; const u = Math.min(1, help.bt / BOAT_T), o = BOAT_IN * Math.pow(1 - u, 2.4);
         boatV = boatOff - o; boatOff = o; motorSet(1 - smooth(.42, .58, u));
         if (help.bt % 7 === 0 && u < .9) rings.push({ x: HX + boatOff + BOW + 6, y: 0, t: 0, k: .5 + 1.4 * (1 - u) });
-        if (u >= 1) { help.w = HSEQ.length - 1; boatOff = 0; mv = { t: 0, to: 82 }; } }
+        if (u >= 1) { help.w = HSEQ.length - 1; boatOff = 0; mv = { t: 0, to: NEWR() ? KNEEL_DOWN : 82 }; } }
       else if (help && !mv) mv = { t: 40, to: 82 };
       // build 287 (owner: "can christian not extend his hand, until it prompts him to take hand?"): he keeps struggling
       // while they talk and only lifts his head and arm once Help says "Give me your hand" (C2.handGo)
@@ -897,7 +914,14 @@ const SL = (() => {
       // pace, to frame 66: chest-deep, upright, his arms down, looking toward Help) and holds there, the body easing
       // between 66 and 72 as he breathes (C2.hf, C2.hb; his head moves too, see drawChr); once the child takes Help's
       // hand (C2.reachGo) the video plays on to REACH_F and the lift begins as his hand is up
-      if (help) {
+      if (help && NEWR()) {
+        // build 76: he swims on until the child takes Help's hand; then, when his stroke comes round to the frame the reach leaves from,
+        // he lifts his arm to Help's (REACHN, at its video's pace), and the haul begins as their hands meet
+        if (C2.reachGo && !lift) {
+          if (C2.rf == null) { if (((Math.floor(C2.sw || 0) % SWIM.length) + SWIM.length) % SWIM.length === SWIM_LEAVE) C2.rf = 0; }
+          else { C2.rf = Math.min(REACHN.length - 1, C2.rf + .2); if (C2.rf >= REACHN.length - 1) liftGo(); }
+        }
+      } else if (help) {
         if (C2.hf == null) C2.hf = Math.min(58, C2.q || 6);
         if (!C2.reachGo) { if (C2.hf < 66) { C2.hf = Math.min(66, C2.hf + .2); C2.hb = 0; } else { C2.hb++; C2.hf = 69 - 3 * Math.cos(C2.hb * Math.PI * 2 / 360); } }
         else if (!lift) {
@@ -908,7 +932,8 @@ const SL = (() => {
       }
       if (helpSayT && G.t >= helpSayT) { helpSayT = 0; talk(HELP.slice(0, 1), () => {}); }      // build 380: a breath between "could not get out" and "Then a man came"
       if (help && help.w >= HSEQ.length - 1 && !help.said && !helpSayT && G.state === 'play') { help.said = true; talk(HELP.slice(1), () => {}); }
-      if (lift) { lift.t = Math.min(236, lift.t + .4); if (lift.t >= 236) { ph = 'drawn'; C2.done = 0; C2.x = HX + (LIFT_CHR - META.lift.ax) * CHR_K; C2.y = DECK + 4; C2.D = (META.lift.ground - liftWet(LIFT.length - 1).r) * CHR_K; C2.face = 1; C2.faceA = 1; C2.stand = 1; C2.sd = QUIET[0]; } }
+      if (lift && NEWR()) { lift.t = Math.min(HAUL_END, lift.t + .2); if (lift.t >= HAUL_END) { ph = 'drawn'; C2.done = 0; C2.x = HX + PIL_STAND_DX; C2.y = DECK; C2.D = 95; C2.face = 1; C2.faceA = 1; C2.stand = 1; C2.sd = 0; C2.rf = null; } }      // build 76: the haul, at its video's pace
+      else if (lift) { lift.t = Math.min(236, lift.t + .4); if (lift.t >= 236) { ph = 'drawn'; C2.done = 0; C2.x = HX + (LIFT_CHR - META.lift.ax) * CHR_K; C2.y = DECK + 4; C2.D = (META.lift.ground - liftWet(LIFT.length - 1).r) * CHR_K; C2.face = 1; C2.faceA = 1; C2.stand = 1; C2.sd = QUIET[0]; } }
     } else if (ph === 'drawn') {
       // the lift's last picture dissolves into the two men standing apart, then he turns to look back
       C2.done = Math.min(1, C2.done + .03);
@@ -959,7 +984,7 @@ const SL = (() => {
       }
     }
     fogS = ph === 'look' ? 1 - smooth(60, 60 + LAST.length * 55 + 120, goldT) : ph === 'on' ? Math.max(0, fogS - .01) : fogS;
-    if (mv) mv.t = Math.min(mv.to ?? 150, mv.t + .4);
+    if (mv) mv.t = Math.min(mv.to ?? 150, mv.t + (NEWR() ? .2 : .4));      // build 76: the kneel pack is every 2nd frame of its video
     if (G.act === 'hand') { G.actT++; if (handReady() && !G.ring && G.actT > 20) { dMore.textContent = 'take his hand ✦'; const [hx, hy] = handPt(); G.ring = () => [(hx - cam.cx) * cam.z + VW / 2, cam.wl + hy * cam.z]; } }
     // --- Pliable ---
     if (pli) {
@@ -1099,7 +1124,7 @@ const SL = (() => {
   let nearC = null, mudC = null, mudGd = null, bandC = null, profC = null, chrLate = 0; const mudCh = [];
   function draw() {
     if (!nearC || nearC.width !== cv.width || nearC.height !== cv.height) nearC = mk(cv.width, cv.height);
-    RECS = {}; chrLate = 0; SH0 = SHN; SHN = [];
+    RECS = {}; chrLate = 0; haulLate = -1; SH0 = SHN; SHN = [];
     const { z, cx, wl } = cam, hor = wl - 140 * z, S = DPR;
     const X = x => (x - cx) * z + VW / 2, Y = y => wl + y * z;
     // (build 662, art direction: the level's last picture was a wide gold burst with rays, too near the Cross's sunrise)
@@ -1235,17 +1260,27 @@ const SL = (() => {
     const vt = mv ? mv.t : 0, lt = lift ? lift.t : -1, mixIn = lift ? clamp(lt / 3.2) : 0, talkH = talkMove(H), talkC = talkMove(C);
     if (ph === 'drawn' || ph === 'ferry' || ph === 'hist' || ph === 'look' || ph === 'onway' || ph === 'on') {
       const d = ph === 'drawn' ? C2.done : 1;
-      FIG_WET = liftWet(LIFT.length - 1); if (d < 1) figure(n, 'lift', LIFT[LIFT.length - 1], META.lift, HX, HY(), 1, fig, true, 1 - d); FIG_WET = null;
+      const hgo = help && help.boatGo ? 1 - smooth(560, 880, help.boatGo) : 1;
+      if (NEWR()) {      // build 76: the haul's last picture melts into the two of them standing apart; Help stays in it, in his boat, and goes in it
+        if (d < 1) figure(n, 'lift', HAUL[HAUL_END], META.res, HX, 0, 1, fig, false, 1 - d);
+        if (!(help && help.gone)) { TALKM = talkH; RCLIP = { x0: HX + boatOff + HAUL_SPLIT }; figure(n, 'help', HAUL[HAUL_END], META.res, HX + boatOff, 0, 1, fig, false, d * hgo); RCLIP = null; }
+      } else FIG_WET = liftWet(LIFT.length - 1); if (!NEWR() && d < 1) figure(n, 'lift', LIFT[LIFT.length - 1], META.lift, HX, HY(), 1, fig, true, 1 - d); FIG_WET = null;
       const hx0 = HX + (LIFT_HELP - META.lift.ax) * CHR_K, lv = help && help.lv;
-      if (help && help.gone) {}
+      if ((help && help.gone) || NEWR()) {}
       else { TALKM = talkH || { sh: 0, sy: breath(3) }; figure(n, 'help', HELPF[0], META.help, hx0 + boatOff, HY(), 1, fig, false, d * (help && help.boatGo ? 1 - smooth(560, 880, help.boatGo) : 1)); }      // build 65: he stays in his boat, and goes in it
       TALKM = talkC; FIG_WET = { D: C2.D || 0, a: .72 }; drawChr(n, fig, d); TALKM = null; FIG_WET = null;
     } else {
       TALKM = vt > 0 ? null : talkH || { sh: 0, sy: breath(3) };      // not while he kneels and reaches: his hand must stay where Christian's meets it; standing, he breathes (build 120)
-      if (help && help.w < HSEQ.length - 1) figure(n, 'help', HELPF[0], META.help, HX + boatOff, HY(), 1, fig, false, help.a);      // build 65: standing in his boat as it comes in
+      if (help && NEWR()) {      // build 76: the 2100 Help: standing by the console as his boat comes in, then down on one knee in the bow, reaching
+        if (help.w < HSEQ.length - 1) figure(n, 'help', KNEEL[0], META.res, HX + boatOff, 0, 1, fig, false, help.a);
+        else if (mixIn < 1) figure(n, 'help', KNEEL[Math.min(KNEEL.length - 1, Math.floor(vt))], META.res, HX, 0, 1, fig, false, help.a * (1 - mixIn));
+      }
+      else if (help && help.w < HSEQ.length - 1) figure(n, 'help', HELPF[0], META.help, HX + boatOff, HY(), 1, fig, false, help.a);      // build 65: standing in his boat as it comes in
       else if (help && mixIn < 1) figure(n, 'help', HELPF[at(HELP_SRC, vt)], META.help, HX, HY(), 1, fig, false, help.a * (1 - mixIn));
       TALKM = null;
-      if (lift) { const lf = at(LIFT_SRC, lt); MREC = 'L'; FIG_WET = liftWet(lf); figure(n, 'lift', LIFT[lf], META.lift, HX, HY(), 1, fig, true, mixIn); MREC = null; FIG_WET = null; }
+      // build 76: the haul: Help's side (right of HAUL_SPLIT) here, behind the hull; the pilgrim's side later, in front of it (haulLate)
+      if (lift && NEWR()) { RCLIP = { x0: HX + HAUL_SPLIT }; figure(n, 'lift', HAUL[Math.min(HAUL_END, Math.floor(lt))], META.res, HX, 0, 1, fig, false, mixIn); RCLIP = null; haulLate = Math.min(HAUL_END, Math.floor(lt)); }
+      else if (lift) { const lf = at(LIFT_SRC, lt); MREC = 'L'; FIG_WET = liftWet(lf); figure(n, 'lift', LIFT[lf], META.lift, HX, HY(), 1, fig, true, mixIn); MREC = null; FIG_WET = null; }
       chrLate = 0;
       if (!lift || mixIn < 1) { if (['fall', 'pli', 'back', 'backtalk', 'wade', 'stuck', 'help'].includes(ph)) chrLate = 1 - mixIn; else { TALKM = C2.reach > 0 ? null : talkC; drawChr(n, fig, 1 - mixIn); TALKM = null; } }
     }
@@ -1449,7 +1484,8 @@ const SL = (() => {
     if (FP > .01) { ctx.save(); ctx.setTransform(S, 0, 0, S, 0, 0); const B = darkMist().band, bw = 1300 * z, bh = 120 * z, off = (((-cx * z * .9 - G.t * .25) % bw) + bw) % bw;      // build 381: a low band of dark mist lying flat across the mire behind him (drawn before the figures, so never over him)
       ctx.globalAlpha = Math.min(1, .85 * FP); for (let x = off - bw; x < VW; x += bw) ctx.drawImage(B, x, wl - 190 * z, bw, bh); ctx.restore(); }
     if (pliIn) { TALKM = talkMove(PL); pliMire(ctx); TALKM = null; }
-    if (chrLate > 0) { MREC = 'C'; FIG_WET = { D: C2.D || 0, a: .8 }; TALKM = C2.reach > 0 ? null : talkMove(C); drawChr(ctx, fig, chrLate); TALKM = null; MREC = null; FIG_WET = null; }
+    if (haulLate >= 0) { const f = haulLate, top = lerp(0, -35, smooth(36, 58, f)); RCLIP = { x1: HX + HAUL_SPLIT, y1: top }; figure(ctx, 'haulP', HAUL[f], META.res, HX, 0, 1, fig, false, clamp(lift ? lift.t / 3.2 : 1)); RCLIP = null; }      // build 76: up over the side
+    if (chrLate > 0) { MREC = 'C'; FIG_WET = NEWR() ? null : { D: C2.D || 0, a: .8 }; TALKM = C2.reach > 0 ? null : talkMove(C); drawChr(ctx, fig, chrLate); TALKM = null; MREC = null; FIG_WET = null; }
     sense();
     { // (1), (2): the surface line, lifted by the field and by a collar hugging every crossing; seen near the bodies and
       // wherever the mud has been moved, and only where there is mud
@@ -1749,6 +1785,14 @@ const SL = (() => {
     // build 180: the struggling picture comes in quickly (about a sixth of a second) once he is in to the hips, under the
     // splash, instead of a long double picture while he sank from 44 to 57
     const wk = ph === 'fall' ? smooth(36, 46, C2.fallT) : smooth(36, 40, C2.y); let wa = 1;      // build 119: he flounders from the fall on
+    // build 76: in the water he is the 2100 pilgrim swimming (SWIM), or lifting his arm to Help (REACHN), cut at the water line;
+    // drawn about his own middle, so he faces either way without jumping
+    if (NEWR() && inWater && wk > 0 && ['fall', 'pli', 'back', 'backtalk', 'wade', 'stuck', 'help'].includes(ph)) {
+      if (wk < .5) { figure(n, 'chr0', walkIm, walkM, C2.x, C2.y, C2.face, fig, true, alpha * C2.alpha); return; }
+      let im = SWIM[((Math.floor(C2.sw || 0) % SWIM.length) + SWIM.length) % SWIM.length], fc = C2.face;
+      if (ph === 'help' && C2.rf != null) { im = REACHN[Math.min(REACHN.length - 1, Math.floor(C2.rf))]; fc = 1; }
+      FIG_DIP = 0; figure(n, 'swim', im, META.res, C2.x - fc * PIL_DX, 1, fc, fig, true, alpha * C2.alpha); return;
+    }
     if (WADE.length && inWater && wk > 0 && ['fall', 'pli', 'back', 'backtalk', 'wade', 'stuck', 'help'].includes(ph)) {
       if (wk < .5) figure(n, 'chr0', walkIm, walkM, C2.x, C2.y, C2.face, fig, true, alpha * C2.alpha);      // build 395: a clean swap under the splash, never both at once
       const wf = C2.wa || 0; walkIm = WADE[Math.floor(wf) % WADE.length]; walkM = META.wade;
