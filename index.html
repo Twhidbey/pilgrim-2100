@@ -1349,7 +1349,7 @@ function reset() {
     pli: null, obst: null, flare: 0, gloom: 0, gloomTo: 0, gateOpen: 0, act: null, actT: 0, ring: null, auto: null, finale: null, guard: 0, idle: 0, wins: 0,
     evanDone: !!TEST_X, evanGone: TEST_X ? 1 : 0, neigh: TEST_X > NEIGH_X + 300, gateSeen: false, walked: false, touched: false, leaving: false, fam: TEST_X > HOME_X ? 2 : 0, door: 0,      // build 13 (owner: "as far as we know pilgrim has no family, for now"): his door stays shut
     doorShut: false, roll: TEST_X ? { t: 999, x: 0, y: 0 } : null, runZone: !!TEST_X && TEST_X < RUN_END, outSaid: false, watched: TEST_X > WATCH_X, ears: TEST_X > HOME_X });
-  G.sunUp = 0; G.waitFn = null; G.drone = null; G.tank = null; G.train = null; G.hornFar = false; G.gateTried = null; G.gateOpening = null; G.gateOpts = null; G.sentryAway = false; G.sentryTw = 0;  G.tvRun = !!TEST_X && TEST_X > TV_RUN_A; G.phGo = !!TEST_X && TEST_X > EVAN_X; G.phFade = G.phGo ? 1 : 0; if (ROW[0] && !ROW[0].who) ROW[0].open = 1;      // build 16: the party: the door of the building beside his (to the left), lit from the start
+  G.lf = null; G.sunUp = 0; G.waitFn = null; G.drone = null; G.tank = null; G.train = null; G.hornFar = false; G.gateTried = null; G.gateOpening = null; G.gateOpts = null; G.sentryAway = false; G.sentryTw = 0;  G.tvRun = !!TEST_X && TEST_X > TV_RUN_A; G.phGo = !!TEST_X && TEST_X > EVAN_X; G.phFade = G.phGo ? 1 : 0; if (ROW[0] && !ROW[0].who) ROW[0].open = 1;      // build 16: the party: the door of the building beside his (to the left), lit from the start
   G.through = false; G.homeTo = null; G.autoRun = 0; G.calm = 0; G.doorSaid = false; G.choiceKind = null; G.sawLight = !!TEST_X && TEST_X > EVAN_X; G.nchose = false; G.alone = false;
   G.zoom = 1 - (1 - ZOOM_GATE) * smooth(GATE - 1300, GATE - 380, START_X);      // starting near the gate (?at=gate): already drawn back
   G.evan.pt = TEST_X ? 239 : 0; G.evan.go = false; G.evan.st = EVS_META.frames * 100; downs.clear(); pushing = false; keys.r = keys.push = false;
@@ -2248,7 +2248,10 @@ function update() {
   if (G.roll) G.roll.t++; if (G.hint === 'roll' && --G.rollT <= 0) clearHint('roll');
   people(); gather(); if (!SL.on && !HL.on && !CR.on) { droneTick(); tankTick(); gateTick(); trainTick(); } motes(); effects(); capTick(); acts(); ambience(); opening();
   if (G.state === 'play') story();
-  const target = Math.max(0, Math.min(camMax(), P.x - VW * (G.evanDone ? .38 : .62) + P.face * 40));      // room in front of him, whichever way he is going
+  // build 108 (owner: "When turn after Philip points, screen jumps ... make it smooth"): the room kept in front of him follows the way he
+  // faces through an eased value (G.lf), which starts moving as his turn begins, so the camera glides instead of setting off at full pace
+  G.lf = G.lf == null ? P.face : G.lf + ((P.turnV && P.turnV.n ? 1 : P.face) - G.lf) * .03;
+  const target = Math.max(0, Math.min(camMax(), P.x - VW * (G.evanDone ? .38 : .62) + G.lf * 40));      // room in front of him, whichever way he is going
   G.cam += (target - G.cam) * .05;
   if (G.gateOpen >= 1) G.sunUp = Math.min(1, (G.sunUp || 0) + .0012);      // the light climbs as they go through the gate (about 14 s)
   G.zoom = (G.zoom || 1) + ((1 - (1 - ZOOM_GATE) * smooth(GATE - 1300, GATE - 380, P.x)) - (G.zoom || 1)) * .02;      // the camera draws back near the gate
