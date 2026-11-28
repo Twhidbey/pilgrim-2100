@@ -146,13 +146,21 @@ const SL = (() => {
     const now = AC.currentTime; motor.g.gain.setTargetAtTime(.05 * v, now, .5); motor.o.frequency.setTargetAtTime(44 + 14 * v, now, .4); motor.o2.frequency.setTargetAtTime(89 + 28 * v, now, .4);
   }
   function boatShape(n, x, a, col) {
+    // build 67 (owner, with a photo of a flat-bottomed aluminium work boat: "Boat idea"): a jon boat: long and low, the sheer
+    // nearly straight with a rub rail standing a hair proud, the bottom flat until a quarter from the bow and then raked
+    // straight up to a square bow, a small console a little forward of amidships, a big outboard on the square stern
     if (a <= .01) return;
     n.save(); n.globalAlpha = a; n.fillStyle = css(col); n.translate(x, 0); n.beginPath();
-    n.moveTo(BOW, -44); n.quadraticCurveTo(10, -35, STERN - 2, -33); n.lineTo(STERN, -33); n.lineTo(STERN - 2, 7); n.lineTo(-18, 7); n.quadraticCurveTo(-50, 5, BOW, -42); n.closePath();      // the hull: a raised bow, a low sheer, a square stern
-    n.moveTo(24, -31); n.lineTo(25, -50); n.lineTo(36, -53); n.lineTo(40, -31); n.closePath();      // a small steering console amidships
-    n.moveTo(STERN - 5, -33); n.lineTo(STERN - 7, -56); n.quadraticCurveTo(STERN + 8, -63, STERN + 22, -54); n.lineTo(STERN + 20, -40); n.lineTo(STERN + 10, -37); n.lineTo(STERN + 10, 10); n.lineTo(STERN + 4, 10); n.lineTo(STERN + 4, -33); n.closePath();      // the outboard: cowling up behind, the leg down into the water
+    n.moveTo(BOW - 4, -36); n.lineTo(STERN, -34); n.lineTo(STERN, -31.5); n.lineTo(STERN - 1, 7); n.lineTo(BOW + 74, 7);      // the sheer (with its rail) and the transom, the flat bottom
+    n.quadraticCurveTo(BOW + 64, 7, BOW + 58, 1); n.lineTo(BOW + 2, -30); n.quadraticCurveTo(BOW - 3, -32.5, BOW - 4, -36); n.closePath();      // the rake up to the square bow
+    n.moveTo(46, -33); n.lineTo(46, -52); n.lineTo(58, -54); n.lineTo(66, -48); n.lineTo(66, -33); n.closePath();      // the console
+    // the outboard: a tall boxy cowling sitting on the stern, leaning back, its leg slanting down into the water
+    n.moveTo(STERN - 1, -36); n.lineTo(STERN - 3, -60); n.quadraticCurveTo(STERN - 2, -69, STERN + 8, -70); n.lineTo(STERN + 22, -68); n.quadraticCurveTo(STERN + 31, -66, STERN + 30, -56);
+    n.lineTo(STERN + 27, -42); n.lineTo(STERN + 19, -38); n.lineTo(STERN + 22, 2); n.lineTo(STERN + 27, 4); n.lineTo(STERN + 26, 11); n.lineTo(STERN + 12, 12); n.lineTo(STERN + 11, 3); n.lineTo(STERN + 8, -2); n.lineTo(STERN + 6, -36); n.closePath();
+    n.moveTo(STERN - 1, -37); n.lineTo(STERN + 10, -37); n.lineTo(STERN + 10, -21); n.lineTo(STERN - 1, -21); n.closePath();      // the clamp bracket on the stern
     n.fill(); n.restore();
   }
+
 
   // ---------- the oak (the same seed, 18, as the approved still) ----------
   function oak(seed, hero = true, depth = 4) {
