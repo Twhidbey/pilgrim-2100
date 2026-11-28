@@ -279,6 +279,13 @@ const SL = (() => {
     k.globalCompositeOperation = 'source-in'; k.fillStyle = css(LIGHT); k.fillRect(0, 0, 512, 96); return FARMIST = c; }
   const putTree = (c, b, x, y, s, sy = s) => c.drawImage(b.c, x + b.x0 * s, y + b.y0 * sy, b.c.width / b.k * s, b.c.height / b.k * sy);
   let SHB = null, FARMUD = [], mudDk = null, mudLt = null, shC = null, mistC = null, fogC = null, SHN = [], SH0 = [];
+  // build 111 (owner: "make level 2 load fast too"): the three mud textures (mudMap, mudDk, mudLt) took about 3 s to compute on the level's
+  // first start (a noise sum for every pixel of a 2650 x 270 strip). They are baked once into pictures (tools/bake-l2.js writes
+  // assets/l2-mud*.webp) that load with the page; build() uses them when they match the strip's size and computes them only if they
+  // are missing or stale (or with ?rebake). Change the mud's look in build() and run the bake tool again, or the old pictures are used.
+  const BAKED = {}, MUD_BAKE_V = 1, REBAKE = /[?&]rebake/.test(location.search);
+  if (!REBAKE) for (const k of ['mudmap', 'muddk', 'mudlt']) { const im = new Image(); im.onload = () => { BAKED[k] = im; }; im.src = 'assets/l2-' + k + '.webp?v=' + MUD_BAKE_V; }
+  const baked = k => { const im = BAKED[k]; return im && im.width === MUD_W * (k === 'mudmap' ? 1 : MUDK) && im.height === MUD_H * (k === 'mudmap' ? 1 : MUDK) ? im : null; };
   let SHORE = null, OAK = null, GHOSTS = null, skyMist = null, skyClear = null, paper = null, threads = null, puff = null, fogBank = null, mudMap = null, built = false;
   function build() {
     if (built) return; built = true;
@@ -330,6 +337,7 @@ const SL = (() => {
       return ps; };
     FARMUD = []; { let sd = 7; const rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
       for (let k = 0; k < 14; k++) { const q = Math.pow((k + 1) / 14, 1.35); FARMUD.push({ q, ps: lay(rnd, WATER_L - 900, BANK0 + 900, 14) }); } }
+    if (baked('mudmap') && baked('muddk') && baked('mudlt')) { mudMap = baked('mudmap'); mudDk = baked('muddk'); mudLt = baked('mudlt'); } else {      // build 111: the baked pictures
     mudMap = mk(MUD_W, MUD_H); { const c = mudMap.getContext('2d'); let sd = 11; const rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
       c.fillStyle = '#fff';
       // build 303 (owner: "little less stripy in the front ... instead of thickening strips can you just make more to cover
@@ -356,7 +364,7 @@ const SL = (() => {
         dd.data[o] = cd[0]; dd.data[o + 1] = cd[1]; dd.data[o + 2] = cd[2]; dd.data[o + 3] = 255 * dk * a;
         dl.data[o] = cl[0]; dl.data[o + 1] = cl[1]; dl.data[o + 2] = cl[2]; dl.data[o + 3] = 255 * lt * a;
       }
-      mudDk.getContext('2d').putImageData(dd, 0, 0); mudLt.getContext('2d').putImageData(dl, 0, 0); }
+      mudDk.getContext('2d').putImageData(dd, 0, 0); mudLt.getContext('2d').putImageData(dl, 0, 0); } }
     fogBank = mk(360, 96); { const c = fogBank.getContext('2d'), d = c.createImageData(360, 96), col = tone(.93);
       for (let j = 0; j < 96; j++) for (let i = 0; i < 360; i++) {
         const u = i / 359, up = 1 - j / 95;
@@ -1883,5 +1891,5 @@ const SL = (() => {
   // for testing: SL.peek() tells where the story is
   // grow, ribbons: the tree grower and its painter, for Level 3's oak in leaf (hill.js, bakeOak): keep these exports
   // oakPic: the great oak baked small in one colour, for Level 1's far glimpse of the Slough (index.html, drawFarSlough)
-  return { on: false, show: false, title, start, phase: () => ph, update, draw, touch, grip, pick, preload, lines: ALL, oakPic: (col, k) => bakeTree(oak(18), col, k), grow: (seed, hero, depth) => oak(seed, hero, depth), ribbons, peek: () => ({ ph, nd: nearDk, hw: help && help.w, thk: { cityT, fearT2 }, mem: { histT, histA, travT, travA }, x: C2.x, y: C2.y, mv: mv && mv.t, lift: lift && lift.t, pli: pli && pli.mode, plx: pli && Math.round(pli.x), plStop: !!(pli && pli.stop), cam, mud: { strings: strings.length, hmax: Math.max(...fh), hmin: Math.min(...fh), drops: drops.length, rings: rings.length, recs: Object.fromEntries(Object.entries(RECS).map(([o, r]) => [o, { body: r.body, arms: (r.arms || []).length, act: MS[o] ? MS[o].act : 0, y: r.y, a: r.a }])) }, c2: { wa: C2.wa, D: C2.D, rt: C2.rt, hf: C2.hf, reachGo: C2.reachGo, reach: C2.reach, fallT: C2.fallT }, pl: pli && { y: pli.y, ct: pli.ct, wk: pli.wk, wal: pli.wal, fa: pli.fa, wt: pli.wt, x: pli.x, duck: pli.duck, mode: pli.mode, out: pli.out, ot: pli.ot } }) };
+  return { bakes: () => ({ mudMap, mudDk, mudLt }), on: false, show: false, title, start, phase: () => ph, update, draw, touch, grip, pick, preload, lines: ALL, oakPic: (col, k) => bakeTree(oak(18), col, k), grow: (seed, hero, depth) => oak(seed, hero, depth), ribbons, peek: () => ({ ph, nd: nearDk, hw: help && help.w, thk: { cityT, fearT2 }, mem: { histT, histA, travT, travA }, x: C2.x, y: C2.y, mv: mv && mv.t, lift: lift && lift.t, pli: pli && pli.mode, plx: pli && Math.round(pli.x), plStop: !!(pli && pli.stop), cam, mud: { strings: strings.length, hmax: Math.max(...fh), hmin: Math.min(...fh), drops: drops.length, rings: rings.length, recs: Object.fromEntries(Object.entries(RECS).map(([o, r]) => [o, { body: r.body, arms: (r.arms || []).length, act: MS[o] ? MS[o].act : 0, y: r.y, a: r.a }])) }, c2: { wa: C2.wa, D: C2.D, rt: C2.rt, hf: C2.hf, reachGo: C2.reachGo, reach: C2.reach, fallT: C2.fallT }, pl: pli && { y: pli.y, ct: pli.ct, wk: pli.wk, wal: pli.wal, fa: pli.fa, wt: pli.wt, x: pli.x, duck: pli.duck, mode: pli.mode, out: pli.out, ot: pli.ot } }) };
 })();
