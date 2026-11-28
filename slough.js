@@ -527,7 +527,7 @@ const SL = (() => {
   // ---------- state ----------
   let ph = 'plain', cam = { cx: 0, z: 1, wl: 440 }, look = { mist: 0, veil: 0, gold: 1, disc: 1, sky: 0 };
   let pli = null, help = null, mv = null, lift = null, rings = [], motes = [], steps = [], gloom = 0, gloomTo = 0, noteI = 0, lastFoot = 0;
-  let prints = [], fogH = 1, fogS = 1, strain = 0, slipT = 0, fearT = 0, fearsSaid = false, goldT = 0, onwayT = 0, capsSaid = new Set(), nearSaid = true, pliGo = 0, cityT = -1, fearT2 = -1;
+  let prints = [], fogH = 1, fogS = 1, strain = 0, slipT = 0, fearT = 0, fearsSaid = false, goldT = 0, onwayT = 0, capsSaid = new Set(), nearSaid = true, pliGo = 0, alone = false, cityT = -1, fearT2 = -1;
   const C2 = { x: START, y: 0, face: 1, anim: 12, alpha: 1, sink: 0, reach: 0, stand: 0, st: 0 };
 
   // the picture behind the title page when Level 2 is the child's level (build 119): the oak over the bog, nobody in it
@@ -548,8 +548,11 @@ const SL = (() => {
     G.calm = 0;
     C2.rt = 0; C2.sp = null; C2.handGo = false; C2.tv = null; C2.fy = null; C2.md = null; C2.rq0 = null; C2.q = 0; C2.hf = null; C2.hb = 0; C2.reachGo = false; C2.handT = 0; drops = []; churns = []; fReset(); strings = []; RECS = {}; for (const k in MS) delete MS[k]; C2.D = 0;
     ph = 'plain'; Object.assign(C2, { x: START, y: bankY(START) + 4, face: 1, anim: 12, alpha: 1, sink: 0, reach: 0, stand: 1, sd: QUIET[0], st: 0, faceA: 1, done: 0 });
-    pli = { x: START - 80, y: 0, face: 1, anim: 0, alpha: 1, sink: 0, mode: 'follow', px: START - 80, stop: { t: 50, x0: START - 80 - 72.5 * CHR_K, cx: START } };      // he starts standing (his stop video's breathing part)
-    prints = []; fogH = 1; fogS = 1; help = null; mv = null; lift = null; boatOff = 0; ferryT = 0; if (motor) motorSet(0); rings = []; steps = []; gloom = gloomTo = 0; noteI = 0; strain = 0; slipT = 0; fearT = 300; fearsSaid = false; histT = 0; histA = 0; travT = 0; travA = 0; struggleSaid = false; stillSaid = false; goldT = 0; onwayT = 0; capsSaid = new Set(); nearSaid = true; pliGo = 0; cityT = -1; fearT2 = -1; fearHelpT = 0; preDk = 0; beatT = -1e9; quietT = 0; helpSayT = 0;
+    // build 69 (owner: "alone in level 2 if he doesn't get joined"): if the young man stayed in town at the end of Level 1
+    // (pp-alone, set by index.html at choice 5), the pilgrim crosses the plain alone: no talk on the plain, no quarrel in the mire
+    alone = (() => { try { return localStorage.getItem('pp-alone') === '1'; } catch (e) { return false; } })();
+    pli = alone ? null : { x: START - 80, y: 0, face: 1, anim: 0, alpha: 1, sink: 0, mode: 'follow', px: START - 80, stop: { t: 50, x0: START - 80 - 72.5 * CHR_K, cx: START } };      // he starts standing (his stop video's breathing part)      // he starts standing (his stop video's breathing part)
+    prints = []; fogH = 1; fogS = 1; help = null; mv = null; lift = null; boatOff = 0; ferryT = 0; if (motor) motorSet(0); rings = []; steps = []; gloom = gloomTo = 0; noteI = 0; strain = 0; slipT = 0; fearT = 300; fearsSaid = false; histT = 0; histA = 0; travT = 0; travA = 0; struggleSaid = false; stillSaid = false; goldT = 0; onwayT = 0; capsSaid = new Set(alone ? OPEN_AT.map((_, i) => i) : []); nearSaid = true; pliGo = 0; cityT = -1; fearT2 = -1; fearHelpT = 0; preDk = 0; beatT = -1e9; quietT = 0; helpSayT = 0;
     motes = [...Array(LAST.length)].map((_, i) => ({ ox: -30 - Math.random() * 50, oy: -112 - Math.random() * 40, x: START, y: -150, tw: Math.random() * 6, i }));
     // the steps through the bog, hidden until the lights settle on them: low flat stones, no two alike (from the approved still)
     const R = rngS(33); let sx = HX + FERRY + BOW - 24;      // build 65: the steps begin beyond the moored boat's bow (the far bank is behind it)
@@ -564,7 +567,7 @@ const SL = (() => {
     const AT2 = { bog: -1090 }[new URLSearchParams(location.search).get('at')];
     if (typeof dropPlace === 'function') dropPlace();
     if (AT2) {
-      C2.x = AT2; C2.y = bankY(AT2) + 4; pli.x = pli.px = AT2 - 80; pli.stop = { t: 50, x0: AT2 - 80 - 72.5 * CHR_K };
+      C2.x = AT2; C2.y = bankY(AT2) + 4; if (pli) { pli.x = pli.px = AT2 - 80; pli.stop = { t: 50, x0: AT2 - 80 - 72.5 * CHR_K }; }
       capsSaid = new Set(OPEN_AT.map((_, i) => i)); nearSaid = true;
       const f = smooth(-1350, FALL_X, AT2), mi = PLAIN_MIST(AT2);
       Object.assign(cam, { cx: lerp(AT2 + 150, -470, f), z: lerp(1, .8, f), wl: lerp(440, 392, f) });
@@ -575,7 +578,7 @@ const SL = (() => {
   // the Pliable talk is said while they walk, a line at a time, at places along the plain
   const OPEN_AT = [START - 1, -1590];      // build 391: two lines now (Pliable's "let's walk faster" and Christian's "I cannot go fast" cut)      // build 368: the first line is said as the level opens (the storyteller's line before it was cut)
   function choose2() {
-    document.getElementById('chHome').textContent = 'Go back, as Pliable did';
+    document.getElementById('chHome').textContent = alone ? 'Go back' : 'Go back, as Pliable did';
     document.getElementById('chOn').textContent = 'Struggle on to the gate';
     choose();
   }
@@ -832,8 +835,8 @@ const SL = (() => {
     const burst = k => smooth(.3, .7, .5 + .5 * Math.sin(G.t / (52 + 9 * k) + 2.2 * Math.sin(G.t / (131 + 17 * k) + k)));
     if (['fall', 'pli', 'backtalk'].includes(ph)) { const b = burst(1); waStep(calm ? .06 : .07 + .13 * b); }      // (build 143: the mud's answer comes from his pictures: see sense())
     if (ph === 'fall') {
-      if (C2.fallT === 8 || C2.fallT === 14) { rings.push({ x: C2.x, y: 0, t: 0, k: 1.3 }); rings.push({ x: pli.x, y: 0, t: 0, k: 1.1 }); }
-      if (C2.fallT === 120) { ph = 'pli'; heave(-1); talk(FALL, () => { if (pli) { pli.mode = 'climb'; pli.wal = false; pli.turn = 1; } pliGo = 1; }); }
+      if (C2.fallT === 8 || C2.fallT === 14) { rings.push({ x: C2.x, y: 0, t: 0, k: 1.3 }); if (pli) rings.push({ x: pli.x, y: 0, t: 0, k: 1.1 }); }
+      if (C2.fallT === 120) { ph = 'pli'; heave(-1); talk(alone ? FALL.filter(l => l[0] !== PL) : FALL, () => { if (pli) { pli.mode = 'climb'; pli.wal = false; pli.turn = 1; } pliGo = 1; }); }
     } else if (ph === 'pli' && pliGo) {
       // build 368, STORY MOVES (owner: "less game and more intentional story building moves"): (D) the choice waits until
       // Pliable has climbed out and gone into the mist; Christian is seen alone in the bog first (the camera comes in on him)
