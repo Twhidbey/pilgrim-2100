@@ -249,7 +249,7 @@ every year.</div>
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 80 · Nov 28 2026</div>
+  <div id="build">build 81 · Nov 28 2026</div>
   <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
@@ -924,8 +924,10 @@ const BEAT = 58, NOTE = { D: 62, E: 64, G: 67, A: 69, B: 71, d: 74 };
 // where the two men stand and its lights only come, slowly, once both men have stood aside and he has passed the young man (wait);
 // build 71: with the standoff 300 sooner, the third phrase is at 8400 and the fourth at 9000, so the last 360 before the barricade are clear
 const PHRASES = [
-  { x: 1770, back: true, at: 0, n: [[0, 'D'], [1, 'G'], [3, 'B'], [3.5, 'G'], [4, 'B'], [6, 'A'], [7, 'G'], [9, 'E'], [10, 'D']] },
-  { x: 1100, back: true, at: 12, n: [[0, 'D'], [1, 'G'], [3, 'B'], [3.5, 'G'], [4, 'B'], [6, 'A'], [7, 'd']] },
+  // build 81 (owner: "Build 1": the lights on his way to Phillip are the underpass's dead tube lights, coming on one by one as he
+  // passes, each humming its note, then dying again): both phrases now lie under the deck, a little closer together (bt, road per beat)
+  { x: 1300, bt: 40, tube: true, back: true, at: 0, n: [[0, 'D'], [1, 'G'], [3, 'B'], [3.5, 'G'], [4, 'B'], [6, 'A'], [7, 'G'], [9, 'E'], [10, 'D']] },
+  { x: 880, bt: 30, tube: true, back: true, at: 12, n: [[0, 'D'], [1, 'G'], [3, 'B'], [3.5, 'G'], [4, 'B'], [6, 'A'], [7, 'd']] },
   { x: 8400, at: 24, wait: true, n: [[0, 'B'], [1, 'd'], [2.5, 'B'], [3, 'd'], [3.5, 'B'], [4, 'G'], [6, 'D'], [7, 'E'], [8.5, 'G'], [9, 'G'], [9.5, 'E'], [10, 'D']] },
   { x: 9000, at: 36, n: [[0, 'D'], [1, 'G'], [3, 'B'], [3.5, 'G'], [4, 'B'], [6, 'A'], [7, 'G']] },
 ];
@@ -936,8 +938,8 @@ const HARM = [55, 59, 62, 67, 50, 57];     // notes for lights set free by a tou
 const LIGHTS = [], LAMPS = [], THINGS = [], FLOCKS = [], CAPS = [];
 function buildLevel() {
   LIGHTS.length = LAMPS.length = FLOCKS.length = CAPS.length = 0;
-  const light = (x, midi, wait) => LIGHTS.push({ x, y: GY - 60 - clamp(midi - 62, -6, 12) * 5.2, midi, got: false, ph: rnd() * 6, wait, a: wait ? 0 : 1 });
-  for (const ph of PHRASES) for (const [b, k] of ph.n) light(ph.x + (ph.back ? -b : b) * BEAT, NOTE[k], !!ph.wait);      // 'back': a phrase met walking left, out into the field
+  const light = (x, midi, wait, tube) => LIGHTS.push({ x, y: tube ? UP.dy + 6 : GY - 60 - clamp(midi - 62, -6, 12) * 5.2, midi, got: false, ph: rnd() * 6, wait, a: wait ? 0 : 1, tube, gt: 0 });
+  for (const ph of PHRASES) for (const [b, k] of ph.n) light(ph.x + (ph.back ? -b : b) * (ph.bt || BEAT), NOTE[k], !!ph.wait, !!ph.tube);      // 'back': a phrase met walking left, out into the field
   for (const x of [2700, 9500]) LAMPS.push({ x, lit: 0 });                       // few and far apart: they count as special things too (none in the field)
   // Things, each on a depth level (LEVELS). Owner's rule (build 40): no more than one special thing in the picture at a
   // time, because their likeness distracts. So there are few of them, about one every 600 of road counting the lamps and his
@@ -2188,10 +2190,28 @@ function gather() {
   const still = w => w && (w.mode === 'block' || w.mode === 'talk'), way = !still(G.obst) && !still(G.pli) && !(G.pli && G.pli.mode === 'follow' && G.pli.x > P.x - 20);      // the men no longer stand in his way (build 71: nor the young man ahead of him)
   for (const s of LIGHTS) if (s.wait) s.a = way ? Math.min(1, s.a + .008) : 0;
   for (const s of LIGHTS) if (!s.got && s.a > .5 && s.x - P.x < 22 && s.x - P.x > -60) {
-    s.got = true; G.got++; note(s.midi, .075, 2.8);
-    G.motes.push({ x: s.x, y: s.y, tw: Math.random() * 6, life: 0 });
+    s.got = true; s.gt = G.t; G.got++;
+    if (s.tube) { tubeHum(s.midi); s.mote = true; }      // build 81: the tube flickers on and hums its note; its mote leaves when it dies (TUBE_ON)
+    else { note(s.midi, .075, 2.8); G.motes.push({ x: s.x, y: s.y, tw: Math.random() * 6, life: 0 }); }
   }
   for (const fl of FLOCKS) if (!fl.away && Math.abs(fl.x - G.cam * fl.par - (P.x - G.cam)) < 64) scatter(fl);
+  for (const s of LIGHTS) if (s.tube && s.mote && G.t - s.gt > TUBE_ON) { s.mote = false; G.motes.push({ x: s.x, y: s.y + 10, tw: Math.random() * 6, life: 0 }); }      // the tube dies; a little warmth drifts up and away
+}
+// build 81: a dead tube light under the deck: how long it stays on (ticks), and how bright it is t ticks after it is reached
+// (a fluorescent start: two quick blinks, a stutter, then steady; dimming and a last flicker as the power fails again)
+const TUBE_ON = 190;
+function tubeLevel(t) {
+  if (t < 0) return 0; if (t < 22) return [1, 0, 0, 1, 1, 0, 0, 0, .6, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1][t | 0] * (.55 + .45 * t / 22);
+  if (t < TUBE_ON - 40) return 1; if (t < TUBE_ON) { const u = (t - (TUBE_ON - 40)) / 40; return (1 - u) * (Math.sin(t * 1.7) > -.6 ? 1 : .3); } return 0;
+}
+// its sound: the ballast's buzz at the note, warming over half a second into the note itself, soft (no chime, no echo of a harp)
+function tubeHum(midi) {
+  if (!audio()) return; const t = AC.currentTime, f = hz(midi);
+  const o = AC.createOscillator(), lp = AC.createBiquadFilter(), g = AC.createGain(); o.type = 'sawtooth'; o.frequency.value = f;
+  lp.type = 'lowpass'; lp.frequency.setValueAtTime(f * 6, t); lp.frequency.exponentialRampToValueAtTime(f * 1.4, t + .5);
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.022, t + .03); g.gain.exponentialRampToValueAtTime(.0004, t + 1.1);
+  o.connect(lp); lp.connect(g); g.connect(SFXG); o.start(t); o.stop(t + 1.15);
+  note(midi, .06, 2.6, .12);
 }
 // each light, once sung, drifts up and away toward the far light, slowly, and fades on the way; the far light answers a little
 function motes() {
@@ -2789,6 +2809,9 @@ function underpass(cam, part) {
   const dk = col(1.05); c.fillStyle = dk; c.fillRect(x0, TOPY - 2, x1 - x0, DY - TOPY + 2);
   c.fillStyle = col(.92); c.fillRect(x0, DY - 9, x1 - x0, 3); for (let x = x0 + 18; x < x1 - 10; x += 46) c.fillRect(x, DY - 6, 9, 6);
   c.fillStyle = col(.8); c.fillRect(x0, TOPY - 2, 5, DY - TOPY + 2); c.fillRect(x1 - 5, TOPY - 2, 5, DY - TOPY + 2);
+  // build 81: the row of dead tube fixtures along the deck's underside (the hymn's lights on his way to Phillip)
+  c.fillStyle = col(1.12);
+  for (const sL of LIGHTS) if (sL.tube) { const x = sL.x - cam; if (x < -40 || x > VW + 40) continue; c.fillRect(x - 14, DY, 3, 4); c.fillRect(x + 11, DY, 3, 4); c.fillRect(x - 16, DY + 4, 32, 4); }
   // the one lamp still working, and its light on the wet road
   const lx = UP.lamp - cam, fl = .9 + .1 * Math.sin(G.t * .07) * Math.sin(G.t * .013), on = Math.sin(G.t * .21) > -.985 ? 1 : .35;      // it hums and, now and then, blinks
   if (lx > -200 && lx < VW + 200) {
@@ -3342,6 +3365,11 @@ function drawWorld() {
   for (const it of ROW) if (it.who && it.open > .02) { const sx = lineUp(it.a, LEVELS.home.par) - cam * LEVELS.home.par; if (sx > -200 && sx < VW + 200) glow(sx, LEVELS.home.base - 55, 170, .22 * it.open); }      // the glow of the neighbours' doors
   if (G.door > .02) glow(doorX(cam) + 3, LEVELS.home.base - 62, 260, .32 * G.door * lerp(1, .5, warm(doorX(cam) / VW)));   // the glow of home
   for (const s of LIGHTS) {
+    if (s.tube) { const x = s.x - cam, lv = s.got ? tubeLevel(G.t - s.gt) : 0; if (lv < .01 || x < -300 || x > VW + 300) continue;
+      ctx.fillStyle = `rgba(232,242,236,${.95 * lv})`; ctx.fillRect(x - 13, UP.dy + 8, 26, 2.2);      // the tube itself, cool white
+      glow(x, UP.dy + 12, 70, .42 * lv); glow(x, UP.dy + 10, 18, .7 * lv);
+      ctx.save(); ctx.translate(x, GY + 6); ctx.scale(150, 13); const pl = ctx.createRadialGradient(0, 0, 0, 0, 0, 1); pl.addColorStop(0, `rgba(214,232,226,${.26 * lv})`); pl.addColorStop(1, 'rgba(214,232,226,0)'); ctx.fillStyle = pl; ctx.beginPath(); ctx.arc(0, 0, 1, 0, 7); ctx.fill(); ctx.restore();      // a flat pool on the wet road
+      continue; }
     const x = s.x - cam; if (s.got || x < -40 || x > VW + 40) continue;
     const y = s.y + Math.sin(G.t / 26 + s.ph) * 4, tw = .82 + .18 * Math.sin(G.t / 11 + s.ph * 3);
     glow(x, y, 54, .5 * tw * s.a); glow(x, y, 17, s.a);
