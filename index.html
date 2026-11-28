@@ -249,7 +249,7 @@ every year.</div>
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 39 · Nov 28 2026</div>
+  <div id="build">build 40 · Nov 28 2026</div>
   <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
@@ -3294,6 +3294,7 @@ function nightLand(x, X0, Y0, w, h, o) {
       i++;
       out.push('<span style="font-size:' + fs.toFixed(2) + 'em;margin-right:' + m + 'em;transform-origin:50% 88%;transform:translateY(' + y + 'px) rotate(' + t + 'deg) skewX(' + sk + 'deg) scale(' + sx.toFixed(3) + ',' + sy.toFixed(3) + ')' + ink + '">' + ch.replace('&', '&amp;').replace('<', '&lt;') + '</span>'); }
     el.innerHTML = '<span class="w">' + out.join('') + '</span>'; };
+  window.SCRAWL = jit;
   for (const n of document.querySelectorAll('.hn')) jit(n, 1);
   for (const n of document.querySelectorAll('.tnote .nh')) jit(n, .8);
   for (const b of document.querySelectorAll('.tnote #levels .lv')) { const i = b.querySelector('i'), sp = document.createElement('span'); sp.textContent = b.lastChild.textContent; b.lastChild.remove(); b.appendChild(sp); jit(sp, .9); sp.style.display = 'inline'; }

@@ -39,23 +39,30 @@ body.playing #ribbon{display:block}
 .kscover.on{display:flex;animation:ksfade .45s ease both}
 @keyframes ksfade{from{opacity:0}to{opacity:1}}
 .ksx{position:absolute;right:max(14px,env(safe-area-inset-right));top:max(10px,env(safe-area-inset-top));width:2.3em;height:2.3em;border-radius:50%;border:1px solid rgba(244,236,220,.45);background:rgba(20,22,30,.4);color:#f4ecdc;font:20px Georgia,serif;cursor:pointer;line-height:1;z-index:9}
-/* the menu (build 663): the book's contents page, as on the title; the level he is in shows its moments as chapter lines */
+/* the menu (2100 build 39; owner: "make the menu in levels the same note"): the same torn sheet of lined paper that is
+   tucked in his Bible on the title, in his hand (Nanum Pen Script, small capitals, straight lines, ink); every line of it
+   sits on a ruled line (--L apart); under the level he is in, its moments so far, each on its own line, an arrow at where he is */
 #ksmenu{flex-direction:column}
-#ksmenu .kspage{position:relative;width:min(92vw,max(300px,118vh));max-height:min(88vh,640px);overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;background:#e6d9bc center/cover;box-shadow:0 10px 50px rgba(0,0,0,.7);border-radius:2px;color:#2a2018;font-family:'IM Fell English',Georgia,serif;font-size:clamp(14px,3.9vh,19px);box-sizing:border-box;padding:.9em}
-body.portrait #ksmenu .kspage{width:92vw;max-height:80vh;font-size:clamp(15px,4.3vw,19px)}
-#ksmenu .kspin{border:1.4px solid rgba(150,40,30,.55);outline:.7px solid rgba(150,40,30,.45);outline-offset:3px;padding:.7em 1.1em .6em}
-#ksmenu .kh{font-family:'IM Fell English SC','IM Fell English',Georgia,serif;letter-spacing:.2em;text-align:center;font-size:1.05em}
-#ksmenu .krule{height:0;border-top:.8px solid rgba(42,32,24,.6);margin:.45em 8% .3em}#ksmenu .krule.d{border-top:3px double rgba(42,32,24,.6);margin-top:.5em}
-#ksmenu button{font:inherit;background:none;border:none;color:inherit;cursor:pointer;padding:0;text-align:left;-webkit-tap-highlight-color:transparent}
-#ksmenu .kl{display:flex;align-items:baseline;width:100%;padding:.34em .1em;border-bottom:1px dotted rgba(42,32,24,.3);color:rgba(42,32,24,.62)}
-#ksmenu .kl i{flex:0 0 2.3em;font-style:normal;color:#8a2a1e}
-#ksmenu .kl.here{color:#2a2018;border-bottom:none;cursor:default}
-#ksmenu .kl:not(.here):active,#ksmenu .km button:active,#ksmenu .kfoot button:active{color:#8a2a1e}
-#ksmenu .km{display:flex;flex-wrap:wrap;gap:.1em 1.1em;margin:0 0 .3em 2.3em;padding-bottom:.35em;border-bottom:1px dotted rgba(42,32,24,.3);font-style:italic;font-size:.92em;color:#4a3a2a}
-#ksmenu .km button{padding:.28em 0;font-style:italic}
-#ksmenu .km button.now{color:#8a2a1e}#ksmenu .km button.now::before{content:'☞ '}
-#ksmenu .kfoot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:.2em 1em;padding-top:.45em;font-style:italic;font-size:.9em;color:#4a3a2a}
-#ksmenu .kfoot button{padding:.3em 0}#ksmenu .kfoot b{font-weight:400;font-style:normal;color:#8a2a1e;margin-left:.3em}
+#ksmenu .kspage{--L:1.5em;--hand:'Nanum Pen Script';--ink:rgba(30,46,104,.9);position:relative;width:min(64vw,max(290px,100vh));max-height:min(86vh,620px);overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;
+  background:linear-gradient(90deg,transparent 2.1em,rgba(190,70,70,.35) 2.1em,rgba(190,70,70,.35) calc(2.1em + 1px),transparent calc(2.1em + 1px)),
+    repeating-linear-gradient(180deg,transparent 0,transparent calc(var(--L) - 1px),rgba(88,128,170,.34) calc(var(--L) - 1px),rgba(88,128,170,.34) var(--L)),#efe9da;
+  background-attachment:local;box-shadow:0 10px 50px rgba(0,0,0,.7);transform:rotate(-1.2deg);color:var(--ink);font-family:var(--hand),cursive;text-transform:uppercase;font-size:clamp(17px,5.4vh,25px);line-height:1;box-sizing:border-box;padding:0 1em calc(var(--L) * .5) 2.6em;
+  clip-path:polygon(0 1.2%,6% .4%,13% 1.4%,21% .2%,30% 1.1%,39% .3%,47% 1.3%,56% .1%,65% 1%,73% .3%,82% 1.2%,90% .2%,100% 1%,100% 100%,0 100%)}
+body.portrait #ksmenu .kspage{width:90vw;max-height:80vh;font-size:clamp(18px,5.6vw,24px)}
+#ksmenu .kspin{display:flex;flex-direction:column}
+#ksmenu .kh{height:calc(var(--L) * 2);box-sizing:border-box;padding-top:calc(var(--L) - 1.05em);text-align:center;font-size:1.25em;line-height:1}
+#ksmenu .krule{display:none}
+#ksmenu button{font:inherit;background:none;border:none;color:inherit;cursor:pointer;padding:0;text-align:left;-webkit-tap-highlight-color:transparent;text-transform:inherit}
+#ksmenu .kl,#ksmenu .km button,#ksmenu .kfoot button{display:flex;align-items:flex-end;width:100%;height:var(--L);box-sizing:border-box;padding:0 .1em .06em;white-space:nowrap}
+#ksmenu .kl{opacity:.72}
+#ksmenu .kl i{flex:0 0 1.8em;font-style:normal}
+#ksmenu .kl.here{opacity:1;cursor:default}
+#ksmenu .kl:not(.here):active,#ksmenu .km button:active,#ksmenu .kfoot button:active{color:#7a2a1e}
+#ksmenu .km{display:flex;flex-direction:column;padding-left:1.8em;font-size:.82em;--L:calc(1.5em / .82)}
+#ksmenu .km button{opacity:.8}
+#ksmenu .km button.now{opacity:1}#ksmenu .km button.now::after{content:'\\2190';margin-left:.6em}
+#ksmenu .kfoot{display:flex;flex-direction:column;margin-top:var(--L);font-size:.82em;--L:calc(1.5em / .82)}
+#ksmenu .kfoot b{font-weight:400;margin-left:.6em}
 #ksmenu .khint{margin-top:.9em;font:italic clamp(12px,3.2vh,15px) 'IM Fell English',Georgia,serif;color:rgba(244,236,220,.55)}
 /* the Bible: brown calf, blind-tooled, red-sprinkled edges, laid paper */
 #ksbook .bible{position:relative;--W:min(93vw,calc(86vh * 1.5));width:var(--W);height:calc(var(--W) / 1.5);padding:calc(var(--W) * .026);box-sizing:border-box;border-radius:calc(var(--W) * .014);
@@ -391,8 +398,8 @@ body.portrait #ksmenu .kspage{width:92vw;max-height:80vh;font-size:clamp(15px,4.
   const pauseBtn = mkEl(`<button id="ribbon" aria-label="Menu"><i></i><i></i><i></i></button>`);
   document.getElementById('stage').appendChild(pauseBtn);
   const NAMES = ['The city', 'The fields', 'The mountain', 'The house', 'The steeple'], ROMAN = ['1.', '2.', '3.', '', '4.'];
-  const menu = mkEl(`<div id="ksmenu" class="kscover"><div class="kspage"><div class="kspin"><div class="kh">THE WAY</div><div class="krule"></div><div class="klv"></div><div class="krule d"></div>
-    <div class="kfoot"><button data-snd="1">Sound<b></b></button><button data-auto="1">He walks on by himself<b></b></button></div></div></div><div class="khint">Touch outside the page to go on</div></div>`);
+  const menu = mkEl(`<div id="ksmenu" class="kscover"><div class="kspage"><div class="kspin"><div class="kh">The way</div><div class="krule"></div><div class="klv"></div><div class="krule d"></div>
+    <div class="kfoot"><button data-snd="1"><span>Sound</span><b></b></button><button data-auto="1"><span>He walks on by himself</span><b></b></button></div></div></div><div class="khint">Touch outside the page to go on</div></div>`);
   const book = mkEl(`<div id="ksbook" class="kscover"><div class="bible"><div class="spread"><div class="edges"></div><div class="page L"></div><div class="page R"></div>
     <div class="leaf"><div class="face front"></div><div class="face back"></div></div><div class="spine"></div><div class="ribbon"></div><div class="page scratch"></div></div></div>
     <button class="ksarrow l" aria-label="Turn back">‹</button><button class="ksarrow r" aria-label="Turn on">›</button><button class="ksx" aria-label="Close">×</button></div>`);
@@ -449,17 +456,19 @@ body.portrait #ksmenu .kspage{width:92vw;max-height:80vh;font-size:clamp(15px,4.
 
   // the menu
   // (build 309) the auto-walk switch, shared with the contents page's line (setAuto in index.html)
-  const autoLabel = () => { const b = menu.querySelector('[data-auto] b'); if (b) b.textContent = AUTOW ? '\u25C6' : '\u25C7'; const s = menu.querySelector('[data-snd] b'); if (s) s.textContent = muted ? '\u25C7' : '\u25C6'; };
+  const autoLabel = () => { const b = menu.querySelector('[data-auto] b'); if (b) b.textContent = AUTOW ? '- on' : '- off'; const s = menu.querySelector('[data-snd] b'); if (s) s.textContent = muted ? '- off' : '- on'; };
   const curLv = () => CR.on ? 5 : RM.on ? 4 : HL.on ? 3 : SL.on ? 2 : 1;
   const darkOn = () => { try { return localStorage.getItem('pp-dark') === '1'; } catch (e) { return false; } };
   // the page: every level a line; under the level he is in, its moments so far as chapter lines (all of them in the editor)
   function renderMenu() {
     const lv = curLv(), ps = MO.POINTS[lv - 1][2], all = typeof ED !== 'undefined' && ED.on, far = all ? ps.length - 2 : Math.max(MO.reached(lv), MO.here()), now = MO.here();
     let h = '';
-    NAMES.forEach((n, i) => { if (i === 3) return; h += `<button class="kl${i + 1 === lv ? ' here' : ''}" ${i + 1 === lv ? '' : `data-go="${i + 1}"`}><i>${ROMAN[i]}</i>${n}</button>`;
-      if (i + 1 === lv) h += '<div class="km">' + ps.map((p, j) => j > far || j === ps.length - 1 || (/^[67] /.test(p[0]) && !darkOn()) ? '' : `<button data-m="${j}"${j === now ? ' class="now"' : ''}>${p[2] || p[0]}</button>`).join('') + '</div>'; });
+    NAMES.forEach((n, i) => { if (i === 3) return; h += `<button class="kl${i + 1 === lv ? ' here' : ''}" ${i + 1 === lv ? '' : `data-go="${i + 1}"`}><i>${ROMAN[i]}</i><span>${n}</span></button>`;
+      if (i + 1 === lv) h += '<div class="km">' + ps.map((p, j) => j > far || j === ps.length - 1 || (/^[67] /.test(p[0]) && !darkOn()) ? '' : `<button data-m="${j}"${j === now ? ' class="now"' : ''}><span>${p[2] || p[0]}</span></button>`).join('') + '</div>'; });
     menu.querySelector('.klv').innerHTML = h;
-    const pg = menu.querySelector('.kspage'), tp = document.querySelector('.tpage'); if (tp && tp.style.backgroundImage) pg.style.backgroundImage = tp.style.backgroundImage; pg.scrollTop = 0;
+    // in his hand: every piece of writing on the note shaken letter by letter, as on the title's note (SCRAWL, index.html)
+    if (window.SCRAWL) for (const el of menu.querySelectorAll('.kh, .kl > span, .km button > span, .kfoot span')) window.SCRAWL(el, .8);
+    menu.querySelector('.kspage').scrollTop = 0;
   }
   function openMenu() {
     if (G.state === 'title' || MO.busy) return;
