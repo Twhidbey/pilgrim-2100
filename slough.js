@@ -445,6 +445,11 @@ const SL = (() => {
   // It breaks off one phrase short at the far bank; the last phrase comes in the major as the steps light up.
   const m = { D: 50, E: 51, G: 55, A: 57, B: 58, d: 62 };
   const WADE_TUNE = 'D G B G B A G E D D G B G B A d B d B d B G D E G G E D'.split(' ').map(k => m[k]);
+  // build 55 (owner: "work on second level now - putting on pilgrim sprite"): on dry ground he is the 2100 pilgrim of Level 1
+  // (index.html: PW the walk, PST the start, whose frame 0 is his standing picture); in the mire the wading, stuck, reach and
+  // lift videos are still the old figure until new ones are made. Until the new packs load, the old walk and stand stand in.
+  const NEWP = () => typeof PW !== 'undefined' && PW.ready && PST.ready;
+  const wkSet = () => NEWP() ? PW : CHR, wkMeta = () => NEWP() ? PW_META : CHR_META, wkStep = () => NEWP() ? PW_STEP : CHR_STEP;
   const TURN_TICKS = 50, HTURN_TICKS = 44;      // build 365: Christian's and Help's turns, quick pivots (see A QUICK TURN in update())
   // build 376 (owner's rule: Amazing Grace is saved to come whole and in tune at the Cross): the lights on the steps no
   // longer sing the hymn's last phrase; each rings one soft tone of a single rising chord, the gold coming back
@@ -485,7 +490,7 @@ const SL = (() => {
     // the last words ended; a finger only walks him if it went down after that) still held Level 1's clock, thousands
     // of ticks ahead, so no finger counted until the clock caught up. Keys were never affected, so the tests passed.
     G.calm = 0;
-    C2.rt = 0; C2.handGo = false; C2.tv = null; C2.fy = null; C2.md = null; C2.rq0 = null; C2.q = 0; C2.hf = null; C2.hb = 0; C2.reachGo = false; C2.handT = 0; drops = []; churns = []; fReset(); strings = []; RECS = {}; for (const k in MS) delete MS[k]; C2.D = 0;
+    C2.rt = 0; C2.sp = null; C2.handGo = false; C2.tv = null; C2.fy = null; C2.md = null; C2.rq0 = null; C2.q = 0; C2.hf = null; C2.hb = 0; C2.reachGo = false; C2.handT = 0; drops = []; churns = []; fReset(); strings = []; RECS = {}; for (const k in MS) delete MS[k]; C2.D = 0;
     ph = 'plain'; Object.assign(C2, { x: START, y: bankY(START) + 4, face: 1, anim: 12, alpha: 1, sink: 0, reach: 0, stand: 1, sd: QUIET[0], st: 0, faceA: 1, done: 0 });
     pli = { x: START - 80, y: 0, face: 1, anim: 0, alpha: 1, sink: 0, mode: 'follow', px: START - 80, stop: { t: 50, x0: START - 80 - 72.5 * CHR_K, cx: START } };      // he starts standing (his stop video's breathing part)
     prints = []; fogH = 1; fogS = 1; help = null; mv = null; lift = null; rings = []; steps = []; gloom = gloomTo = 0; noteI = 0; strain = 0; slipT = 0; fearT = 300; fearsSaid = false; histT = 0; histA = 0; travT = 0; travA = 0; struggleSaid = false; stillSaid = false; goldT = 0; onwayT = 0; capsSaid = new Set(); nearSaid = true; pliGo = 0; cityT = -1; fearT2 = -1; fearHelpT = 0; preDk = 0; beatT = -1e9; quietT = 0; helpSayT = 0;
@@ -658,7 +663,7 @@ const SL = (() => {
   // forth without body moving, could we use turns from other levels"): Level 1's turning video (TURN, left to right),
   // played backwards to turn him to the left. C2.tv = its clock; d = the way he will face; k = how fast (twice as fast in
   // the mire, where only his head and the sack show). Without the pack: the old dissolve.
-  function turnC(d, k = 1) { if (C2.face === d) return; if (TURN.length) C2.tv = { t: d > 0 ? 0 : TURN.length - 1, d, k }; else C2.face = d; }
+  function turnC(d, k = 1) { if (C2.face === d) return; if (NEWP() && C2.y <= 2) { C2.face = C2.faceA = d; return; } if (TURN.length) C2.tv = { t: d > 0 ? 0 : TURN.length - 1, d, k }; else C2.face = d; }
   function finish() {
     G.state = 'end'; G.ended = false;
     const e = document.getElementById('endc');
@@ -691,7 +696,7 @@ const SL = (() => {
 
   // ---------- each tick ----------
   function update() {
-    gloom += (gloomTo - gloom) * .02; if (C2.sd != null) C2.sd += .4; for (const pr of prints) pr.t++; C2.faceA = clamp((C2.faceA ?? 1) + (C2.face - (C2.faceA ?? 1)) * .06, -1, 1);
+    gloom += (gloomTo - gloom) * .02; if (C2.sd != null) C2.sd = NEWP() ? Math.max(0, C2.sd - .4) : C2.sd + .4; for (const pr of prints) pr.t++; C2.faceA = clamp((C2.faceA ?? 1) + (C2.face - (C2.faceA ?? 1)) * .06, -1, 1);
     const want = G.state === 'play' && (keys.r || held());
     fStep();
     // (5) how high the mud has reached on him, above his feet (it stays when he rises, and dries off very slowly)
@@ -714,25 +719,35 @@ const SL = (() => {
       // stride to walk frame 28 or 1, where his own stopping video joins (STD from 0, or from STAND_FROM_1), and that video
       // plays on into his quiet breathing; holding again starts the walk from frame 1. No dissolve. (C2.sd = the standing
       // video's clock, null while walking.)
-      const fr0 = ((Math.floor(C2.anim) % CHR.length) + CHR.length) % CHR.length;
-      if (v) { if (C2.sd != null) { C2.sd = null; C2.anim = 1; } }
-      else if (C2.sd == null) { if (fr0 === 28 || fr0 === 1 || !STD.length) C2.sd = fr0 === 28 ? 0 : STAND_FROM_1; else v = MAXV; }
+      // build 55, the 2100 pilgrim as in Level 1: letting go, he walks on to loop frame PST_JOIN, then his start plays backwards
+      // into his standing picture (C2.sd 13 -> 0); setting off, it plays forwards with the distance walked (C2.sp) and joins the loop
+      const nw = NEWP(), WS = wkSet(), WM = wkMeta();
+      const fr0 = ((Math.floor(C2.anim) % WS.length) + WS.length) % WS.length;
+      if (nw) {
+        if (v) { if (C2.sd != null) { C2.sp = C2.sd; C2.sd = null; } }
+        else if (C2.sd == null) { if (C2.sp != null || fr0 === PST_JOIN) { C2.sd = C2.sp ?? PST_END; C2.sp = null; } else v = MAXV; }
+      } else {
+        if (v) { if (C2.sd != null) { C2.sd = null; C2.anim = 1; } }
+        else if (C2.sd == null) { if (fr0 === 28 || fr0 === 1 || !STD.length) C2.sd = fr0 === 28 ? 0 : STAND_FROM_1; else v = MAXV; }
+      }
       C2.x += v;
-      C2.anim = stepAnim(C2.anim, v, CHR_STEP, CHR_META); C2.y = bankY(C2.x) + 4 + MUDDY(C2.x);
+      if (nw && C2.sp != null) { C2.sp += v / PW_STEP; if (C2.sp >= PST_END) { C2.anim = PST_JOIN + (C2.sp - PST_END); C2.sp = null; } }
+      else C2.anim = stepAnim(C2.anim, v, wkStep(), WM);
+      C2.y = bankY(C2.x) + 4 + MUDDY(C2.x);
       C2.stand = C2.sd != null ? 1 : 0;
       // faint wet footprints in the soft ground near the bog (owner's idea, build 114: "mud prints or feet sinking slightly")
-      const fr1 = ((Math.floor(C2.anim) % CHR.length) + CHR.length) % CHR.length;
+      const fr1 = ((Math.floor(C2.anim) % WS.length) + WS.length) % WS.length;
       // build 492: his steps on the grass of the plain and of the far side
-      if (v && fr1 !== fr0 && CHR_META.rest.includes(fr1) && audio()) { if (typeof stepOn === 'function') stepOn('grass', 1, .6); else sfx.step(false, .6); }
-      if (ph === 'plain' && v && fr1 !== fr0 && CHR_META.rest.includes(fr1) && C2.x > -1700) prints.push({ x: C2.x + 8 + (fr1 === CHR_META.rest[0] ? 0 : 5), t: 0 });
+      if (v && fr1 !== fr0 && WM.rest.includes(fr1) && audio()) { if (typeof stepOn === 'function') stepOn('grass', 1, .6); else sfx.step(false, .6); }
+      if (ph === 'plain' && v && fr1 !== fr0 && WM.rest.includes(fr1) && C2.x > -1700) prints.push({ x: C2.x + 8 + (fr1 === WM.rest[0] ? 0 : 5), t: 0 });
       if (ph === 'plain') {
         OPEN_AT.forEach((x, i) => { if (C2.x > x && !capsSaid.has(i)) { capsSaid.add(i); caption([LEVEL2_OPENING[i]]); } });
         if (C2.x > -1300 && !nearSaid) { nearSaid = true; caption(NEAR); }
-        if (C2.x >= FALL_X) { C2.stand = 0; C2.sd = null; ph = 'fall'; G.state = 'auto'; G.capQ.length = 0; C2.fallT = 0; C2.fy = C2.y; sfxS.fall(); clearHint('walk'); splash(C2.x, 13, 1.15); if (pli) splash(pli.x, 11, 1.1); for (const fx of [C2.x, pli ? pli.x : null]) if (fx != null) { fPush(fx, -3, 9); fPush(fx - 20, 2.4, 8); fPush(fx + 20, 2.4, 8); } }
+        if (C2.x >= FALL_X) { C2.stand = 0; C2.sd = null; C2.sp = null; ph = 'fall'; G.state = 'auto'; G.capQ.length = 0; C2.fallT = 0; C2.fy = C2.y; sfxS.fall(); clearHint('walk'); splash(C2.x, 13, 1.15); if (pli) splash(pli.x, 11, 1.1); for (const fx of [C2.x, pli ? pli.x : null]) if (fx != null) { fPush(fx, -3, 9); fPush(fx - 20, 2.4, 8); fPush(fx + 20, 2.4, 8); } }
         if (!G.walked && G.t > 400 && C2.x < START + 20) { G.walked = true; hint('walk', 'Hold to walk.'); }
         if (want) clearHint('walk');
       } else {
-        C2.stand = clamp(C2.stand + (want ? -.08 : .04));
+        C2.stand = nw ? (C2.sd != null ? 1 : 0) : clamp(C2.stand + (want ? -.08 : .04));      // build 55: the new pilgrim stops and sets off by his own frames, no dissolve
         if (C2.x > END_X - 170) C2.alpha = clamp((END_X - C2.x) / 170);      // build 124: he lasts until he is well into the mist, which hides him first
         if (C2.x >= END_X && G.state === 'play') finish();
       }
@@ -1640,7 +1655,8 @@ const SL = (() => {
     }
     let blendIm = null, blendK = 0;
     const inWater = C2.y > 2 && ph !== 'look' && ph !== 'onway' && ph !== 'on' && ph !== 'drawn' && ph !== 'hist';
-    let walkIm = CHR[((Math.floor(C2.anim) % CHR.length) + CHR.length) % CHR.length], walkM = CHR_META;
+    const WS = wkSet(); let walkIm = WS[((Math.floor(C2.anim) % WS.length) + WS.length) % WS.length], walkM = wkMeta();
+    if (NEWP() && C2.sp != null) { walkIm = PST[Math.min(PST_END, Math.floor(C2.sp))]; walkM = PST_META; }      // build 55: setting off from standing
     // in the mire he heaves and struggles (one video loop) instead of walking
     // build 141: his floundering picture ends at the waist, so it only comes in once he has sunk nearly that far (it came
     // in by the clock, while he was still knee-deep, and blank paper showed under him)
@@ -1648,7 +1664,7 @@ const SL = (() => {
     // splash, instead of a long double picture while he sank from 44 to 57
     const wk = ph === 'fall' ? smooth(36, 46, C2.fallT) : smooth(36, 40, C2.y); let wa = 1;      // build 119: he flounders from the fall on
     if (WADE.length && inWater && wk > 0 && ['fall', 'pli', 'back', 'backtalk', 'wade', 'stuck', 'help'].includes(ph)) {
-      if (wk < .5) figure(n, 'chr0', walkIm, CHR_META, C2.x, C2.y, C2.face, fig, true, alpha * C2.alpha);      // build 395: a clean swap under the splash, never both at once
+      if (wk < .5) figure(n, 'chr0', walkIm, walkM, C2.x, C2.y, C2.face, fig, true, alpha * C2.alpha);      // build 395: a clean swap under the splash, never both at once
       const wf = C2.wa || 0; walkIm = WADE[Math.floor(wf) % WADE.length]; walkM = META.wade;
       // build 214: heaving on the spot (the fall, Pliable's quarrel, going back, stuck at the far bank) is the stuck video;
       // only the wading forward is the wading video
@@ -1675,11 +1691,12 @@ const SL = (() => {
       return;
     }
     if (C2.stand > 0 && STD.length) {
-      const im = STD[atTime(STD_META, breathT(C2.sd ?? QUIET[0] + G.t * .4))], fr = (1 + C2.faceA) / 2;
+      const nw = NEWP(), im = nw ? PST[Math.round(clamp(C2.sd ?? 0, 0, PST_END))] : STD[atTime(STD_META, breathT(C2.sd ?? QUIET[0] + G.t * .4))], sm = nw ? PST_META : STD_META;
+      const fr = nw ? (C2.face > 0 ? 1 : 0) : (1 + C2.faceA) / 2;      // build 55: the new pilgrim turns about at once (Level 1's plain turn), never two mirrored pictures
       const cutS = C2.y > 2;
-      if (fr > .01) figure(n, 'std', im, STD_META, C2.x, C2.y, 1, fig, cutS, alpha * C2.stand * C2.alpha * fr);
-      if (fr < .99) figure(n, 'std2', im, STD_META, C2.x, C2.y, -1, fig, cutS, alpha * C2.stand * C2.alpha * (1 - fr));
-      if (C2.stand < 1) figure(n, 'chr', walkIm, CHR_META, C2.x, C2.y, C2.face, fig, false, alpha * (1 - C2.stand) * C2.alpha);
+      if (fr > .01) figure(n, 'std', im, sm, C2.x, C2.y, 1, fig, cutS, alpha * C2.stand * C2.alpha * fr);
+      if (fr < .99) figure(n, 'std2', im, sm, C2.x, C2.y, -1, fig, cutS, alpha * C2.stand * C2.alpha * (1 - fr));
+      if (C2.stand < 1) figure(n, 'chr', walkIm, walkM, C2.x, C2.y, C2.face, fig, false, alpha * (1 - C2.stand) * C2.alpha);
       return;
     }
     // build 180: the struggling picture is never shown higher than its own mud line (58: five units of filled body, hidden by the
