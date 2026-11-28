@@ -50,7 +50,10 @@ body.opened .tleaf{transform:translateZ(2px) rotateY(-180deg)}
 .tcover{position:absolute;inset:calc(var(--u,1) * -5px) calc(var(--u,1) * -6px) calc(var(--u,1) * -6px) 0;background:#2a211d center/100% 100%;border-radius:2px 7px 7px 2px;backface-visibility:hidden;-webkit-backface-visibility:hidden;cursor:pointer;box-shadow:0 calc(var(--u,1) * 1px) calc(var(--u,1) * 2px) rgba(0,0,0,.5)}
 /* the block of pages under the board (build 210): its own layer, so the ribbon can come out from between the pages,
    under the cover; cream edges with the fine lines of the leaves, a little lower and to the right of the board */
-.tpages{position:absolute;inset:calc(var(--u,1) * -2px) calc(var(--u,1) * -10px) calc(var(--u,1) * -12px) calc(var(--u,1) * 2px);border-radius:2px 5px 5px 2px;background:repeating-linear-gradient(0deg,#ab9b7c 0 1px,#9a8a6c 1px 2px);backface-visibility:hidden;-webkit-backface-visibility:hidden;box-shadow:0 calc(var(--u,1) * 14px) calc(var(--u,1) * 40px) rgba(0,0,0,.6),inset 0 0 0 1px rgba(90,60,25,.35);transition:opacity .4s}
+.tpages{position:absolute;inset:calc(var(--u,1) * -7px) calc(var(--u,1) * -8px) calc(var(--u,1) * -8px) calc(var(--u,1) * 1px);border-radius:2px 6px 6px 2px;background:linear-gradient(90deg,#3e2219,#5a3a26 45%,#47281c);backface-visibility:hidden;-webkit-backface-visibility:hidden;box-shadow:0 calc(var(--u,1) * 4px) calc(var(--u,1) * 26px) rgba(0,0,0,.55),inset 0 0 0 1px rgba(20,8,4,.55);transition:opacity .4s}
+/* build 101 (owner: "make pages look more realistic ... remove that perspective look"): seen straight from above, the leaves show only as an
+   even thin edge of dull, aged red-and-gold on the three open sides, just past the soft cover (was a cream block set low and to the right, which read as a
+   slab seen at an angle); the shadow falls evenly round the book */
 body.opened .tpages{opacity:0}
 .tribbon{position:absolute;left:61%;bottom:calc(var(--u,1) * -31px);width:calc(var(--u,1) * 16px);height:calc(var(--u,1) * 27px);background:linear-gradient(90deg,transparent 18%,#6b1f18 18% 82%,transparent 82%);background-size:100% 100%;filter:drop-shadow(0 calc(var(--u,1) * 1px) calc(var(--u,1) * 1.2px) rgba(0,0,0,.55));backface-visibility:hidden;-webkit-backface-visibility:hidden;transition:opacity .4s}
 body.opened .tribbon{opacity:0}
@@ -137,6 +140,10 @@ body.opening #opening{display:block}
 /* the words: a thin strip of light text on the dark road, under everyone's feet */
 #dlg{position:absolute;left:0;right:0;top:82.5%;bottom:0;padding:0 7.5% 0 4%;font-family:Georgia,serif;color:#f4ecdc;display:none;background:linear-gradient(rgba(14,14,20,0),rgba(14,14,20,.4) 30%);text-shadow:0 1px 3px rgba(0,0,0,.8);pointer-events:none}
 #dlg.on{display:flex;align-items:center}
+/* build 103 (owner: "subtitles went away. Kinda prefer that but maybe we can have toggle"): the spoken words are off unless turned on in the menu
+   (localStorage pp-words '1'); side messages (#dlg.hint) and the gold prompt to act (.more) always show */
+body.nowords #dlg:not(.hint) .who,body.nowords #dlg:not(.hint) .txt{visibility:hidden}
+body.nowords #dlg:not(.hint){background:none!important}
 body.slough #dlg{background:linear-gradient(rgba(14,14,20,0),rgba(14,14,20,.78) 34%)}
 #dlg .who{font-style:italic;color:#e8c27c}
 #dlg .who:not(:empty)::after{content:': '}
@@ -249,7 +256,7 @@ every year.</div>
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 99 · Nov 28 2026</div>
+  <div id="build">build 105 · Nov 28 2026</div>
   <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
@@ -1330,7 +1337,7 @@ const held = () => { if (autoHeld()) return true; for (const t of downs.values()
 // camera draws back at the gate, the far light rises to stand above the gateway, in the sky over the gatehouse
 // (Evangelist: "Keep that light in your eye, and go straight up to it. Then you will see the gate."). Since build 100
 // the gatehouse is tall, so the light stands high in the open sky beside it.
-const lightPos = () => { const t = smooth(0, 1, (1 - (G.zoom || 1)) / (1 - ZOOM_GATE)), lc = Math.min(G.cam, OLD_W - VW); return { x: lerp(880 - lc * .02, DOORM - lc + 600, t),      // build 96: past the old end (the train ride) the far light stays put, ahead
+const lightPos = () => { const t = smooth(0, 1, (1 - (G.zoom || 1)) / (1 - ZOOM_GATE)), lc = Math.min(G.cam, OLD_W - VW); return { x: lerp(760 - lc * .02,      /* build 102 (owner: "Light that Philip point out is kinda under menu button"): 760, was 880 */  DOORM - lc + 600, t),      // build 96: past the old end (the train ride) the far light stays put, ahead
  y: lerp(96, -330, t) - 90 * smooth(0, 1, G.sunUp || 0) }; };      // sunUp: once the gate is open it climbs a little higher (build 102)      // build 100: in the open sky to the right of the tall gatehouse
 
 function reset() {
@@ -1403,9 +1410,11 @@ function fitWords(box) {
 }
 const TXT_MIN = 16, TXT_MAX = 21, TXT_K = .036, TXT_MIN_UP = 11, TXT_K_UP = .052;
 addEventListener('resize', () => { if (dlg.classList.contains('on')) fitWords(dlg.querySelector('.txt')); });
+try { if (localStorage.getItem('pp-words') !== '1') document.body.classList.add('nowords'); } catch (e) { document.body.classList.add('nowords'); }
 function words(who, txt, cls) {
   const shown = who !== RD && who !== RD2;      // build 26 (owner: "radio voice does not need script below"): the radio is heard, never written
-  dWho.textContent = shown ? (who === PG ? 'Traveler' : who) : '';      // build 73 (owner: "Traveler"): the name shown; his recordings stay filed under 'Pilgrim' dTxt.textContent = shown ? txt : ''; dlg.className = 'on ' + cls;
+  dWho.textContent = shown ? (who === PG ? 'Traveler' : who) : '';      // build 73 (owner: "Traveler"): the name shown; his recordings stay filed under 'Pilgrim'
+  dTxt.textContent = shown ? txt : ''; dlg.className = 'on ' + cls;      // build 103: this line had been swallowed by the comment above since build 74, so no words showed
   const box = dlg.querySelector('.txt'); box.style.animation = 'none'; void box.offsetWidth; box.style.animation = '';
   fitWords(box);
   if (!cls.includes('hint')) say(who, txt); else hush();
@@ -1654,7 +1663,7 @@ function toTrain() {
   G.train.ph = 'back'; G.state = 'auto'; G.auto = { dir: -1, to: -1e9 };      // he runs back toward it (a story move: the child need not hold)
   if (G.pli && G.pli.mode === 'follow') G.pli.mode = 'train';
 }
-const DECK = [.5, 5.6];      // the flatcar's empty rear deck, metres from its rear
+const DECK = [.5, 5.6], HIDE_OX = [10.2, 8.6];      // the flatcar's empty rear deck, metres from its rear; where the two stand hidden behind its container
 function trainTick() {
   const T = G.train; if (!T) return; T.t++; T.F += TR.v; trainSound(TR.v);
   const cam = G.camDraw ?? G.cam, px = P.x - cam, flat = trCars(T.F)[1], l = carPt(flat, DECK[0], 0, cam).x, r = carPt(flat, DECK[1], 0, cam).x;
@@ -1667,6 +1676,11 @@ function trainTick() {
   const p = G.pli;
   if (p && p.mode === 'train') { p.face = -1; const tx = P.x + 55; if (p.x > tx) p.x = Math.max(tx, p.x - 3.2); if ((T.ph === 'hop' && T.h.t > 14) || T.ph === 'ride') { p.mode = 'trainhop'; p.face = 1; p.h = { t: 0, x0: p.x - cam, ox: Math.max(DECK[0] + .3, T.h.ox - 1.1) }; } }
   if (p && p.mode === 'trainhop') p.h.t = Math.min(40, p.h.t + 1);
+  // build 98 (owner: "Can we have them hide behind a container so guard doesn't see them" ... "On train"): once up on the deck they walk
+  // forward and stand behind the container on its front half (6.5 to 12.6 m), hidden from the sentry as they ride past him
+  const walkOn = (h, to, meta) => { if (!h) return; if (h.t >= 40 && h.ox < to) { h.wk = true; h.ox = Math.min(to, h.ox + .4 * meta.vpx * CHR_K * TR.pN / 88); h.wf = (h.wf || 0) + .4; } else h.wk = false; };
+  if (T.ph === 'ride') walkOn(T.h, HIDE_OX[0], PW_META);
+  if (p && p.mode === 'trainhop') walkOn(p.h, HIDE_OX[1], pliSet()[1]);
 }
 // the rails, all along: behind the road, then curving away to the tunnel (drawn in the far pass, under everything of the train)
 function trainRails(cam) {
@@ -1701,7 +1715,7 @@ function railPortal(cam) {
 // one car: painted in metres on a small canvas, then laid on the track in narrow upright slices, each at its own place and depth,
 // so in the curve it bends away into the distance and foreshortens (one stretched shape looked broken)
 const CARC = mk(8, 8), CAR_S = 48, CAR_H = 5.2;      // 48 pixels a metre (sharp at the road's scale), 5.2 m tall
-function trainCar(car, cam, col, dk) {
+function trainCar(car, cam, col, dk, part) {      // part (the flatcar): 'base' without its container, 'box' the container alone
   const [ur, uf, kind, L] = car; if (trX(uf, cam) < -40 || trX(ur, cam) > VW + 40) return;
   const W = Math.ceil(L * CAR_S), H = Math.ceil(CAR_H * CAR_S); if (CARC.width !== W || CARC.height !== H) { CARC.width = W; CARC.height = H; }
   const c = CARC.getContext('2d'); c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, W, H); c.setTransform(CAR_S, 0, 0, CAR_S, 0, H);
@@ -1717,9 +1731,10 @@ function trainCar(car, cam, col, dk) {
     R(.4, 2.7, L - .8, .07, dk); for (let x = 1.4; x < L - 1; x += 2.6) R(x, 1.6, .06, 1.1, dk);      // the handrail and its posts
     R(1.2, 2.4, 4.2, .9, mix(col, dk, .35));      // the radiator grilles, a shade darker
   } else {      // the flatcar: a deep frame, a 20-foot container on its front half, the rear half empty
-    truck(2, 2); truck(L - 2, 2);
+    if (part !== 'box') { truck(2, 2); truck(L - 2, 2);
     c.fillStyle = css(col); c.beginPath(); c.moveTo(0, -1.25); c.lineTo(L, -1.25); c.lineTo(L, -.95); c.lineTo(L * .8, -.7); c.lineTo(L * .2, -.7); c.lineTo(0, -.95); c.fill();
-    const bc = boxCol(.66, trX(ur, cam), 41, .1); R(6.5, 1.25, 6.1, 2.6, bc); for (let x = 6.9; x < 12.4; x += .45) R(x, 1.4, .05, 2.3, mix(bc, dk, .3)); R(6.5, 3.7, 6.1, .15, mix(bc, dk, .45));      // the container, its ribs and top rail
+    }
+    const bc = boxCol(.66, trX(ur, cam), 41, .1); if (part !== 'base') { R(6.5, 1.25, 6.1, 2.6, bc); for (let x = 6.9; x < 12.4; x += .45) R(x, 1.4, .05, 2.3, mix(bc, dk, .3)); R(6.5, 3.7, 6.1, .15, mix(bc, dk, .45)); }      // the container, its ribs and top rail
   }
   const N = Math.ceil(L / .2);
   for (let i = 0; i < N; i++) { const o0 = i * L / N, o1 = (i + 1) * L / N, u0 = ur + o0 * 88, u1 = ur + o1 * 88, x0 = trX(u0, cam), x1 = trX(u1, cam); if (x1 < -5 || x0 > VW + 5) continue;
@@ -1732,12 +1747,13 @@ function drawOutTrain(cam, far) {
   ctx.save(); ctx.beginPath(); ctx.rect(-9999, -9999, portalArchL() - cam + 9999, 99999); ctx.clip();      // nothing of it shows past the arch's near side
   const cars = trCars(T.F), flat = cars[1];
   for (const car of cars) { const p = trP((car[0] + car[1]) / 2);
-    const col = portCol(lerp(.6, .8, (p - TR.pF) / (TR.pN - TR.pF)), trX(car[1], cam), .14), dk = mix(col, [0, 0, 0], .28); trainCar(car, cam, col, dk);
+    const col = portCol(lerp(.6, .8, (p - TR.pF) / (TR.pN - TR.pF)), trX(car[1], cam), .14), dk = mix(col, [0, 0, 0], .28); trainCar(car, cam, col, dk, car === flat ? 'base' : undefined);
     if (car === flat) {      // the two jumping up and riding (at the car's depth)
       const hop = (h, im, meta) => { const q = carPt(flat, h.ox, 1.25, cam), u = Math.min(1, h.t / 40), e = u * u * (3 - 2 * u), x = lerp(h.x0, q.x, e), y = lerp(GY, q.y, e) - Math.sin(Math.PI * u) * 26, k = lerp(1, q.p, e);
         drawFrame(im, meta, x, y + 1, 1, 1, CHR_K * k); };
-      if (T.h && T.pOn) hop(T.h, ...(T.ph === 'hop' && T.h.t < 32 && PW.ready ? [PW[10], PW_META] : PST.ready ? [PST[0], PST_META] : [PW[0], PW_META]));
-      const p2 = G.pli; if (p2 && p2.mode === 'trainhop') { const [W, M, S, SM] = pliSet(); hop(p2.h, p2.h.t < 32 ? W[4] : S, p2.h.t < 32 ? M : SM); }
+      if (T.h && T.pOn) hop(T.h, ...(T.ph === 'hop' && T.h.t < 32 && PW.ready ? [PW[10], PW_META] : T.h.wk && PW.ready ? [PW[Math.floor(T.h.wf) % PW.length], PW_META] : PST.ready ? [PST[0], PST_META] : [PW[0], PW_META]));
+      const p2 = G.pli; if (p2 && p2.mode === 'trainhop') { const [W, M, S, SM] = pliSet(); hop(p2.h, p2.h.t < 32 ? W[4] : p2.h.wk ? W[Math.floor(p2.h.wf) % W.length] : S, p2.h.t < 32 || p2.h.wk ? M : SM); }
+      trainCar(car, cam, col, dk, 'box');      // build 98: the container in front of them: once they have walked up behind it, they are hidden
     } }
   ctx.restore();
 }
@@ -1781,7 +1797,7 @@ function pick(home) {
     try { localStorage.setItem('pp-gate', way); } catch (e) {}
     if (way === 'guard') talk(G.alone ? GUARD_ASK1 : GUARD_ASK, () => G.alone ? talk(GUARD_NO, () => { (G.gateTried = G.gateTried || {}).guard = 1; gateChoice(); }) : talk(GUARD_YES, () => openGate(false)));
     else if (way === 'tank') talk(TANK_WAIT, () => { G.state = 'wait'; if (G.tank) G.tank.leave = 1; later(330, () => { G.sentryAway = true; openGate(true); }); });
-    else talk(TRAIN_SEE, () => { trainGo(); G.sentryAway = true; talk(G.alone ? TRAIN_RUN1 : TRAIN_RUN, toTrain); });
+    else talk(TRAIN_SEE, () => { trainGo(); talk(G.alone ? TRAIN_RUN1 : TRAIN_RUN, toTrain); });
     return;
   }
   if (kind === 'young') {      // build 64: choice 5: only the light brings him
@@ -3322,6 +3338,22 @@ function lampLight(l, a, cam) {
   { const R = 300, g = c.createRadialGradient(0, 0, 0, 0, 0, R); g.addColorStop(0, css(PAL.light, .55 * a * fl)); g.addColorStop(.3, css(PAL.win, .32 * a * fl)); g.addColorStop(.65, css(PAL.win, .1 * a * fl)); g.addColorStop(1, css(PAL.win, 0));
     c.save(); c.globalAlpha = 1; c.translate(x, GY + 4); c.scale(1, .13); c.fillStyle = g; c.fillRect(-R, -R, 2 * R, 2 * R); c.restore(); }      // a wide flat pool on the road below
 }
+// build 104 (owner: "The lights that follow pilgrim should stay behind overpass pile ons"): the far lamps (the city's windows on the walk
+// to Phillip, the cranes' lamps by the barricade) are drawn with the far scenery, before the underpass's piers, the port's boxes and
+// everything nearer, so those stand in front of them (they used to be drawn last of all, over everything); the crane lamps come just
+// after the port itself (they sit on the cranes), so the train, the tank, the fence and all nearer stand in front of them
+function farLamps(cam, which) {
+  ctx.save(); ctx.globalCompositeOperation = 'screen';
+  for (const s of LIGHTS) {
+    if (s.port && which === 'port') { const lv = s.got && s.lamp ? tubeLevel(G.t - s.gt) : 0; if (lv < .01) continue;
+      const [x, y] = portLampAt(s.lamp); if (behindWall(x, y)) continue; glow(x, y, 22, .45 * lv); glow(x, y, 6, .85 * lv); continue; }
+    if (s.tube && !s.port && which === 'win') { const lv = s.got && s.win ? tubeLevel(G.t - s.gt) : 0; if (lv < .01) continue;
+      const [li, w] = s.win, x = w[0] - cam * SCN[li].par + w[2] / 2, y = w[1] + w[3] / 2, k = li ? 1 : .8;
+      ctx.globalAlpha = 1; ctx.fillStyle = css(PAL.win, .95 * lv); ctx.fillRect(x - w[2] / 2, y - w[3] / 2, w[2], w[3]);
+      glow(x, y, 26 * k, .5 * lv); glow(x, y, 8 * k, .8 * lv); }
+  }
+  ctx.restore();
+}
 const glow = (x, y, size, a) => { if (a < .01) return; ctx.globalAlpha = Math.min(1, a); ctx.drawImage(GLOW, x - size / 2, y - size / 2, size, size); };
 const drops = []; { const r = rng(9); for (let i = 0; i < 240; i++) drops.push({ x: r() * (VW + 160), y: r() * VH, l: 14 + r() * 24, v: 9 + r() * 8, a: .12 + r() * .3 }); }
 let STEPS = 1;
@@ -3399,7 +3431,7 @@ function drawWorld() {
   const gcol = layerCol(1), wAt = x => warm((x - cam) / VW), on = (x, w = 0, m = 80) => x < cam + VW + m && x + w > cam - m;
   // the lane just behind the road: a low bank a little paler than the road, with his house and a few things on it
   ctx.fillStyle = hGrad(ctx, ...layerCol(.93)); ctx.fillRect(0, LEVELS.home.base, VW, GY - LEVELS.home.base + 2);
-  underpass(cam, 'back'); drawPort(cam); drawOutTrain(cam, true); drawTank(cam); drawRow(cam); home(cam); drawSmoke(cam); drawPoles(cam); drawLevel('mid', cam); drawWatchers(cam); busStop(cam); drawCrowd(cam); drawWheat(false); drawDrone(cam);          // the wheat behind him
+  farLamps(cam, 'win'); underpass(cam, 'back'); drawPort(cam); farLamps(cam, 'port');      /* the crane lamps just after the port (on the cranes, under the train, the tank and all nearer) */ drawOutTrain(cam, true); drawTank(cam); drawRow(cam); home(cam); drawSmoke(cam); drawPoles(cam); drawLevel('mid', cam); drawWatchers(cam); busStop(cam); drawCrowd(cam); drawWheat(false); drawDrone(cam);          // the wheat behind him
   ctx.setTransform(1, 0, 0, 1, 0, OYD); drawFog('lane'); ctx.setTransform(DPR, 0, 0, DPR, 0, OYD);
   lightThrough();      // build 79: the far light's glow, seen through the rain over the rooftops where the buildings hide it      // mist lying along the lane, round the houses' feet and in the wheat
   ctx.save(); ctx.translate(-cam, 0);
@@ -3546,20 +3578,14 @@ function drawWorld() {
   for (const it of ROW) if (it.who && it.open > .02) { const sx = lineUp(it.a, LEVELS.home.par) - cam * LEVELS.home.par; if (sx > -200 && sx < VW + 200) glow(sx, LEVELS.home.base - 55, 170, .22 * it.open); }      // the glow of the neighbours' doors
   if (G.door > .02) glow(doorX(cam) + 3, LEVELS.home.base - 62, 260, .32 * G.door * lerp(1, .5, warm(doorX(cam) / VW)));   // the glow of home
   for (const s of LIGHTS) {
-    if (s.port) { const lv = s.got && s.lamp ? tubeLevel(G.t - s.gt) : 0; if (lv < .01) continue;      // build 91: a lamp on a far crane comes on
-      const [x, y] = portLampAt(s.lamp); if (behindWall(x, y)) continue; glow(x, y, 22, .45 * lv); glow(x, y, 6, .85 * lv); continue; }
-    if (s.tube) { const lv = s.got && s.win ? tubeLevel(G.t - s.gt) : 0; if (lv < .01) continue;      // build 83: a far window coming on in the city
-      const [li, w] = s.win, x = w[0] - cam * SCN[li].par + w[2] / 2, y = w[1] + w[3] / 2, k = li ? 1 : .8;
-      ctx.fillStyle = css(PAL.win, .95 * lv); ctx.fillRect(x - w[2] / 2, y - w[3] / 2, w[2], w[3]);
-      glow(x, y, 26 * k, .5 * lv); glow(x, y, 8 * k, .8 * lv);
-      continue; }
+    if (s.port || s.tube) continue;      // build 104: the far lamps are drawn behind the near things (farLamps)
     const x = s.x - cam; if (s.got || x < -40 || x > VW + 40) continue;
     const y = s.y + Math.sin(G.t / 26 + s.ph) * 4, tw = .82 + .18 * Math.sin(G.t / 11 + s.ph * 3);
     glow(x, y, 54, .5 * tw * s.a); glow(x, y, 17, s.a);
   }
-  if (G.state !== 'title') glow(P.x - cam, GY - 84, 210 + G.got * 2.2, (.1 + Math.min(.2, G.got * .0045)) * dim * (1 - intoGate(P.x)));   // the warmth he carries
+  if (G.state !== 'title' && !(G.train && G.train.pOn)) glow(P.x - cam, GY - 84, 210 + G.got * 2.2, (.1 + Math.min(.2, G.got * .0045)) * dim * (1 - intoGate(P.x)));   // the warmth he carries
   for (const m of G.motes) { const x = m.x - cam, tw = (.75 + .25 * Math.sin(G.t / 9 + m.tw)) * (m.a ?? 1); glow(x, m.y, 26, .5 * tw * dim); glow(x, m.y, 8.5, tw * dim); }
-  for (const g of G.glints) { const x = g.x - cam * g.par, a = Math.sin(Math.PI * g.t / 56); glow(x, g.y, 30, .5 * a); ctx.globalAlpha = .9 * a; ctx.strokeStyle = '#fff6da'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x - 8, g.y); ctx.lineTo(x + 8, g.y); ctx.moveTo(x, g.y - 8); ctx.lineTo(x, g.y + 8); ctx.stroke(); }
+  for (const g of G.glints) { const x = g.x - cam * g.par, a = Math.sin(Math.PI * g.t / 56); glow(x, g.y, 34, .6 * a); glow(x, g.y, 12, .8 * a); }      // build 102: a soft round glint only (its four-pointed star of lines read as a cross)
   for (const t of G.taps) { ctx.globalAlpha = .5 * (1 - t.t / 26); ctx.strokeStyle = '#fff3d0'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(t.x, t.y, 6 + t.t * 1.3, 0, 6.2832); ctx.stroke(); }
   if (G.ring) { const [x, y] = G.ring(); ctx.strokeStyle = '#ffe6ae'; ctx.lineWidth = 2; for (const k of [0, .5]) { const ph = (G.t / 80 + k) % 1; ctx.globalAlpha = .65 * (1 - ph); ctx.beginPath(); ctx.arc(x, y, 14 + ph * 40, 0, 6.2832); ctx.stroke(); } }
   ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
@@ -4043,19 +4069,8 @@ function nightLand(x, X0, Y0, w, h, o) {
   for (let k = 0; k < 9; k++) { let px = 60 + r() * (W - 120), py = 40 + r() * (H - 80); const ang = (r() - .5) * 1.6 + (r() < .5 ? 0 : Math.PI / 2), len = 30 + r() * 140;
     x.lineWidth = 1; x.strokeStyle = 'rgba(130,104,84,.16)'; x.beginPath(); x.moveTo(px, py);
     for (let t = 0; t < len; t += 8) { px += Math.cos(ang) * 8 + (r() - .5) * 2; py += Math.sin(ang) * 8 + (r() - .5) * 2; x.lineTo(px, py); } x.stroke(); }
-  // build 87 (owner: "The cover saying Bible seems too in your face"; chose "no words on the front" and "words only on the
-  // spine"): the front is plain worn leather; the spine shows as a narrow strip along the left edge, rounding away into
-  // shadow, two raised bands, and "HOLY BIBLE" small down it in gilt mostly rubbed away (worn on its own canvas).
-  { const SW = 40;
-    g = x.createLinearGradient(0, 0, SW, 0); g.addColorStop(0, 'rgba(0,0,0,.55)'); g.addColorStop(.45, 'rgba(70,52,38,.25)'); g.addColorStop(.85, 'rgba(0,0,0,.15)'); g.addColorStop(1, 'rgba(0,0,0,.5)');
-    x.fillStyle = g; x.fillRect(0, 0, SW, H);
-    for (const by of [96, H - 96]) { x.fillStyle = 'rgba(0,0,0,.4)'; x.fillRect(0, by + 4, SW - 2, 3); x.fillStyle = 'rgba(130,100,74,.22)'; x.fillRect(0, by, SW - 2, 4); }      // the raised bands
-    const t = mk(W, H), tx = t.getContext('2d'); tx.save(); tx.translate(SW * .52, H / 2); tx.rotate(Math.PI / 2);
-    tx.textAlign = 'center'; tx.textBaseline = 'middle'; tx.font = '600 19px Georgia,serif'; tx.fillStyle = 'rgba(176,144,86,.55)';
-    tx.fillText('HOLY BIBLE'.split('').join(String.fromCharCode(8202, 8202)), 0, 0); tx.restore();
-    tx.globalCompositeOperation = 'destination-out';
-    for (let i = 0; i < 260; i++) { const px = r() * SW, py = H / 2 - 120 + r() * 240, rad = .6 + r() * (r() < .08 ? 6 : 2.2); tx.fillStyle = 'rgba(0,0,0,' + (.3 + r() * .6) + ')'; tx.beginPath(); tx.arc(px, py, rad, 0, 7); tx.fill(); }
-    x.drawImage(t, 0, 0); }
+  // build 101 (owner: "take title off ... remove that perspective look"): no title and no spine strip (its rounding and bands read as
+  // a book seen at an angle); the front is plain worn leather with its hinge crease
   // a thin blind line round the edge, worn through in places
   x.strokeStyle = 'rgba(0,0,0,.35)'; x.lineWidth = 2; x.strokeRect(70, 30, W - 100, H - 60);
   x.strokeStyle = 'rgba(110,86,66,.12)'; x.lineWidth = 1; x.strokeRect(72, 32, W - 104, H - 64);

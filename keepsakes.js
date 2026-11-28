@@ -58,7 +58,10 @@ body.portrait #ksmenu .kspage{width:90vw;max-height:80vh;font-size:clamp(18px,5.
 #ksmenu .kl i{flex:0 0 1.8em;font-style:normal}
 #ksmenu .kl.here{opacity:1;cursor:default}
 #ksmenu .kl:not(.here):active,#ksmenu .km button:active,#ksmenu .kfoot button:active{color:#7a2a1e}
-#ksmenu .km{display:flex;flex-direction:column;padding-left:1.8em;font-size:.82em;--L:calc(1.5em / .82)}
+#ksmenu .km{display:flex;flex-direction:row;flex-wrap:wrap;padding-left:1.8em;font-size:.82em;--L:calc(1.5em / .82)}
+/* build 105 (owner: "make sub chapters in page menu side by side instead of stacked so they stay compact"): the moments flow along the line,
+   wrapping onto the next rule, a small dot between them */
+#ksmenu .km button{width:auto;padding-right:.2em}#ksmenu .km button:not(:last-child)::after{content:'\\00b7';margin:0 .45em 0 .5em;opacity:.7}#ksmenu .km button.now:not(:last-child)::after{content:'\\2190\\2003\\00b7'}
 #ksmenu .km button{opacity:.8}
 #ksmenu .km button.now{opacity:1}#ksmenu .km button.now::after{content:'\\2190';margin-left:.6em}
 #ksmenu .kfoot{display:flex;flex-direction:column;margin-top:var(--L);font-size:.82em;--L:calc(1.5em / .82)}
@@ -399,7 +402,7 @@ body.portrait #ksmenu .kspage{width:90vw;max-height:80vh;font-size:clamp(18px,5.
   document.getElementById('stage').appendChild(pauseBtn);
   const NAMES = ['The city', 'The fields', 'The mountain', 'The house', 'The steeple'], ROMAN = ['1.', '2.', '3.', '', '4.'];
   const menu = mkEl(`<div id="ksmenu" class="kscover"><div class="kspage"><div class="kspin"><div class="kh">The way</div><div class="krule"></div><div class="klv"></div><div class="krule d"></div>
-    <div class="kfoot"><button data-snd="1"><span>Sound</span><b></b></button><button data-auto="1"><span>He walks on by himself</span><b></b></button></div></div></div><div class="khint">Touch outside the page to go on</div></div>`);
+    <div class="kfoot"><button data-snd="1"><span>Sound</span><b></b></button><button data-auto="1"><span>He walks on by himself</span><b></b></button><button data-words="1"><span>Words on the screen</span><b></b></button></div></div></div><div class="khint">Touch outside the page to go on</div></div>`);
   const book = mkEl(`<div id="ksbook" class="kscover"><div class="bible"><div class="spread"><div class="edges"></div><div class="page L"></div><div class="page R"></div>
     <div class="leaf"><div class="face front"></div><div class="face back"></div></div><div class="spine"></div><div class="ribbon"></div><div class="page scratch"></div></div></div>
     <button class="ksarrow l" aria-label="Turn back">‹</button><button class="ksarrow r" aria-label="Turn on">›</button><button class="ksx" aria-label="Close">×</button></div>`);
@@ -456,7 +459,7 @@ body.portrait #ksmenu .kspage{width:90vw;max-height:80vh;font-size:clamp(18px,5.
 
   // the menu
   // (build 309) the auto-walk switch, shared with the contents page's line (setAuto in index.html)
-  const autoLabel = () => { const b = menu.querySelector('[data-auto] b'); if (b) b.textContent = AUTOW ? '- on' : '- off'; const s = menu.querySelector('[data-snd] b'); if (s) s.textContent = muted ? '- off' : '- on'; };
+  const autoLabel = () => { const b = menu.querySelector('[data-auto] b'); if (b) b.textContent = AUTOW ? '- on' : '- off'; const s = menu.querySelector('[data-snd] b'); if (s) s.textContent = muted ? '- off' : '- on'; const w = menu.querySelector('[data-words] b'); if (w) w.textContent = document.body.classList.contains('nowords') ? '- off' : '- on'; };
   const curLv = () => CR.on ? 5 : RM.on ? 4 : HL.on ? 3 : SL.on ? 2 : 1;
   const darkOn = () => { try { return localStorage.getItem('pp-dark') === '1'; } catch (e) { return false; } };
   // the page: every level a line; under the level he is in, its moments so far as chapter lines (all of them in the editor)
@@ -480,6 +483,7 @@ body.portrait #ksmenu .kspage{width:90vw;max-height:80vh;font-size:clamp(18px,5.
   menu.addEventListener('click', e => {
     if (e.target.closest('[data-auto]')) { setAuto(!AUTOW); autoLabel(); return; }
     if (e.target.closest('[data-snd]')) { sndEl.onclick(); vol(.15); autoLabel(); return; }
+    if (e.target.closest('[data-words]')) { const on = !document.body.classList.toggle('nowords'); try { localStorage.setItem('pp-words', on ? '1' : '0'); } catch (er) {} autoLabel(); return; }      // build 103: words on the screen, on or off (off at first)
     const m = e.target.closest('[data-m]'); if (m) { const lv = curLv(); hide(); MO.jumpTo(lv - 1, +m.dataset.m); return; }
     const b = e.target.closest('[data-go]'); if (!b && e.target.closest('.kspage')) return;
     const go = b ? b.dataset.go : 'on'; hide();
