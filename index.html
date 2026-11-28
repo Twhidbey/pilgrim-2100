@@ -249,7 +249,7 @@ every year.</div>
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 41 · Nov 28 2026</div>
+  <div id="build">build 42 · Nov 28 2026</div>
   <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
@@ -264,6 +264,11 @@ every year.</div>
 const CHR_META={"ax": 93, "ground": 295, "frames": 38, "vpx": 4.9, "rest": [12, 29], "leap": 10};
 const PLI_META={"ax": 98, "ground": 298, "frames": 32, "vpx": 6.0, "rest": [0, 18]};
 const OBS_META={"ax": 95, "ground": 307, "frames": 32, "vpx": 6.0, "rest": [23]};
+// build 42: the big man and the young man of scene 5 as 2100 figures (sources/townsfolk: gen-man.py, video-walk.py), in Level 1 only; each stands
+// on his walk's feet-together frame (rest), so the dissolve from walking to standing never changes his legs. Level 2 keeps the old Pliable.
+const BMW = [], BMW_META = {"ax": 132, "ground": 308, "frames": 40, "vpx": 5.2, "rest": [13]}, YMW = [], YMW_META = {"ax": 132, "ground": 299, "frames": 32, "vpx": 5.2, "rest": [20]};
+const obsSet = () => BMW.ready ? [BMW, BMW_META, BMW[13], BMW_META] : [OBS, OBS_META, OBS_ST, OBS_ST_META];
+const pliSet = () => YMW.ready && !SL.on ? [YMW, YMW_META, YMW[20], YMW_META] : [PLI, PLI_META, PLI_ST, PLI_ST_META];
 const EVA_META={"ax": 82, "ground": 311, "frames": 80, "src": [0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 46, 49, 52, 55, 58, 61, 64, 67, 70, 73, 76, 79, 82, 85, 88, 91, 94, 97, 100, 103, 106, 109, 112, 115, 118, 121, 124, 127, 130, 133, 136, 139, 142, 145, 148, 151, 154, 157, 160, 163, 166, 169, 172, 175, 178, 180, 182, 184, 186, 188, 190, 192, 194, 196, 198, 200, 202, 204, 206, 208, 210, 212, 216, 220, 224, 228, 232, 236]};
 const STD_META={"ax": 101, "ground": 302, "frames": 79, "src": [0, 2, 4, 6, 8, 10, 12, 14, 16, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35, 37, 39, 41, 43, 45, 47, 49, 51, 53, 55, 57, 59, 61, 63, 65, 67, 69, 71, 73, 75, 77, 79, 81, 83, 85, 87, 89, 91, 93, 95, 96, 100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 140, 144, 148, 152, 156, 160, 164, 168, 172, 176, 180, 184, 188, 192, 196, 200, 204, 208, 212]};
 
@@ -1630,7 +1635,7 @@ const runNow = () => PR.ready && pwOn() ? [PR, PR_META] : G.ears || !RUNP.ready 
 function coverEars() { if (G.ears) return; if (P.run) poseChange(8, true); G.ears = true; }
 const CHR = [], PLI = [], OBS = [], EVA = [], STD = [], RUN = [], CHR_K = .52, RUN_STEP = RUN_META.vpx * CHR_K, RUNV = RUN_STEP * .4,   // the run at its video's own speed (24 frames a second)
    CHR_STEP = CHR_META.vpx * CHR_K, PLI_STEP = PLI_META.vpx * CHR_K, OBS_STEP = OBS_META.vpx * CHR_K;
-const PACK_V = 44;                          // bump when the .pack files change, so phones fetch the new ones
+const PACK_V = 45;                          // bump when the .pack files change, so phones fetch the new ones
 // SOLID FIGURES (build 202; owner: "in both level 2 and 3, pilgrims sprite is clear in spots. we need to fix this"). The
 // figures were cut from their white paper by how white each pixel is, so the white paper showing inside the watercolour
 // (highlights on the cloak, the pack, the hood) was cut away too and the scene showed through those spots (2 to 7 per cent
@@ -2028,9 +2033,9 @@ function people() {
   // Standing (owner: they should stand while talking, not freeze mid-stride): once a walker has come to rest, his painted
   // standing pose dissolves in (st 0 = walking picture, 1 = standing picture); before he walks again it dissolves out.
   const rest = (w, meta) => meta.rest.includes(Math.floor(w.anim ?? meta.rest[0]) % meta.frames);
-  if (o) o.st = clamp((o.st || 0) + (o.mode === 'talk' && rest(o, OBS_META) && OBS_ST ? .035 : -.06));
+  if (o) o.st = clamp((o.st || 0) + (o.mode === 'talk' && rest(o, obsSet()[1]) && obsSet()[2] ? .035 : -.06));
   if (o && o.wait && !G.capQ.length && (G.t > (G.capEnd || 0) + 20 || G.cap <= 0)) { o.wait = false; o.mode = 'home'; }      // his last line said: now he turns for home
-  if (o && o.mode === 'home' && o.st <= 0 && o.x > G.cam - 200) o.x -= 1.25; // his video's own walking pace
+  if (o && o.mode === 'home' && o.st <= 0 && o.x > G.cam - 200) o.x -= obsSet()[1].vpx * CHR_K * .4;      // his video's own walking pace
   if (p && p.mode === 'follow') {                             // Pliable keeps a little behind Christian, hurrying only if he falls back
     const gap = (G.leaving ? DOOR1 + 90 : P.x - 70) - p.x;      // at the end he follows Christian in through the gate and on
     if (G.leaving && gap < 4) { G.leaving = false; p.mode = 'gone'; finish(); }      // through the gate: he stays gone
@@ -2038,11 +2043,11 @@ function people() {
   }
   if (p) {
     const still = p.mode === 'talk' || (p.mode === 'follow' && !p.go);
-    p.st = clamp((p.st || 0) + (still && rest(p, PLI_META) && PLI_ST ? .035 : -.06));
+    p.st = clamp((p.st || 0) + (still && rest(p, pliSet()[1]) && pliSet()[2] ? .035 : -.06));
     if (p.mode === 'follow' && p.go && p.st <= 0) { const gap = (G.leaving ? DOOR1 + 90 : P.x - 70) - p.x; p.x += Math.max(0, Math.min(gap, gap > 46 ? 2 : MAXV)); }
   }
-  if (o) { o.anim = stepAnim(o.anim ?? OBS_META.rest[0], Math.abs(o.x - (o.px ?? o.x)), OBS_STEP, OBS_META); o.px = o.x; }
-  if (p) { p.anim = stepAnim(p.anim ?? PLI_META.rest[0], Math.abs(p.x - (p.px ?? p.x)), PLI_STEP, PLI_META); p.px = p.x; }
+  if (o) { const m = obsSet()[1]; o.anim = stepAnim(o.anim ?? m.rest[0], Math.abs(o.x - (o.px ?? o.x)), m.vpx * CHR_K, m); o.px = o.x; }
+  if (p) { const m = pliSet()[1]; p.anim = stepAnim(p.anim ?? m.rest[0], Math.abs(p.x - (p.px ?? p.x)), m.vpx * CHR_K, m); p.px = p.x; }
 }
 // lights on the road: each sings its note as he reaches it, then drifts slowly up and away toward the far light and
 // fades. NOTHING IS COLLECTED (owner, build 84: "not sure about lights floating above head or collecting lights at all
@@ -2433,7 +2438,7 @@ function drawRow(cam) {
     if (e > .3) {                            // and a neighbour in it, turning to keep facing him, mocking (the video loop, or the still breathing)
       const sx = lineUp(it.a, p) - cam * p, K = CHR_K * DOOR_FIG * k, fy = L.base + 2 - FEET_SINK, al = smooth(.3, 1, e);
       it.f += ((P.x - cam > sx ? 1 : -1) - it.f) * .2; const u = (it.f + 1) / 2, vp = WATCH_PACK[it.who], vm = WATCH_VMETA[it.who];
-      const [im, meta, sy] = it.who === 'obs' ? [OBS_ST, OBS_ST_META, breath(it.a)] : it.who === 'pli' ? [PLI_ST, PLI_ST_META, breath(it.a)] : vp && vp.ready && vm ? [vp[Math.floor(G.t * .2 + it.a) % vp.length], vm, 1] : [WATCH_IM[it.who], WATCH_META[it.who], breath(it.a)];
+      const [im, meta, sy] = it.who === 'obs' ? [obsSet()[2], obsSet()[3], BMW.ready ? 1 : breath(it.a)] : it.who === 'pli' ? [pliSet()[2], pliSet()[3], YMW.ready ? 1 : breath(it.a)] : vp && vp.ready && vm ? [vp[Math.floor(G.t * .2 + it.a) % vp.length], vm, 1] : [WATCH_IM[it.who], WATCH_META[it.who], breath(it.a)];
       if (im && meta) { if (u < .99) drawFrame(im, meta, sx, fy, -1, al * (u < .5 ? 1 : 2 * (1 - u)), K, sy); if (u > .01) drawFrame(im, meta, sx, fy, 1, al * (u < .5 ? 2 * u : 1), K, sy); }
     }
   }
@@ -2457,7 +2462,7 @@ function drawWatchers(cam) {
   const L = LEVELS.home, p = L.par, y = L.base + 2 - FEET_SINK, K = CHR_K * DOOR_FIG * HOUSE_K * L.k;      // on the houses' level, at the doorway people's size (build 78)
   for (const w of WATCHERS) {
     if (!ROW.some(it => it.who === 'obs' && it.open > .3)) continue;      // Pliable comes out when Obstinate's door opens
-    const im = w.key === 'obs' ? OBS_ST : w.key === 'pli' ? PLI_ST : WATCH_IM[w.key], meta = w.key === 'obs' ? OBS_ST_META : w.key === 'pli' ? PLI_ST_META : WATCH_META[w.key];
+    const im = w.key === 'obs' ? obsSet()[2] : w.key === 'pli' ? pliSet()[2] : WATCH_IM[w.key], meta = w.key === 'obs' ? obsSet()[3] : w.key === 'pli' ? pliSet()[3] : WATCH_META[w.key];
     const x = lineUp(w.a, p) - cam * p; if (!im || !meta || x < -120 || x > VW + 120) continue;
     w.f += ((P.x - cam > x ? 1 : -1) - w.f) * .2; const u = (w.f + 1) / 2;      // 0 = facing left, 1 = facing right
     const vp = WATCH_PACK[w.key], vm = WATCH_VMETA[w.key];
@@ -2872,9 +2877,9 @@ function drawWorld() {
   // comes in on top, then the walking one goes: the background never shows through him)
   const walker = (w, fr, meta, stIm, stMeta, face, a) => { const st = w.st || 0; if (st < 1) drawFrame(fr, meta, w.x - cam, GY, face, a * (st < .5 ? 1 : 2 * (1 - st))); if (st > 0) drawFrame(stIm, stMeta, w.x - cam, GY, 1, a * (st < .5 ? 2 * st : 1)); };
   TALKM = talkMove(O);
-  if (G.obst && G.obst.x > cam - 100) walker(G.obst, OBS[Math.floor(G.obst.anim ?? OBS_META.rest[0]) % OBS.length], OBS_META, OBS_ST, OBS_ST_META, G.obst.mode === 'home' ? -1 : 1, 1);
+  if (G.obst && G.obst.x > cam - 100) { const [W, M, S, SM] = obsSet(); walker(G.obst, W[Math.floor(G.obst.anim ?? M.rest[0]) % W.length], M, S, SM, G.obst.mode === 'home' ? -1 : 1, 1); }
   TALKM = talkMove(PL);
-  if (G.pli && G.pli.mode !== 'gone') figure(G.pli.x, a => walker(G.pli, PLI[Math.floor(G.pli.anim ?? 0) % PLI.length], PLI_META, PLI_ST, PLI_ST_META, 1, a));
+  if (G.pli && G.pli.mode !== 'gone') { const [W, M, S, SM] = pliSet(); figure(G.pli.x, a => walker(G.pli, W[Math.floor(G.pli.anim ?? 0) % W.length], M, S, SM, 1, a)); }
   { const dxs = P.x - cam - doorX(cam), a = G.door * smooth(300, 60, Math.abs(dxs)); RIM = a > .02 ? { dir: dxs > 0 ? -1 : 1, a } : null; }      // the door's light on him
   TALKM = talkMove(C);
   figure(P.x, a => drawChristian(P.x - cam, P.y + 1, P.face, a)); RIM = null; TALKM = null;
@@ -3499,7 +3504,7 @@ document.getElementById('on2').onclick = () => SL.on ? go3() : HL.on ? go5() : g
   // If it is not ready by its line he simply stands (WEEP.ready is checked there).
   loadPack('christian-weep', WEEP).catch(() => {}).then(() => loadPack('christian-turn', TURN)).then(() => bookLoaded('TURN')).catch(() => {}).then(nbLoad);
   Promise.all([loadPack('evangelist', EVA), loadPack('evangelist-stand', EVS), loadPack('phillip-stand', PHS).catch(() => {}), loadPack('phillip-point', PHP).catch(() => {})]).then(() => Promise.all([loadImg('family.webp').then(im => { FAM = im; if (im) FAM_SH = mkShadow(im); }), Promise.resolve().then(() => { const B = barricade(); GATE_P = bakeTint(B.gate, .42, .4); WALL_P = bakeTint(B.wall, .42, .4); }), ...['a', 'b', 'c'].map(key => loadImg('neighbor-' + key + '.webp').then(im => { WATCH_IM[key] = im; })), ...['a', 'b', 'c'].map(key => loadPack('neighbor-' + key, WATCH_PACK[key]).catch(() => {})), loadImg('christian-back.webp').then(im => { BACK = im; }), loadPack('christian-run', RUN), loadPack('christian-run-plain', RUNP)]))
-    .then(() => Promise.all([loadPack('obstinate', OBS), loadPack('pliable', PLI), loadImg('obstinate-stand.webp').then(im => { OBS_ST = im; }), loadImg('pliable-stand.webp').then(im => { PLI_ST = im; })]));
+    .then(() => Promise.all([loadPack('obstinate', OBS), loadPack('pliable', PLI), loadPack('bigman-walk', BMW).catch(() => {}), loadPack('youngman-walk', YMW).catch(() => {}), loadImg('obstinate-stand.webp').then(im => { OBS_ST = im; }), loadImg('pliable-stand.webp').then(im => { PLI_ST = im; })]));
   for (const [who, txt] of INTRO) vox(who, txt);          // the first words, ready before Begin is pressed
 })();
 </script>
