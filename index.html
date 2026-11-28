@@ -249,7 +249,7 @@ every year.</div>
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 86 · Nov 28 2026</div>
+  <div id="build">build 91 · Nov 28 2026</div>
   <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
@@ -928,8 +928,8 @@ const PHRASES = [
   // passes, each humming its note, then dying again): both phrases now lie under the deck, a little closer together (bt, road per beat)
   { x: 1300, bt: 40, tube: true, back: true, at: 0, n: [[0, 'D'], [1, 'G'], [3, 'B'], [3.5, 'G'], [4, 'B'], [6, 'A'], [7, 'G'], [9, 'E'], [10, 'D']] },
   { x: 880, bt: 30, tube: true, back: true, at: 12, n: [[0, 'D'], [1, 'G'], [3, 'B'], [3.5, 'G'], [4, 'B'], [6, 'A'], [7, 'd']] },
-  { x: 8400, at: 24, wait: true, n: [[0, 'B'], [1, 'd'], [2.5, 'B'], [3, 'd'], [3.5, 'B'], [4, 'G'], [6, 'D'], [7, 'E'], [8.5, 'G'], [9, 'G'], [9.5, 'E'], [10, 'D']] },
-  { x: 9000, at: 36, n: [[0, 'D'], [1, 'G'], [3, 'B'], [3.5, 'G'], [4, 'B'], [6, 'A'], [7, 'G']] },
+  { x: 8400, at: 24, wait: true, port: true, n: [[0, 'B'], [1, 'd'], [2.5, 'B'], [3, 'd'], [3.5, 'B'], [4, 'G'], [6, 'D'], [7, 'E'], [8.5, 'G'], [9, 'G'], [9.5, 'E'], [10, 'D']] },
+  { x: 9000, at: 36, port: true, n: [[0, 'D'], [1, 'G'], [3, 'B'], [3.5, 'G'], [4, 'B'], [6, 'A'], [7, 'G']] },
 ];
 // the whole tune, sung through once when the gate opens, with a low note under each bar
 const TUNE = [], BASS = [43, 43, 48, 43, 43, 43, 50, 50, 43, 43, 48, 43, 43, 50, 43, 43];
@@ -938,8 +938,9 @@ const HARM = [55, 59, 62, 67, 50, 57];     // notes for lights set free by a tou
 const LIGHTS = [], LAMPS = [], THINGS = [], FLOCKS = [], CAPS = [];
 function buildLevel() {
   LIGHTS.length = LAMPS.length = FLOCKS.length = CAPS.length = 0;
-  const light = (x, midi, wait, tube) => LIGHTS.push({ x, y: tube ? UP.dy + 6 : GY - 60 - clamp(midi - 62, -6, 12) * 5.2, midi, got: false, ph: rnd() * 6, wait, a: wait ? 0 : 1, tube, gt: 0 });
-  for (const ph of PHRASES) for (const [b, k] of ph.n) light(ph.x + (ph.back ? -b : b) * (ph.bt || BEAT), NOTE[k], !!ph.wait, !!ph.tube);      // 'back': a phrase met walking left, out into the field
+  if (typeof PORTLIT !== 'undefined') { PORTLIT.clear(); FARLIT.clear(); }      // build 91: every walk lights its lamps afresh
+  const light = (x, midi, wait, tube, port) => LIGHTS.push({ x, y: tube ? UP.dy + 6 : GY - 60 - clamp(midi - 62, -6, 12) * 5.2, midi, got: false, ph: rnd() * 6, wait, a: wait ? 0 : 1, tube: tube || port, port, gt: 0 });
+  for (const ph of PHRASES) for (const [b, k] of ph.n) light(ph.x + (ph.back ? -b : b) * (ph.bt || BEAT), NOTE[k], !!ph.wait, !!ph.tube, !!ph.port);      // 'back': a phrase met walking left, out into the field
   for (const x of [2700, 9500]) LAMPS.push({ x, lit: 0 });                       // few and far apart: they count as special things too (none in the field)
   // Things, each on a depth level (LEVELS). Owner's rule (build 40): no more than one special thing in the picture at a
   // time, because their likeness distracts. So there are few of them, about one every 600 of road counting the lamps and his
@@ -1332,7 +1333,7 @@ function reset() {
     pli: null, obst: null, flare: 0, gloom: 0, gloomTo: 0, gateOpen: 0, act: null, actT: 0, ring: null, auto: null, finale: null, guard: 0, idle: 0, wins: 0,
     evanDone: !!TEST_X, evanGone: TEST_X ? 1 : 0, neigh: TEST_X > NEIGH_X + 300, gateSeen: false, walked: false, touched: false, leaving: false, fam: TEST_X > HOME_X ? 2 : 0, door: 0,      // build 13 (owner: "as far as we know pilgrim has no family, for now"): his door stays shut
     doorShut: false, roll: TEST_X ? { t: 999, x: 0, y: 0 } : null, runZone: !!TEST_X && TEST_X < RUN_END, outSaid: false, watched: TEST_X > WATCH_X, ears: TEST_X > HOME_X });
-  G.sunUp = 0; G.waitFn = null; G.drone = null; G.tank = null; G.train = null; G.gateTried = null; G.gateOpening = null; G.gateOpts = null; G.sentryAway = false; G.sentryTw = 0;  G.tvRun = !!TEST_X && TEST_X > TV_RUN_A; G.phGo = !!TEST_X && TEST_X > EVAN_X; G.phFade = G.phGo ? 1 : 0; if (ROW[0] && !ROW[0].who) ROW[0].open = 1;      // build 16: the party: the door of the building beside his (to the left), lit from the start
+  G.sunUp = 0; G.waitFn = null; G.drone = null; G.tank = null; G.train = null; G.hornFar = false; G.gateTried = null; G.gateOpening = null; G.gateOpts = null; G.sentryAway = false; G.sentryTw = 0;  G.tvRun = !!TEST_X && TEST_X > TV_RUN_A; G.phGo = !!TEST_X && TEST_X > EVAN_X; G.phFade = G.phGo ? 1 : 0; if (ROW[0] && !ROW[0].who) ROW[0].open = 1;      // build 16: the party: the door of the building beside his (to the left), lit from the start
   G.through = false; G.homeTo = null; G.autoRun = 0; G.calm = 0; G.doorSaid = false; G.choiceKind = null; G.sawLight = !!TEST_X && TEST_X > EVAN_X; G.nchose = false; G.alone = false;
   G.zoom = 1 - (1 - ZOOM_GATE) * smooth(GATE - 1300, GATE - 380, START_X);      // starting near the gate (?at=gate): already drawn back
   G.evan.pt = TEST_X ? 239 : 0; G.evan.go = false; G.evan.st = EVS_META.frames * 100; downs.clear(); pushing = false; keys.r = keys.push = false;
@@ -1469,7 +1470,7 @@ async function say(who, txt) {
 }
 // fetch every line's recording quietly, in story order, while the child is already playing
 async function fetchVoices() {
-  const all = [...INTRO, ...TV_NEWS, ...PARTY_NO, ...FIELDS, ...EVAN, ...ASK_GO, ...ASK_NO, ...EVAN2, ...NAME_ASK, ...NAME_THANKS, ...GONE, ...NEIGH_BURN, ...NEIGH_HOME, ...NEIGH_GO, ...YOUNG_ASK, ...YOUNG_LIGHT, ...YOUNG_AWAY, ...RUNS, ...DOOR_WORDS, ...FAMILY, ...LIFE, ...WATCH, ...FETCH, ...NEIGH_CALL]; for (const c of CAPS) all.push(...c.lines); all.push(...NEIGH, ...HOME, ...ONWARD, ...PART, ...GATEWORDS, ...GATE_ALL, ...END);
+  const all = [...INTRO, ...TV_NEWS, ...PARTY_NO, ...FIELDS, ...EVAN, ...ASK_GO, ...ASK_NO, ...EVAN2, ...NAME_ASK, ...NAME_THANKS, ...GONE, ...GONE2, ...NEIGH_BURN, ...NEIGH_HOME, ...NEIGH_GO, ...YOUNG_ASK, ...YOUNG_LIGHT, ...YOUNG_AWAY, ...RUNS, ...DOOR_WORDS, ...FAMILY, ...LIFE, ...WATCH, ...FETCH, ...NEIGH_CALL]; for (const c of CAPS) all.push(...c.lines); all.push(...NEIGH, ...HOME, ...ONWARD, ...PART, ...GATEWORDS, ...GATE_ALL, ...END);
   for (const [who, txt] of all) { if (who === TIP) continue; const v = vox(who, txt); await v.raw; await voxBuf(v); }
 }
 function caption(arr) { for (const l of arr) G.capQ.push(l); }
@@ -1539,7 +1540,7 @@ const EVAN2 = [
   [PH, 'Keep it in your eye and go straight to it. Tikvaw keeps it burning. There you\'ll find the gate.'],
 ];
 const NAME_ASK = [[PG, 'And who are you?'], [PH, 'Phillip.']], NAME_THANKS = [[PG, 'Thank you.']];
-const GONE = [[PG, '...Gone.'], [PG, 'Then I\'ll run.']];
+const GONE = [[PG, '...Gone.']], GONE2 = [[PG, 'Don\'t look back.']];      // build 89 (owner: "Then I'll run is too close to 'gone' ... weak line"; chose "Don't look back.", after Bunyan: he "looked not behind him"): said after a pause of about 2.5 s
 const RUNS = [[N, 'So I saw in my dream that the man began to run.', 'quick']];      // {18}
 // He is already running (from Evangelist, as in the book) when the door of his own house is flung open and his family
 // cry after him. THE CHILD CHOOSES (owner, build 49), without being asked: keep holding and he runs straight past, as in
@@ -1602,9 +1603,8 @@ const GATE_ALONE = [];      // build 64: the young man stayed behind: the pilgri
 // the guard (only works if the young man came: he knows him; alone, the sentry turns him away and the choice comes again without it), wait
 // for the tank (it turns and rolls out behind the barricade, the sentry hauls the gate open for it and watches it go; they slip through), or
 // the train (build 78, owner: "Drain option is corny- what about jump on train car instead - involving going back"; the drain is gone, DO
-// NOT BRING IT BACK): a freight train stands behind the fence, its engine tucked behind the barricade (OTR); it sounds its horn and creeps
-// out; he runs back along the fence to an open yard gate (TRAIN_GATE), waits for the flatcar and jumps up onto its empty rear deck, the
-// young man after him, and the train carries them out behind the barricade (trainTick, drawOutTrain). The way taken is kept (pp-gate).
+// NOT BRING IT BACK): a far horn; chosen, a freight train comes rolling out of the town (OTR), he runs back to meet it and jumps onto
+// its flatcar's empty deck, the young man after him, and it carries them out behind the barricade (trainTick, drawOutTrain). The way taken is kept (pp-gate).
 // Words drafted in the script app (scene 6), not yet approved: shown, not yet recorded.
 const SN = 'Sentry', SENTRY_X = DOOR1 + 45;
 const SENTRY_STOP = [[SN, 'That\'s far enough. The gate\'s shut.']];
@@ -1612,9 +1612,10 @@ const GUARD_ASK = [[PG, 'Let us through. Please.']], GUARD_ASK1 = [[PG, 'Let me 
 const GUARD_YES = [[YM, 'It\'s me. Open up.'], [SN, '...You? Out here?'], [YM, 'We\'re leaving.'], [SN, 'Go on, then. I never saw you.']];
 const GUARD_NO = [[SN, 'Orders. Nobody goes out. Go home, friend.']];
 const TANK_WAIT = [[PG, 'Wait.']], TANK_NOW = [[PG, 'Now.']];
-const TRAIN_SEE = [[PG, 'The train. It\'s going out.']], TRAIN_RUN = [[YM, 'It\'s moving!'], [PG, 'Run.']], TRAIN_RUN1 = [[PG, 'Run.']];
+const TRAIN_SEE = [[PG, 'A train. It\'s going out.']], TRAIN_RUN = [[YM, 'It\'s moving!'], [PG, 'Run.']], TRAIN_RUN1 = [[PG, 'Run.']];
 const GATE_ALL = [...SENTRY_STOP, ...GUARD_ASK, ...GUARD_ASK1, ...GUARD_YES, ...GUARD_NO, ...TANK_WAIT, ...TANK_NOW, ...TRAIN_SEE, ...TRAIN_RUN];
 function gateChoice() {
+  if (!G.hornFar) { G.hornFar = true; trainHorn(.025); }      // build 78: a train's horn, far off: the third way
   const L = { guard: 'Ask the guard', tank: 'Wait for the tank', train: 'Jump the train' }, tried = G.gateTried || {};
   G.gateOpts = ['guard', 'tank', 'train'].filter(k => !tried[k]);
   offer('gate', ...G.gateOpts.map(k => L[k]));
@@ -1626,76 +1627,70 @@ function gateTick() {
   G.gateOpen = Math.min(1, G.gateOpen + .005);
   if (G.gateOpen >= 1) { G.gateOpening = null; gateOpened(); const go = () => { G.through = true; G.throughT = G.t; G.state = 'play'; G.idle = 0; caption(END); }; if (o.sneak) talk(TANK_NOW, go); else go(); }
 }
-// THE TRAIN (build 78). OTR: on its own line behind the fence (p .62), at real scale (88 px a metre at the road, so 54.6 here), its front
-// (road-equivalent place, as lineUp uses) at OTR.a: a shunting engine (14 m) and one flatcar (13 m) with a 20-foot container on its front
-// half, the rear half of the deck empty. TRAIN_GATE: an open gate in the fence (p .88) where he waits and jumps.
-const OTR = { p: .62, a: 10768, loco: 14, flat: 13, gap: 1 }, TRAIN_GATE = 8890;
-const otrM = () => 88 * OTR.p, otrBase = () => HORIZON + 140 * OTR.p, otrX = cam => lineUp(G.train ? G.train.a : OTR.a, OTR.p) - cam * OTR.p;      // its front on the screen
+// THE TRAIN (build 78). OTR: a freight train on a line between the tank and the fence (p .78), at real scale (88 px a metre at the road,
+// so 68.6 here): a shunting engine (10 m) and one flatcar (12 m) with a 20-foot container on its front half, the rear half of the deck
+// empty. It is not there before: a far horn is heard at the barricade; chosen, it comes rolling in from the town (from the left) at a
+// walking pace, he runs back to meet it, lets the engine go by and jumps onto the empty deck as it passes, the young man after him; it
+// passes in front of the tank and carries them out behind the barricade.
+const OTR = { p: .78, loco: 10, flat: 12, gap: 1 };
+const otrM = () => 88 * OTR.p, otrBase = () => HORIZON + 140 * OTR.p, otrX = cam => lineUp(G.train.a, OTR.p) - cam * OTR.p;      // its front on the screen
 const deckY = () => otrBase() - 1.25 * otrM();
+const otrLen = () => (OTR.loco + OTR.gap + OTR.flat) * otrM();
 // the empty rear deck of the flatcar, on the screen: [left, right]
-const deckSpan = cam => { const m = otrM(), x = otrX(cam) - (OTR.loco + OTR.gap + OTR.flat) * m; return [x + .4 * m, x + 6 * m]; };
-const fenceGateX = cam => lineUp(TRAIN_GATE, .88) - cam * .88;
-function trainGo() { G.train = { a: OTR.a, v: 0, t: 0, horn: 0 }; trainHorn(); }
+const deckSpan = cam => { const m = otrM(), x = otrX(cam) - otrLen(); return [x + .4 * m, x + 5.4 * m]; };
+function trainGo() { const cam = G.camDraw ?? G.cam; G.train = { a: 0, v: 1.4, t: 0 }; G.train.a = (-20 - 325 + cam * OTR.p) / OTR.p + 325; trainHorn(.09); }      // its front just off the left of the picture
 function toTrain() {
-  const T = G.train; T.ph = 'back'; G.state = 'auto'; G.auto = { dir: -1, to: -1e9, then: () => { G.state = 'wait'; T.ph = 'wait'; P.face = -1; } };      // the goal is set each tick (trainTick): where the fence's gate is on the screen
+  G.train.ph = 'back'; G.state = 'auto'; G.auto = { dir: -1, to: -1e9 };      // he runs back toward it (a story move: the child need not hold)
   if (G.pli && G.pli.mode === 'follow') G.pli.mode = 'train';
 }
 function trainTick() {
   const T = G.train; if (!T) return; T.t++;
-  const cam = G.camDraw ?? G.cam, px = P.x - cam, [l, r] = deckSpan(cam);
-  const hold = (T.ph === 'back' || T.ph === 'wait') && l > px - 70;      // it never gets past him before he can jump (it creeps on only as he comes)
-  if (T.t > 70) T.v = hold ? Math.max(0, T.v - .01) : Math.min(T.ph === 'ride' ? 1.25 : .3, T.v + .004);      // it creeps, then, once they are on, gathers a little speed
-  T.a += T.v; trainSound(T.v);
-  if (T.ph === 'back' && G.auto) G.auto.to = P.x - (px - fenceGateX(cam));      // he runs back to the gate in the fence (a story move: the child need not hold)
-  else if (T.ph === 'wait') {      // watching the flatcar come; he jumps when its empty deck is beside him
-    if (px > l + 10 && px < r - 10) { T.ph = 'hop'; T.h = { t: 0, x0: px, off: Math.min(r - 20, px + 30) - otrX(cam) }; P.face = 1; }
-  } else if (T.ph === 'hop') {
-    T.h.t++; T.pOn = true; if (T.h.t >= 42) { T.ph = 'ride'; T.r = G.t; }
-  }
-  if (T.ph === 'ride' && !T.done) { const x = otrX(cam) + T.h.off; P.x = x + cam; if (x > (GATE - 760 + 330) - cam && G.t > T.r + 60) { T.done = true; finish(); } }      // carried out behind the barricade: the end
+  T.v = T.ph === 'ride' ? Math.min(2.6, T.v + .008) : 1.4; T.a += T.v; trainSound(T.v);
+  const cam = G.camDraw ?? G.cam, px = P.x - cam, [l, r] = deckSpan(cam), X = otrX(cam);
+  if (T.ph === 'back' && r - 25 >= px) {      // the empty deck has come up to him: he stops and jumps
+    G.auto = null; G.state = 'wait'; P.vx = 0; P.face = 1; T.ph = 'hop'; T.h = { t: 0, x0: px, off: clamp(px + 20, l + 18, r - 18) - X };
+  } else if (T.ph === 'hop') { T.h.t++; T.pOn = true; if (T.h.t >= 42) { T.ph = 'ride'; T.r = G.t; } }
+  if (T.ph === 'ride' && !T.done) { P.x = X + T.h.off + cam; if (P.x > GATE - 760 + 340 && G.t > T.r + 60) { T.done = true; finish(); } }      // carried out behind the barricade: the end
   // the young man runs back with him and jumps a little after him
   const p = G.pli;
-  if (p && p.mode === 'train') { p.face = -1; const tx = P.x + 55; if (p.x > tx) p.x = Math.max(tx, p.x - 3.2); if ((T.ph === 'hop' && T.h.t > 30) || T.ph === 'ride') { p.mode = 'trainhop'; p.h = { t: 0, x0: p.x - cam, off: T.h.off - 42 }; } }
-  if (p && p.mode === 'trainhop') { p.h.t = Math.min(42, p.h.t + 1); }
+  if (p && p.mode === 'train') { p.face = -1; const tx = P.x + 55; if (p.x > tx) p.x = Math.max(tx, p.x - 3.2); if ((T.ph === 'hop' && T.h.t > 14) || T.ph === 'ride') { p.mode = 'trainhop'; p.face = 1; p.h = { t: 0, x0: p.x - cam, off: Math.max(l + 10 - X, T.h.off - 46) }; } }
+  if (p && p.mode === 'trainhop') p.h.t = Math.min(42, p.h.t + 1);
 }
-// drawn in drawPort between the far rails (p .55) and the fence (p .88): the engine, the flatcar, and the two once they are on it
-function drawOutTrain(c, cam) {
-  G.camDraw = cam; const m = otrM(), base = otrBase(), X = otrX(cam), Lx = (OTR.loco + OTR.gap + OTR.flat) * m;
+// drawn in draw() right after the tank (it is nearer than the tank, so it passes in front of it): the engine, the flatcar, the two on it
+function drawOutTrain(cam) {
+  const T = G.train; G.camDraw = cam; if (!T) return;
+  const c = ctx, m = otrM(), base = otrBase(), X = otrX(cam), Lx = otrLen();
   if (X < -60 || X - Lx > VW + 60) return;
-  const col = portCol(.72, X, 0), dk = portCol(.82, X, 0); c.globalAlpha = 1;
+  const col = portCol(.72, X, .12), dk = portCol(.8, X, .08); c.globalAlpha = 1;      // one misty tone for its depth, a little darker than the tank behind it
   const bogie = (x) => { c.fillStyle = css(dk); c.fillRect(x - 1.3 * m, base - .95 * m, 2.6 * m, .3 * m); for (const v of [-.8, 0, .8]) { c.beginPath(); c.arc(x + v * m, base - .45 * m, .45 * m, 0, 7); c.fill(); } };
-  // the engine: frame, a long hood, the cab at its front (to the right), a short hood before it, a dark window, a handrail
+  // the engine: frame, a long hood, the cab toward its front (right), a short hood before it, dark windows, a handrail
   { const x0 = X - OTR.loco * m; c.fillStyle = css(col);
     c.fillRect(x0, base - 1.5 * m, OTR.loco * m, .55 * m);
-    c.fillRect(x0 + .6 * m, base - 3.6 * m, 8.6 * m, 2.1 * m); c.fillRect(x0 + 2 * m, base - 3.85 * m, 1.2 * m, .3 * m);      // the long hood, its exhaust
-    c.fillRect(x0 + 9.6 * m, base - 4.3 * m, 3 * m, 2.8 * m); c.fillRect(x0 + 9.45 * m, base - 4.4 * m, 3.3 * m, .18 * m);      // the cab, its roof
-    c.fillRect(x0 + 12.6 * m, base - 2.7 * m, 1.2 * m, 1.2 * m);      // the short hood
-    c.fillStyle = css(mix(dk, [0, 0, 0], .35)); c.fillRect(x0 + 10.1 * m, base - 3.9 * m, .9 * m, .8 * m); c.fillRect(x0 + 11.4 * m, base - 3.9 * m, .9 * m, .8 * m);      // its windows, dark
-    c.fillStyle = css(col); c.fillRect(x0 + .3 * m, base - 2.45 * m, OTR.loco * m - .6 * m, .07 * m);      // the handrail
-    bogie(x0 + 3 * m); bogie(x0 + OTR.loco * m - 3 * m); }
+    c.fillRect(x0 + .5 * m, base - 3.5 * m, 5.6 * m, 2 * m); c.fillRect(x0 + 1.6 * m, base - 3.75 * m, 1 * m, .3 * m);      // the long hood, its exhaust
+    c.fillRect(x0 + 6.4 * m, base - 4.2 * m, 2.5 * m, 2.7 * m); c.fillRect(x0 + 6.25 * m, base - 4.3 * m, 2.8 * m, .16 * m);      // the cab, its roof
+    c.fillRect(x0 + 8.9 * m, base - 2.6 * m, .9 * m, 1.1 * m);      // the short hood
+    c.fillStyle = css(mix(dk, [0, 0, 0], .35)); c.fillRect(x0 + 6.8 * m, base - 3.8 * m, .8 * m, .75 * m); c.fillRect(x0 + 7.85 * m, base - 3.8 * m, .8 * m, .75 * m);      // its windows, dark
+    c.fillStyle = css(col); c.fillRect(x0 + .3 * m, base - 2.4 * m, OTR.loco * m - .6 * m, .07 * m);      // the handrail
+    bogie(x0 + 2.2 * m); bogie(x0 + OTR.loco * m - 2.2 * m); }
   // the flatcar: a deep frame, a 20-foot container on its front half, the rear half empty
-  { const x0 = X - Lx; c.fillStyle = css(col);
-    c.beginPath(); c.moveTo(x0, base - 1.25 * m); c.lineTo(x0 + OTR.flat * m, base - 1.25 * m); c.lineTo(x0 + OTR.flat * m, base - .95 * m); c.lineTo(x0 + OTR.flat * m * .8, base - .7 * m); c.lineTo(x0 + OTR.flat * m * .2, base - .7 * m); c.lineTo(x0, base - .95 * m); c.fill();
-    c.fillRect(x0 + OTR.flat * m, base - 1.15 * m, OTR.gap * m, .15 * m);      // the coupling
-    cbox(c, x0 + 6.6 * m, base - 1.25 * m - 2.6 * m, 6.1 * m, 2.6 * m, boxCol(.7, x0, 37, .22), 1, 1);
-    bogie(x0 + 2 * m); bogie(x0 + OTR.flat * m - 2 * m); }
-  // the pilgrim and the young man jumping up and riding (at this depth: smaller, and behind the fence)
-  const hop = (h, im, meta) => { const u = Math.min(1, h.t / 42), e = u * u * (3 - 2 * u), x = lerp(h.x0, X + h.off, e), y = lerp(GY, deckY(), e) - Math.sin(Math.PI * u) * 34, k = lerp(1, OTR.p, e);
+  { const x0 = X - Lx, L = OTR.flat * m; c.fillStyle = css(col);
+    c.beginPath(); c.moveTo(x0, base - 1.25 * m); c.lineTo(x0 + L, base - 1.25 * m); c.lineTo(x0 + L, base - .95 * m); c.lineTo(x0 + L * .8, base - .7 * m); c.lineTo(x0 + L * .2, base - .7 * m); c.lineTo(x0, base - .95 * m); c.fill();
+    c.fillRect(x0 + L, base - 1.15 * m, OTR.gap * m, .15 * m);      // the coupling
+    cbox(c, x0 + 5.8 * m, base - 1.25 * m - 2.6 * m, 6.1 * m, 2.6 * m, boxCol(.72, x0, 37, .1), 1, 1);
+    bogie(x0 + 2 * m); bogie(x0 + L - 2 * m); }
+  // the pilgrim and the young man jumping up and riding (at this depth they are a little smaller)
+  const hop = (h, im, meta) => { const u = Math.min(1, h.t / 42), e = u * u * (3 - 2 * u), x = lerp(h.x0, X + h.off, e), y = lerp(GY, deckY(), e) - Math.sin(Math.PI * u) * 30, k = lerp(1, OTR.p, e);
     drawFrame(im, meta, x, y + 1, 1, 1, CHR_K * k); };
-  const T = G.train; if (T && T.h && T.pOn) hop(T.h, ...(T.ph === 'hop' && T.h.t < 34 && PW.ready ? [PW[10], PW_META] : PST.ready ? [PST[0], PST_META] : [PW[0], PW_META]));
+  if (T.h && T.pOn) hop(T.h, ...(T.ph === 'hop' && T.h.t < 34 && PW.ready ? [PW[10], PW_META] : PST.ready ? [PST[0], PST_META] : [PW[0], PW_META]));
   const p = G.pli; if (p && p.mode === 'trainhop') { const [W, M, S, SM] = pliSet(); hop(p.h, p.h.t < 34 ? W[4] : S, p.h.t < 34 ? M : SM); }
-  // the open gate in the fence: a gap in the mesh, one leaf swung back
-  { const gx = fenceGateX(cam), fb = HORIZON + 140 * .88, h = 120 * .88, fc = portCol(.82, gx, 0); if (gx > -40 && gx < VW + 40) {
-    c.fillStyle = css(fc, .9); c.fillRect(gx - 34, fb - h - 3, 3.5, h + 3); c.fillRect(gx + 34, fb - h - 3, 3.5, h + 3);      // its posts
-    c.fillStyle = css(fc, .5); c.beginPath(); c.moveTo(gx - 34, fb - h); c.lineTo(gx - 70, fb - h + 6); c.lineTo(gx - 70, fb - 4); c.lineTo(gx - 34, fb); c.fill(); } }      // the leaf, swung back
 }
 // the train's sounds, made in code: the horn (two low reed tones, long and short), and the wheels' clack over the rail joints with its speed
 let TRN_SND = null;
-function trainHorn() {
+function trainHorn(v = .09) {
   if (!AC || muted) return;
   try { const t = AC.currentTime, g = AC.createGain(), lp = AC.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1400; g.gain.value = 0; lp.connect(g); g.connect(SFXG);
     for (const f of [185, 233]) { const o = AC.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f; o.connect(lp); o.start(t); o.stop(t + 3.4); }
-    g.gain.setTargetAtTime(.09, t, .08); g.gain.setTargetAtTime(0, t + 1.5, .06); g.gain.setTargetAtTime(.09, t + 1.85, .08); g.gain.setTargetAtTime(0, t + 2.9, .1);
+    g.gain.setTargetAtTime(v, t, .08); g.gain.setTargetAtTime(0, t + 1.5, .06); g.gain.setTargetAtTime(v, t + 1.85, .08); g.gain.setTargetAtTime(0, t + 2.9, .1);
   } catch (e) {}
 }
 function trainSound(v) {
@@ -1713,7 +1708,7 @@ function choose() { G.state = 'choice'; choiceEl.className = 'on'; document.body
 function offer(kind, a, b, c) { G.choiceKind = kind; document.getElementById('chHome').textContent = a; document.getElementById('chOn').textContent = b; const t = document.getElementById('chThird'); t.textContent = c || ''; t.style.display = c ? '' : 'none'; choose(); }
 const later = (ticks, f) => { G.waitAt = G.t + ticks; G.waitFn = f; };      // a pause counted in the game's own ticks
 const partyChoice = () => offer('party', 'Go in, just for tonight', 'Walk away');
-const phGone = () => { G.evanGone = 1; G.phGo = true; G.state = 'wait'; later(110, () => talk(GONE, () => { G.runZone = true; G.idle = 0; })); };
+const phGone = () => { G.evanGone = 1; G.phGo = true; G.state = 'wait'; later(110, () => talk(GONE, () => { G.state = 'wait'; later(150, () => talk(GONE2, () => { G.runZone = true; G.idle = 0; })); })); };
 const nameChoice = () => offer('name', 'And who are you?', 'Thank you.', '(say nothing)');
 function pick(home) {
   if (G.state !== 'choice') return;
@@ -2249,11 +2244,12 @@ function gather() {
   for (const s of LIGHTS) if (s.wait) s.a = way ? Math.min(1, s.a + .008) : 0;
   for (const s of LIGHTS) if (!s.got && s.a > .5 && s.x - P.x < 22 && s.x - P.x > -60) {
     s.got = true; s.gt = G.t; G.got++;
-    if (s.tube) { tubeHum(s.midi); s.mote = true; s.win = farWindow(s); }      // build 83: a window far off in the city comes on (was: the tube overhead); build 81: the tube flickers on and hums its note; its mote leaves when it dies (TUBE_ON)
+    if (s.port) { tubeHum(s.midi); s.mote = true; s.lamp = portLamp(s); }      // build 91: a dead lamp far off on a crane comes on
+    else if (s.tube) { tubeHum(s.midi); s.mote = true; s.win = farWindow(s); }      // build 83: a window far off in the city comes on (was: the tube overhead); build 81: the tube flickers on and hums its note; its mote leaves when it dies (TUBE_ON)
     else { note(s.midi, .075, 2.8); G.motes.push({ x: s.x, y: s.y, tw: Math.random() * 6, life: 0 }); }
   }
   for (const fl of FLOCKS) if (!fl.away && Math.abs(fl.x - G.cam * fl.par - (P.x - G.cam)) < 64) scatter(fl);
-  for (const s of LIGHTS) if (s.tube && s.mote && G.t - s.gt > TUBE_ON) { s.mote = false; G.motes.push({ x: s.x, y: s.y + 10, tw: Math.random() * 6, life: 0 }); }      // the tube dies; a little warmth drifts up and away
+  for (const s of LIGHTS) if (s.tube && s.mote && G.t - s.gt > TUBE_ON) { s.mote = false; const q = s.port && s.lamp ? portLampAt(s.lamp) : null; G.motes.push(q ? { x: q[0] + G.cam, y: q[1], tw: Math.random() * 6, life: 0 } : { x: s.x, y: s.y + 10, tw: Math.random() * 6, life: 0 }); }      // the tube dies; a little warmth drifts up and away
 }
 // build 81: a dead tube light under the deck: how long it stays on (ticks), and how bright it is t ticks after it is reached
 // (a fluorescent start: two quick blinks, a stutter, then steady; dimming and a last flicker as the power fails again)
@@ -2261,6 +2257,30 @@ const TUBE_ON = 190;
 // build 83 (owner: "not sure about lights immediately above him ... what about in distance"): each note lights ONE dark window
 // far off in the city across the water, seen between the piers, ahead of him (to his left as he walks to Phillip), below the deck
 const FARLIT = new Set();
+// build 91 (owner: "Do level 1 suggestion 2"): the third and fourth phrases, on the road through the port to the barricade, were
+// still floating orbs over the road. Now, like the far windows under the deck, each note brings a dead lamp far off in the port
+// flickering back on: a work light on one of the three ship-to-shore cranes (PORT.cranes, drawn at p .12 in drawPort): the
+// A-frame's apex, the boom's tip, the portal beam's ends, the machinery house, part way up a leg. One lamp per note, ahead of him.
+const PLAMP_N = 7, PORTLIT = new Set();
+function portLampAt(key) {      // where lamp [crane, spot] is on the screen now (the same numbers as the crane's own drawing)
+  const [ci, si] = key, [a, up, sz] = PORT.cranes[ci], p = .12, base = HORIZON + 140 * p, x = lineUp(a, p) - G.cam * p;
+  const h = 240 * sz, lw = h * .34, cy = base - h * .62, lx = x - lw / 2, rx = x + lw / 2, L = h * .95;
+  const S = [[x - lw * .04, cy - h * .3], up ? [lx - h * .1, cy - h * .66] : [lx - L * .9, cy - 3], [lx - 3, cy + 3], [rx + 3, cy + 3],
+    [x + lw * .22, cy - 9], [lx, cy + (base - cy) * .5], up ? [lx - h * .05, cy - h * .33] : [lx - L * .5, cy - 3]];
+  return S[si];
+}
+function behindWall(x, y) {      // is screen point (x, y) behind the barricade (its rubble slope from GATE - 760, then the wall about 300 high)?
+  const W0 = GATE - 760, xw = x + G.cam; if (xw < W0) return false;
+  return y > (xw < W0 + 260 ? GY + 10 - (xw - W0) / 260 * 430 : GY - 300);
+}
+function portLamp(sL) {
+  const px = P.x - G.cam; let best = null, bd = 1e9;
+  for (let ci = 0; ci < PORT.cranes.length; ci++) for (let si = 0; si < PLAMP_N; si++) { const k = ci * 10 + si; if (PORTLIT.has(k)) continue;
+    const [x, y] = portLampAt([ci, si]); if (x < px + 10 || x > VW - 30 || behindWall(x, y)) continue;
+    const d = Math.abs(x - (px + 140)) + Math.abs(y - (HORIZON - 40 - (sL.midi - 62) * 7)) * .8;
+    if (d < bd) { bd = d; best = [ci, si, k]; } }
+  if (best) PORTLIT.add(best[2]); return best;
+}
 function farWindow(sL) {
   const px = P.x - G.cam; let best = null, bd = 1e9;
   for (const i of [1, 0]) { const Lr = SCN[i]; if (!Lr || !Lr.dwins) continue; const off = G.cam * Lr.par;
@@ -2730,7 +2750,6 @@ function drawPort(cam) {
         else cbox(c, x + 4 * k, cy, L - 8 * k, ch, boxCol(.6, x, a0 + i * 9, .24), al, 1);
       } });
   }
-  drawOutTrain(c, cam);      // build 78: the train he can jump
   // the fence along the lane (p .88): posts, a top rail, the mesh as a faint veil
   { const p = .88, base = HORIZON + 140 * p, k = p, h = 120 * k, a0 = PORT_A, a1 = PORT_B - 260;
     const x0 = lineUp(a0, p) - cam * p, x1 = lineUp(a1, p) - cam * p; if (x1 > -10 && x0 < VW + 10) {
@@ -3319,7 +3338,7 @@ function drawWorld() {
   const gcol = layerCol(1), wAt = x => warm((x - cam) / VW), on = (x, w = 0, m = 80) => x < cam + VW + m && x + w > cam - m;
   // the lane just behind the road: a low bank a little paler than the road, with his house and a few things on it
   ctx.fillStyle = hGrad(ctx, ...layerCol(.93)); ctx.fillRect(0, LEVELS.home.base, VW, GY - LEVELS.home.base + 2);
-  underpass(cam, 'back'); drawPort(cam); drawTank(cam); drawRow(cam); home(cam); drawSmoke(cam); drawPoles(cam); drawLevel('mid', cam); drawWatchers(cam); busStop(cam); drawCrowd(cam); drawWheat(false); drawDrone(cam);          // the wheat behind him
+  underpass(cam, 'back'); drawPort(cam); drawTank(cam); drawOutTrain(cam); drawRow(cam); home(cam); drawSmoke(cam); drawPoles(cam); drawLevel('mid', cam); drawWatchers(cam); busStop(cam); drawCrowd(cam); drawWheat(false); drawDrone(cam);          // the wheat behind him
   ctx.setTransform(1, 0, 0, 1, 0, OYD); drawFog('lane'); ctx.setTransform(DPR, 0, 0, DPR, 0, OYD);
   lightThrough();      // build 79: the far light's glow, seen through the rain over the rooftops where the buildings hide it      // mist lying along the lane, round the houses' feet and in the wheat
   ctx.save(); ctx.translate(-cam, 0);
@@ -3463,6 +3482,8 @@ function drawWorld() {
   for (const it of ROW) if (it.who && it.open > .02) { const sx = lineUp(it.a, LEVELS.home.par) - cam * LEVELS.home.par; if (sx > -200 && sx < VW + 200) glow(sx, LEVELS.home.base - 55, 170, .22 * it.open); }      // the glow of the neighbours' doors
   if (G.door > .02) glow(doorX(cam) + 3, LEVELS.home.base - 62, 260, .32 * G.door * lerp(1, .5, warm(doorX(cam) / VW)));   // the glow of home
   for (const s of LIGHTS) {
+    if (s.port) { const lv = s.got && s.lamp ? tubeLevel(G.t - s.gt) : 0; if (lv < .01) continue;      // build 91: a lamp on a far crane comes on
+      const [x, y] = portLampAt(s.lamp); if (behindWall(x, y)) continue; glow(x, y, 22, .45 * lv); glow(x, y, 6, .85 * lv); continue; }
     if (s.tube) { const lv = s.got && s.win ? tubeLevel(G.t - s.gt) : 0; if (lv < .01) continue;      // build 83: a far window coming on in the city
       const [li, w] = s.win, x = w[0] - cam * SCN[li].par + w[2] / 2, y = w[1] + w[3] / 2, k = li ? 1 : .8;
       ctx.fillStyle = css(PAL.win, .95 * lv); ctx.fillRect(x - w[2] / 2, y - w[3] / 2, w[2], w[3]);
@@ -3957,11 +3978,18 @@ function nightLand(x, X0, Y0, w, h, o) {
   for (let k = 0; k < 9; k++) { let px = 60 + r() * (W - 120), py = 40 + r() * (H - 80); const ang = (r() - .5) * 1.6 + (r() < .5 ? 0 : Math.PI / 2), len = 30 + r() * 140;
     x.lineWidth = 1; x.strokeStyle = 'rgba(130,104,84,.16)'; x.beginPath(); x.moveTo(px, py);
     for (let t = 0; t < len; t += 8) { px += Math.cos(ang) * 8 + (r() - .5) * 2; py += Math.sin(ang) * 8 + (r() - .5) * 2; x.lineTo(px, py); } x.stroke(); }
-  // the gilt title, mostly rubbed away (worn on its own canvas, then laid on the leather)
-  { const t = mk(W, H), tx = t.getContext('2d'); tx.textAlign = 'center'; tx.font = '600 46px Georgia,serif'; tx.fillStyle = 'rgba(176,144,86,.6)';
-    for (const [w, y] of [['HOLY', 300], ['BIBLE', 360]]) tx.fillText(w.split('').join(String.fromCharCode(8202)), W / 2 + 18, y);
+  // build 87 (owner: "The cover saying Bible seems too in your face"; chose "no words on the front" and "words only on the
+  // spine"): the front is plain worn leather; the spine shows as a narrow strip along the left edge, rounding away into
+  // shadow, two raised bands, and "HOLY BIBLE" small down it in gilt mostly rubbed away (worn on its own canvas).
+  { const SW = 40;
+    g = x.createLinearGradient(0, 0, SW, 0); g.addColorStop(0, 'rgba(0,0,0,.55)'); g.addColorStop(.45, 'rgba(70,52,38,.25)'); g.addColorStop(.85, 'rgba(0,0,0,.15)'); g.addColorStop(1, 'rgba(0,0,0,.5)');
+    x.fillStyle = g; x.fillRect(0, 0, SW, H);
+    for (const by of [96, H - 96]) { x.fillStyle = 'rgba(0,0,0,.4)'; x.fillRect(0, by + 4, SW - 2, 3); x.fillStyle = 'rgba(130,100,74,.22)'; x.fillRect(0, by, SW - 2, 4); }      // the raised bands
+    const t = mk(W, H), tx = t.getContext('2d'); tx.save(); tx.translate(SW * .52, H / 2); tx.rotate(Math.PI / 2);
+    tx.textAlign = 'center'; tx.textBaseline = 'middle'; tx.font = '600 19px Georgia,serif'; tx.fillStyle = 'rgba(176,144,86,.55)';
+    tx.fillText('HOLY BIBLE'.split('').join(String.fromCharCode(8202, 8202)), 0, 0); tx.restore();
     tx.globalCompositeOperation = 'destination-out';
-    for (let i = 0; i < 700; i++) { const px = W / 2 - 150 + r() * 340, py = 250 + r() * 130, rad = 1 + r() * (r() < .08 ? 12 : 4); tx.fillStyle = 'rgba(0,0,0,' + (.3 + r() * .6) + ')'; tx.beginPath(); tx.arc(px, py, rad, 0, 7); tx.fill(); }
+    for (let i = 0; i < 260; i++) { const px = r() * SW, py = H / 2 - 120 + r() * 240, rad = .6 + r() * (r() < .08 ? 6 : 2.2); tx.fillStyle = 'rgba(0,0,0,' + (.3 + r() * .6) + ')'; tx.beginPath(); tx.arc(px, py, rad, 0, 7); tx.fill(); }
     x.drawImage(t, 0, 0); }
   // a thin blind line round the edge, worn through in places
   x.strokeStyle = 'rgba(0,0,0,.35)'; x.lineWidth = 2; x.strokeRect(70, 30, W - 100, H - 60);
