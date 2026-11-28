@@ -249,7 +249,7 @@ every year.</div>
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 45 · Nov 28 2026</div>
+  <div id="build">build 46 · Nov 28 2026</div>
   <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
@@ -1455,7 +1455,7 @@ async function say(who, txt) {
 }
 // fetch every line's recording quietly, in story order, while the child is already playing
 async function fetchVoices() {
-  const all = [...INTRO, ...PARTY_NO, ...FIELDS, ...EVAN, ...ASK_GO, ...ASK_NO, ...EVAN2, ...NAME_ASK, ...NAME_THANKS, ...GONE, ...NEIGH_BURN, ...NEIGH_HOME, ...RUNS, ...DOOR_WORDS, ...FAMILY, ...LIFE, ...WATCH, ...FETCH, ...NEIGH_CALL]; for (const c of CAPS) all.push(...c.lines); all.push(...NEIGH, ...HOME, ...ONWARD, ...PART, ...GATEWORDS, ...END);
+  const all = [...INTRO, ...TV_NEWS, ...PARTY_NO, ...FIELDS, ...EVAN, ...ASK_GO, ...ASK_NO, ...EVAN2, ...NAME_ASK, ...NAME_THANKS, ...GONE, ...NEIGH_BURN, ...NEIGH_HOME, ...RUNS, ...DOOR_WORDS, ...FAMILY, ...LIFE, ...WATCH, ...FETCH, ...NEIGH_CALL]; for (const c of CAPS) all.push(...c.lines); all.push(...NEIGH, ...HOME, ...ONWARD, ...PART, ...GATEWORDS, ...END);
   for (const [who, txt] of all) { if (who === TIP) continue; const v = vox(who, txt); await v.raw; await voxBuf(v); }
 }
 function caption(arr) { for (const l of arr) G.capQ.push(l); }
@@ -1487,7 +1487,10 @@ const INTRO_SAVED = [
   [PG, '"It is appointed for us once to die, and after that, the judgment." I found it in this book. I\'m overcome with dread.', 0, () => { if (WEEP.ready && !pwOn()) P.weep = { t: 0 }; }],
   [PG, 'I\'ve wasted enough time. What should I do? Who should I go to?'],
 ];
-const INTRO = [INTRO_SAVED[1], INTRO_SAVED[7]];
+// build 46 (owner: "The newscaster can just be a screen in storefront in background, not [a] script item ... could it be a touchable item?"):
+// the news is a TV in the shop window of his building (room() style 10); a touch on it plays the report (TV_NEWS). The opening is his line only.
+const TV_NEWS = [INTRO_SAVED[1]];
+const INTRO = [INTRO_SAVED[7]];
 const PARTY_NO = [[PG, 'No. I can\'t.']];
 // {11}, {12}: "he would also walk solitarily in the fields, sometimes reading, and sometimes praying"
 const FIELDS = [];      // build 16: no narrator
@@ -1858,8 +1861,10 @@ function nearWindow(i, sx, sy, rad) {
 }
 function pulseLight() { if (G.flare < .35) { G.flare = Math.max(G.flare, .7); [62, 67, 71].forEach((m, i) => note(m, .04, 4, i * .08)); } touched(); }
 // what is under the finger? (sx, sy are in scene units, as seen on the screen)
+let TVR = null;      // where the shop window's TV was last drawn (screen units), for a touch
 function touchAt(sx, sy) {
   const cam = G.cam, wx = sx + cam, lp = lightPos();
+  if (TVR && sx > TVR.x - 12 && sx < TVR.x + TVR.w + 12 && sy > TVR.y - 12 && sy < TVR.y + TVR.h + 12) { if (!(SPK && SPK.who === RD)) say(...TV_NEWS[0]); touched(); return true; }      // build 46: the news on the TV
   if (Math.hypot(sx - lp.x, sy - lp.y) < 58) { pulseLight(); return true; }
   for (const l of LAMPS) if (!l.lit && Math.abs(wx - (l.x + 18)) < 50 && sy > GY - 215 && sy < GY + 14) { lightLamp(l); return true; }
   for (const fl of FLOCKS) if (!fl.away && Math.abs(sx - (fl.x - cam * fl.par)) < 52 && Math.abs(sy - fl.y + 6) < 46) { scatter(fl); touched(); return true; }
@@ -2509,6 +2514,23 @@ function room(c, x, y, w, h, a, dark, v, st = 0, side = 0) {
   } else if (st === 5) {          // a short frilled cloth across the top, and a jug on the sill
     c.globalAlpha = .8; c.beginPath(); c.moveTo(x, y); c.lineTo(x + w, y); c.lineTo(x + w, y + h * .2); for (let k = 6; k >= 0; k--) c.quadraticCurveTo(x + w * (k + .5) / 6, y + h * .27, x + w * k / 6, y + h * .2); c.fill();
     c.globalAlpha = .9; const jx = X(.7); c.beginPath(); c.ellipse(jx, y + h - h * .1, w * .09, h * .1, 0, 0, 7); c.fill(); c.fillRect(jx - w * .04, y + h - h * .26, w * .08, h * .08);
+  } else if (st === 10) {         // build 46: a TV left on in a dark shop, the news on it: a cool screen on a stand, its glow, a newsreader's head and shoulders
+    const on = SPK && SPK.who === RD, fl = .62 + .1 * Math.sin(G.t / 6.3) + .06 * Math.sin(G.t / 2.1 + v) + (on ? .1 * Math.sin(G.t / 1.7) : 0);
+    const sw = w * .62, sh = sw * .62, sx = x + (w - sw) / 2, sy = y + h * .2;
+    c.fillStyle = dark; c.fillRect(x, y, w, h);
+    const gl = c.createRadialGradient(sx + sw / 2, sy + sh / 2, 0, sx + sw / 2, sy + sh / 2, w * .75); gl.addColorStop(0, `rgba(150,180,215,${(.32 * fl).toFixed(3)})`); gl.addColorStop(1, 'rgba(150,180,215,0)');
+    c.fillStyle = gl; c.fillRect(x, y, w, h);
+    c.fillStyle = `rgba(190,212,235,${fl.toFixed(3)})`; c.fillRect(sx, sy, sw, sh);
+    c.save(); c.beginPath(); c.rect(sx, sy, sw, sh); c.clip();      // a dim newsreader behind a desk, soft (no icon): head and shoulders in one shape, a darker desk across the foot
+    const hg = c.createRadialGradient(sx + sw * .5, sy + sh * .62, 0, sx + sw * .5, sy + sh * .62, sh * .55); hg.addColorStop(0, 'rgba(70,84,104,.5)'); hg.addColorStop(1, 'rgba(70,84,104,0)');
+    c.fillStyle = hg; c.fillRect(sx, sy, sw, sh);
+    c.fillStyle = 'rgba(62,76,96,.42)'; c.beginPath(); c.moveTo(sx + sw * .18, sy + sh); c.bezierCurveTo(sx + sw * .22, sy + sh * .66, sx + sw * .38, sy + sh * .64, sx + sw * .44, sy + sh * .56);
+    c.bezierCurveTo(sx + sw * .38, sy + sh * .3, sx + sw * .62, sy + sh * .3, sx + sw * .56, sy + sh * .56); c.bezierCurveTo(sx + sw * .62, sy + sh * .64, sx + sw * .78, sy + sh * .66, sx + sw * .82, sy + sh); c.fill();
+    c.fillStyle = 'rgba(50,60,78,.5)'; c.fillRect(sx, sy + sh * .84, sw, sh * .16); c.restore();
+    c.fillStyle = dark; c.fillRect(sx + sw * .44, sy + sh, sw * .12, h * .12); c.fillRect(x, y + h * .86, w, h * .14);
+    c.fillRect(x + w / 2 - .7, y, 1.4, sy - y);      // the plate glass's upright, above the set
+    TVR = { x, y, w, h };
+    c.restore(); return;
   } else if (st >= 7) {           // build 31: a shop window lit from inside (st 7: shelves along the back; 8: a lamp hanging over a counter; 9: blinds half down)
     c.globalAlpha = .75;
     if (st === 7) for (const u of [.3, .55, .8]) { c.fillRect(x, y + h * u, w, 1.6); for (let i = 0; i < 5; i++) if (r(10 + i + u * 7) < .7) c.fillRect(x + w * (.08 + .18 * i), y + h * u - h * .09, w * .1, h * .09); }
@@ -2539,7 +2561,8 @@ function home(cam) {                       // drawn in screen units, before the 
   if (x > VW + 20 || x + M.w * k < -20) return;
   const wm = warm(doorX(cam) / VW), dark = css(mix(layerCol(.9)[0], layerCol(.9)[1], wm)), cy = y + dy + dh * .5;
   // behind the painting: dim light in the windows, and the doorway (dark, then warm light as the door swings back to the left)
-  M.wins.forEach((w, i) => room(c, x + w[0] * k - 2, y + w[1] * k - 2, w[2] * k + 4, w[3] * k + 4, lerp(1, .55, wm), dark, 3 + i * 4, w[1] > M.h - 200 ? 7 + i : 0, i));      // build 31: his ground floor is a shop too
+  TVR = null; const tvi = M.wins.findIndex(w => w[1] > M.h - 200);      // build 46: his building's first shop window holds the TV
+  M.wins.forEach((w, i) => room(c, x + w[0] * k - 2, y + w[1] * k - 2, w[2] * k + 4, w[3] * k + 4, lerp(1, .55, wm), dark, 3 + i * 4, w[1] > M.h - 200 ? (i === tvi ? 10 : 7 + i) : 0, i));      // build 31: his ground floor is a shop too
   c.fillStyle = dark; c.fillRect(x + dx - 2, y + dy - 2, dw + 4, dh + 4);
   if (e > 0) {
     const g = c.createRadialGradient(x + dx + dw * .55, cy, 0, x + dx + dw * .55, cy, 110); g.addColorStop(0, css(PAL.light, .95 * e)); g.addColorStop(1, css(PAL.win, .8 * e));
