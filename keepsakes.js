@@ -492,7 +492,7 @@ body.portrait #ksmenu .kspage{width:90vw;max-height:80vh;font-size:clamp(18px,5.
     hush(); dlg.className = ''; choiceEl.className = ''; document.body.classList.remove('talking', 'capped', 'slough');
     G.capQ.length = 0; G.cap = 0; G.hint = null; G.act = null; G.ring = null; G.state = 'wait';
     document.getElementById('endc').className = 'card';
-    if (go === '5') go5(); else if (go === '4') goRoom('door'); else if (go === '3') go3(); else if (go === '2') go2(); else start();
+    veil(() => { if (go === '5') go5(); else if (go === '4') goRoom('door'); else if (go === '3') go3(); else if (go === '2') go2(); else { QUICK = true; start(); } });      // build 110: quick, under a short veil
   });
 
   // the Bible

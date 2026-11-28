@@ -256,7 +256,7 @@ every year.</div>
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 109 · Nov 28 2026</div>
+  <div id="build">build 110 · Nov 28 2026</div>
   <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
@@ -1636,7 +1636,7 @@ function gateChoice() {
   if (!G.hornFar) { G.hornFar = true; trainHorn(.025); }      // build 78: a train's horn, far off: the third way
   const L = { guard: 'Ask the guard', tank: 'Wait for the tank', train: 'Jump the train' }, tried = G.gateTried || {};
   G.gateOpts = ['guard', 'train'].filter(k => !tried[k]);      // build 109 (owner: "Remove it from list of options"): the tank way is gone (its code is kept, unused)
-  if (G.gateOpts.length === 1) { G.choiceKind = 'gate'; G.state = 'choice'; pick(true); return; }      // build 109: alone, once the guard has said no, the train is the only way left: he takes it
+  if (G.gateOpts.length === 1) { G.choiceKind = 'gate'; G.state = 'choice'; pick(true); return; }      // build 110: alone, once the guard has said no, the train is the only way left: he takes it
   offer('gate', ...G.gateOpts.map(k => L[k]));
 }
 // the gate opens by itself (the sentry hauls it from beyond): the light, the tune, then on through it (as when it was pushed)
@@ -3746,7 +3746,18 @@ function go2() { CR.on = false; CR.stop(); RM.on = false; RM.stop(); bookless(tr
 function go5() { CR.on = false; RM.on = false; RM.stop(); bookless(true); store.set(5); SL.on = false; SL.show = false; HL.on = false; HL.show = false; document.getElementById('title').style.opacity = 0; setTimeout(() => { document.getElementById('title').style.display = 'none'; }, 900); CR.start(); }
 function goRoom(id) { if (!id || typeof id !== 'string') { id = new URLSearchParams(location.search).get('room') || 'door'; if (/^[1-7]$/.test(id)) id = 'r' + id; } dropPlace(); if (id === 'door') store.set(4); CR.on = false; CR.stop(); bookless(true); document.getElementById('title').style.opacity = 0; setTimeout(() => { document.getElementById('title').style.display = 'none'; }, 900); RM.start(id); }
 const END1 = [...document.querySelectorAll('#endc h1, #endc p')].map(e => e.textContent);
+// build 110 (owner: "Can you make the links to jump into levels smooth and quick"): a jump from a menu (the book's note, the menu in a
+// level, a moment) skips the dream and the waking (QUICK; only the touch on the closed Bible plays the whole opening), and is made under
+// a short soft veil of the page's dark (veil(): in a fifth of a second, out in under half a second) instead of a hard cut
+let QUICK = false;
+function veil(fn, hold = 120) {
+  let v = document.getElementById('veil');
+  if (!v) { v = document.createElement('div'); v.id = 'veil'; v.style.cssText = 'position:fixed;inset:0;z-index:62;background:#0f0f13;opacity:0;pointer-events:none;transition:opacity .2s ease'; document.body.appendChild(v); }
+  v.style.transition = 'opacity .2s ease'; v.style.opacity = 1; v.style.pointerEvents = 'auto';
+  setTimeout(() => { fn(); setTimeout(() => { v.style.transition = 'opacity .45s ease'; v.style.opacity = 0; v.style.pointerEvents = 'none'; }, hold); }, 210);
+}
 function start() {
+  const quick = QUICK; QUICK = false;
   bookless(false);
   store.set(1); CR.on = false; CR.stop(); RM.on = false; RM.stop(); SL.on = false; SL.show = false; HL.on = false; HL.show = false; document.body.classList.remove('slough');
   document.querySelectorAll('#endc h1, #endc p').forEach((e, i) => { e.textContent = END1[i]; }); document.getElementById('on2').style.display = '';
@@ -3759,6 +3770,7 @@ function start() {
   const wasAt = TEST_X; dropPlace();
   if (wasAt) { G.state = 'play'; return; }
   primeVids();      // build 37: this touch lets the phone play the two videos
+  if (quick) { const run = ++runN; G.state = 'wait'; setTimeout(() => { if (run === runN && G.state === 'wait') talk(INTRO, () => { G.state = 'play'; G.idle = 0; }); }, 250); return; }      // build 110: a jump from a menu: no dream, no waking
   const run = ++runN; G.state = 'wait'; wakeEyes(() => { if (run === runN && G.state === 'wait') talk(INTRO, () => { G.state = 'play'; G.idle = 0; }); });   // his eyes open (build 13), then the story (build 37: no party choice here now)
 }
 // THE DREAM AND THE WAKING. Level 1 opens on black. First the dream (build 14; owner, with two photographs of Seattle's
@@ -3954,7 +3966,7 @@ function wakeEyes(then) {
   };
   requestAnimationFrame(frame);
 }
-for (const b of document.querySelectorAll('#levels .lv')) { b.classList.toggle('dim', +b.dataset.lv !== LV); b.onclick = () => +b.dataset.lv === 5 ? go5() : +b.dataset.lv === 4 ? goRoom('door') : +b.dataset.lv === 3 ? go3() : +b.dataset.lv === 2 ? go2() : start(); }
+for (const b of document.querySelectorAll('#levels .lv')) { b.classList.toggle('dim', +b.dataset.lv !== LV); b.onclick = ev => +b.dataset.lv === 5 ? go5() : +b.dataset.lv === 4 ? goRoom('door') : +b.dataset.lv === 3 ? go3() : +b.dataset.lv === 2 ? go2() : (QUICK = !!ev, start()); }      // build 110: a touch on the note's level skips the opening; the cover's touch (no event) plays it
 // THE GAME'S RETURNING PICTURE AT NIGHT (build 663), for the opening screen and the cover's window: a great dusk-blue
 // sky with a few stars, six misty ridges going back (pale far, dark near), the far light low on the right third behind
 // the second ridge, made to glow by the dark round it (Kuindzhi), and the pilgrim small on a near ridge at the left

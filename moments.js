@@ -15,7 +15,7 @@ const MO = (() => {
   const P3 = (...ps) => () => ps.includes(HL.peek().ph), P2 = (...ps) => () => ps.includes(SL.peek().ph), P5 = (...ps) => () => ps.includes(CR.peek().ph), R4 = id => () => RM.peek().room === id;
   const END = () => G.state === 'end';
   const POINTS = [
-    [1, 'The city', [['The start: he wakes', null, 'He wakes'], ['Phillip under the highway', said(typeof EVAN !== 'undefined' && EVAN), 'Phillip'], ['The onlookers (the run)', said(typeof WATCH !== 'undefined' && WATCH), 'The onlookers'], ['The two men in the port', said(typeof NEIGH_CALL !== 'undefined' && NEIGH_CALL), 'The two men'], ['The choice', () => G.state === 'choice', 'The choice'], ['The barricade', said(typeof GATEWORDS !== 'undefined' && GATEWORDS), 'The barricade'], ['The end card', END]]],
+    [1, 'The city', [['The start: he wakes', null, 'He wakes'], ['Phillip under the highway', said(typeof EVAN !== 'undefined' && EVAN), 'Phillip'], ['The onlookers (the run)', said(typeof WATCH !== 'undefined' && WATCH), 'The onlookers'], ['The two men in the port', said(typeof NEIGH_CALL !== 'undefined' && NEIGH_CALL), 'The two men'], ['The choice', () => G.state === 'choice', 'The choice'], ['The barricade', () => typeof GATE_STOP !== 'undefined' && P.x > GATE_STOP - 80 && (G.state === 'dialog' || G.state === 'choice'), 'The barricade'], ['The end card', END]]],
     [2, 'The fields', [['The start: the fields', null, 'The fields'], ['Into the flood', P2('fall'), 'The flood'], ['The young man turns back, the choice', P2('pli'), 'Turning back'], ['Swimming alone', P2('wade'), 'Swimming alone'], ['Out in the middle', P2('stuck'), 'Out in the middle'], ['Help comes in his boat', P2('help'), 'Help'], ['Hauled out; the history', P2('drawn', 'hist'), 'Hauled out'], ['Looking back', P2('look'), 'Looking back'], ['"Go on your way"', P2('onway', 'on'), 'On his way'], ['The end card', END]]],
     [3, 'The mountain', [['The start: the plain', null, 'The plain'], ['A stranger under the oak', P3('meet'), 'The stranger'], ['Turning aside', P3('aside'), 'Turning aside'], ['The rocky path', P3('path'), 'The rocky path'], ['Under the burning mountain (wide shot)', P3('still'), 'Under the mountain'], ['Phillip comes', P3('come', 'evan'), 'Phillip'], ['Running back', P3('back'), 'Running back'], ['The gate', P3('gate'), 'The gate'], ['Knocking', P3('knock'), 'Knocking'], ['The door opens', P3('open'), 'The door opens'], ['Pulled in, the arrows', () => HL.peek().pull > 25, 'Pulled in'], ['The end card', END]]],
     [4, 'The house (not built)', [['The door at night', null, 'The door'], ['1 The picture', R4('r1'), 'The picture'], ['2 The dusty parlour', R4('r2'), 'The parlour'], ['3 Passion and Patience', R4('r3'), 'Passion and Patience'], ['4 The fire behind the wall', R4('r4'), 'The fire'], ['5 The palace', R4('r5'), 'The palace'], ['6 The iron cage (darker rooms on)', R4('r6'), 'The iron cage'], ['7 The dream (darker rooms on)', R4('r7'), 'The dream'], ['Leaving', R4('leave'), 'Leaving'], ['The end card', END]]],
@@ -35,7 +35,7 @@ const MO = (() => {
   const quiet = on => { try { if (typeof AC !== 'undefined' && AC && MASTER) { MASTER.gain.cancelScheduledValues(AC.currentTime); MASTER.gain.setTargetAtTime(on || muted ? 0 : 1, AC.currentTime, on ? .005 : .25); } } catch (e) {} };
   function begin(lv) { if (G.state === 'title' && typeof openBook === 'function') openBook(); hush(); dlg.className = ''; choiceEl.className = ''; document.body.classList.remove('talking', 'capped', 'slough');
     G.capQ.length = 0; G.cap = 0; G.hint = null; G.act = null; G.ring = null; G.state = 'wait'; document.getElementById('endc').className = 'card';
-    if (lv === 5) go5(); else if (lv === 4) goRoom('door'); else if (lv === 3) go3(); else if (lv === 2) go2(); else start(); cur = 0; curLv = lv; }
+    if (lv === 5) go5(); else if (lv === 4) goRoom('door'); else if (lv === 3) go3(); else if (lv === 2) go2(); else { if (typeof QUICK !== 'undefined') QUICK = true; start(); } cur = 0; curLv = lv; }      // build 110: no dream or waking on a jump
   // one tick of play as the play-through test plays it
   function tick() { if (G.state === 'choice') pick(false); keys.r = G.state === 'play';
     if (G.state === 'dialog') { if (G.act === 'gate' || G.act === 'walkon' || (RM.on && RM.HOLDS.includes(G.act))) keys.push = true; else if (G.act === 'hand') SL.grip(); else if (G.act === 'light') lightTouched(); else if (CR.on && G.act) CR.key(); else if (RM.on && G.act) RM.key(); else if (HL.on && G.act) HL.key(); else if (!G.act) next(true); }
@@ -44,19 +44,19 @@ const MO = (() => {
   let busyEl = null;
   function jumpTo(i, j, done) {
     if (busy || (typeof KS !== 'undefined' && KS.paused)) return false; busy = true; quiet(true);
-    if (!busyEl) { busyEl = document.createElement('div'); busyEl.id = 'mobusy'; busyEl.textContent = 'Turning the pages…';
-      busyEl.style.cssText = "position:fixed;inset:0;z-index:61;display:none;align-items:center;justify-content:center;background:#0f0f13;color:rgba(244,236,220,.75);font:italic 18px 'IM Fell English',Georgia,serif"; document.body.appendChild(busyEl); }
-    busyEl.style.display = 'flex';
+    if (!busyEl) { busyEl = document.createElement('div'); busyEl.id = 'mobusy'; busyEl.textContent = '';
+      busyEl.style.cssText = "position:fixed;inset:0;z-index:61;display:none;background:#0f0f13;opacity:0;transition:opacity .2s ease"; document.body.appendChild(busyEl); }
+    busyEl.style.display = 'block'; busyEl.style.transition = 'opacity .2s ease'; void busyEl.offsetWidth; busyEl.style.opacity = 1;      // build 110: a soft veil, no words
     const [lv, , ps] = POINTS[i], cond = ps[j][1]; begin(lv);
     const t0 = Date.now(), poll = setInterval(() => {
       if ((G.state === 'wait' || G.state === 'title') && Date.now() - t0 < 10000) return;
       clearInterval(poll);
       // a time limit, not a tick count: the house changes rooms on real timers, so while a room waits ('wait') the page is
       // let run a moment before ticking on
-      const tStop = Date.now() + 90000; const run = () => { const tEnd = performance.now() + 40;
-        while (cond && !cond() && G.state !== 'end' && performance.now() < tEnd) { if (G.state === 'wait') break; tick(); }
-        if (cond && !cond() && G.state !== 'end' && Date.now() < tStop) return setTimeout(run, G.state === 'wait' ? 40 : 0);
-        settle(); cur = j; busyEl.style.display = 'none'; busy = false; setTimeout(() => quiet(false), 60); if (done) done(); };
+      const tStop = Date.now() + 90000; const run = () => { const tEnd = performance.now() + 250;      /* build 110: longer bursts (was 40 ms): the veil covers the picture, so a quicker jump */
+        while (cond && !cond() && G.state !== 'end' && performance.now() < tEnd) { if (G.state === 'wait' && !G.waitFn) break; tick(); }      // build 110: a pause counted in game ticks (later(), G.waitFn) is ticked through, not waited out in real time
+        if (cond && !cond() && G.state !== 'end' && Date.now() < tStop) return setTimeout(run, G.state === 'wait' && !G.waitFn ? 40 : 0);
+        settle(); cur = j; busyEl.style.transition = 'opacity .45s ease'; busyEl.style.opacity = 0; setTimeout(() => { if (!busy) busyEl.style.display = 'none'; }, 480); busy = false; setTimeout(() => quiet(false), 60); if (done) done(); };
       run(); }, 50);
     return true;
   }
