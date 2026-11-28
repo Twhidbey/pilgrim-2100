@@ -249,7 +249,7 @@ every year.</div>
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 57 · Nov 28 2026</div>
+  <div id="build">build 58 · Nov 28 2026</div>
   <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
@@ -1496,7 +1496,7 @@ const INTRO_SAVED = [
 const TV_NEWS = [INTRO_SAVED[1]];
 // build 51 (owner chose the words): he whispers as he wakes. Not recorded yet (the voice account has no credit): shown as words until it is.
 const WAKE = [PG, '...Again. The same dream.'];
-const INTRO = [WAKE, INTRO_SAVED[7]];
+const INTRO = [INTRO_SAVED[7]];      // build 57 (owner): WAKE is said over his stare in the opening (wakeEyes), not in the street
 const PARTY_NO = [[PG, 'No. I can\'t.']];
 // {11}, {12}: "he would also walk solitarily in the fields, sometimes reading, and sometimes praying"
 const FIELDS = [];      // build 16: no narrator
@@ -3405,7 +3405,7 @@ function wakeEyes(then) {
   const mkT = () => [D.black, D.inn, D.shut, D.open, D.hold, D.out].reduce((a, v) => (a.push(a[a.length - 1] + v), a), [0]).map(v => v + DR);
   let T = mkT();
   const ease = u => u * u * (3 - 2 * u), cl = v => Math.max(0, Math.min(1, v));
-  ec.style.display = 'block'; ec.style.opacity = 1; let told = false;
+  ec.style.display = 'block'; ec.style.opacity = 1; let told = false, woke = false;
   const frame = now => {
     if (run !== runN) { ec.style.display = 'none'; return; }
     const t = now - t0, d = Math.min(2, window.devicePixelRatio || 1), W = Math.round(innerWidth * d), H = Math.round(innerHeight * d);
@@ -3435,6 +3435,7 @@ function wakeEyes(then) {
       const black = t < 1200 ? 1 - t / 1200 : k > 6100 ? cl((k - 6100) / 600) : 0;
       if (black > 0) { c.fillStyle = `rgba(0,0,0,${black})`; c.fillRect(X0, Y0, BW, BH); }
     }
+    if (!woke && t > T[1] + 3100) { woke = true; say(...WAKE); }      // build 58 (owner: "should be played as he stares with open eyes (starts right after eyes are open)")
     if (t > T[1] && vid) {
       if (!vidOn) { vidOn = true; vid.dataset.live = 1; const pr = vid.play(); if (pr && pr.catch) pr.catch(() => { still = true; }); }
       if (!still && t > T[1] + 900 && (vid.readyState < 2 || vid.currentTime < .05)) still = true;      // build 37: it will not play here: the stills instead
