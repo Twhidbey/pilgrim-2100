@@ -202,7 +202,7 @@ body.portrait:not(.playing) #rot{display:none}
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 26 · Nov 28 2026</div>
+  <div id="build">build 27 · Nov 28 2026</div>
   <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
@@ -685,7 +685,7 @@ function buildScenery() {
       // than they are tall; only the church spires stand high; few windows, and few of them lit.
       // Build 13: Seattle's towers in place of the old town's low houses and spires (see tower()). The far row (i = 1) holds the
       // tall towers and, once each, the four special shapes; the near row (i = 2), mostly hidden behind the street, lower blocks.
-      const far = i === 1, specials = far ? { 470: 'mast', 515: 'mast', 905: 'col', 1240: 'crown', 1395: 'old' } : {}      /* build 20: no needle (owner) */, done = {};
+      const far = i === 1, specials = far ? { 380: 'mast', 420: 'mast', 548: 'col', 596: 'crown', 1395: 'old' } : {}      /* build 20: no needle (owner); build 26: the masts, the tall stepped tower and the crowned one stand in the gap left of his building at the start, as in the dream */, done = {};
       for (let x = near ? field : -50 * s - R() * 50 * s; x < edge;) {
         const tp = clamp((edge - x) / (260 * s), .35, 1) * clamp(.55 + (x - field) / 260, .55, 1);
         const sp = Object.keys(specials).find(k => !done[k] && x > +k - 40);
@@ -2986,7 +2986,7 @@ function drawDream(c, u, fire) {
 // THE DREAM IS A VIDEO TOO (build 21; owner: "The nuclear bomb needs an animation to make it realistic"): a photo-real dusk skyline after the
 // traced one (no Space Needle; sources/dream/skyline.png), then a video from it: the flash behind the towers at about 2 s, the fireball and
 // the cloud rising, the camera tilting up after it (sources/dream/blast.mp4, 10 s). Silent. The code-drawn dream stays as the fallback.
-const DREAMVID = (() => { try { const v = document.createElement('video'); v.src = 'assets/dream.' + (v.canPlayType('video/mp4; codecs="avc1.640028"') ? 'mp4' : 'webm') + '?v=23'; v.muted = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('muted', ''); v.preload = 'auto'; v.load(); return v; } catch (e) { return null; } })();
+const DREAMVID = (() => { try { const v = document.createElement('video'); v.src = 'assets/dream.' + (v.canPlayType('video/mp4; codecs="avc1.640028"') ? 'mp4' : 'webm') + '?v=27'; v.muted = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('muted', ''); v.preload = 'auto'; v.load(); return v; } catch (e) { return null; } })();
 const EYEVID = (() => { try { const v = document.createElement('video'); v.src = 'assets/eyes-open.' + (v.canPlayType('video/mp4; codecs="avc1.640028"') ? 'mp4' : 'webm') + '?v=25';      /* H.264 where it plays, else VP9 */ v.muted = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('muted', ''); v.preload = 'auto'; v.load(); return v; } catch (e) { return null; } })();
 function wakeEyes(then) {
   const ec = document.getElementById('eyes'); if (!ec) { setTimeout(then, 1700); return; }
@@ -2994,8 +2994,10 @@ function wakeEyes(then) {
   const c = ec.getContext('2d'), run = runN, t0 = performance.now();
   // the dream: in from black, calm, the flash, the cloud, white, black
   const dv = DREAMVID && DREAMVID.readyState >= 2 ? DREAMVID : null;      // build 21: the dream is a real video when it has loaded (else the code-drawn one)
-  if (dv) { try { dv.pause(); dv.currentTime = 0; const pr = dv.play(); if (pr && pr.catch) pr.catch(() => {}); } catch (e) {} }
-  const FL = 3600, DR = dv ? 10300 : FL + 6700;
+  // build 26: the video's first frame is HELD (the calm city, VH ms) before it plays, and it goes to white just after the city is gone
+  // (video s VW0..VW1), so the darkest part of the blast is not shown; then white, then black
+  const VH = 3000, VW0 = 5.4, VW1 = 6.8, FL = 3600, DR = dv ? VH + VW1 * 1000 + 1300 : FL + 6700;
+  if (dv) { try { dv.pause(); dv.currentTime = 0; } catch (e) {} } let dvOn = false;
   // build 21: his eyes are a real video (assets/eyes-open.mp4, 7.5 s: asleep in bed to 2 s, waking 2.5 to 4.5 s, a blink near 6 s, awake); D.inn..D.hold span it
   const D = { black: 400, inn: 1200, shut: 1000, open: 2500, hold: 2300, out: 1500 };
   const vid = EYEVID; if (vid) { try { vid.pause(); vid.currentTime = 0; } catch (e) {} } let vidOn = false;
@@ -3008,8 +3010,11 @@ function wakeEyes(then) {
     if (ec.width !== W || ec.height !== H) { ec.width = W; ec.height = H; }
     c.setTransform(1, 0, 0, 1, 0, 0); c.fillStyle = '#000'; c.fillRect(0, 0, W, H);
     if (t < DR && dv) {      // the video: in from black, its own flash and cloud, out to black
+      if (t > VH && !dvOn) { dvOn = true; try { const pr = dv.play(); if (pr && pr.catch) pr.catch(() => {}); } catch (e) {} }
       const sc = Math.max(W / dv.videoWidth, H / dv.videoHeight); c.drawImage(dv, (W - dv.videoWidth * sc) / 2, (H - dv.videoHeight * sc) / 2, dv.videoWidth * sc, dv.videoHeight * sc);
-      const black = t < 1000 ? 1 - t / 1000 : t > DR - 1300 ? cl((t - (DR - 1300)) / 1000) : 0;
+      const vt = (t - VH) / 1000, white = vt < VW0 ? 0 : vt < VW1 ? ease((vt - VW0) / (VW1 - VW0)) : 1;
+      if (white > 0) { c.fillStyle = `rgba(255,250,240,${white})`; c.fillRect(0, 0, W, H); }
+      const black = t < 1200 ? 1 - t / 1200 : t > DR - 900 ? cl((t - (DR - 900)) / 700) : 0;
       if (black > 0) { c.fillStyle = `rgba(0,0,0,${black})`; c.fillRect(0, 0, W, H); }
     } else if (t < DR) {
       const k = t - FL, u = k > 300 ? cl((k - 300) / 5200) : 0, fire = k > 0 ? 1 : 0, dc = DREAM.can.getContext('2d');
@@ -3025,12 +3030,14 @@ function wakeEyes(then) {
       if (!vidOn) { vidOn = true; const pr = vid.play(); if (pr && pr.catch) pr.catch(() => {}); }
       if (vid.readyState >= 2 && vid.videoWidth) {
         const bh = Math.round(bw * vid.videoHeight / vid.videoWidth), x0 = (W - bw) / 2, y0 = (H - bh) / 2;
-        c.globalAlpha = Math.min(1, (t - T[1]) / D.inn); c.drawImage(vid, x0, y0, bw, bh);
+        // build 26: as he wakes the eyes go to black first, then the black canvas fades and the street comes up out of it (fading the eyes
+        // and their black together laid a pale box over the street)
+        c.globalAlpha = Math.min(1, (t - T[1]) / D.inn) * (t > T[5] ? 1 - ease(cl((t - T[5]) / (D.out * .45))) : 1); c.drawImage(vid, x0, y0, bw, bh);
         c.save(); c.translate(W / 2, H / 2); c.scale(bw * .56, bh * .74); const g = c.createRadialGradient(0, 0, 0, 0, 0, 1); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(.62, 'rgba(0,0,0,.08)'); g.addColorStop(.86, 'rgba(0,0,0,.75)'); g.addColorStop(1, 'rgba(0,0,0,1)'); c.fillStyle = g; c.fillRect(-1.2, -1.2, 2.4, 2.4); c.restore();      // the picture falls away to black at its edges
         c.globalAlpha = 1;
       }
     }
-    if (t > T[5]) ec.style.opacity = Math.max(0, 1 - (t - T[5]) / D.out);
+    if (t > T[5]) ec.style.opacity = 1 - cl((t - T[5] - D.out * .45) / (D.out * .55));
     if (!told && t > T[5] + D.out * .5) { told = true; then(); }
     if (t < T[6]) requestAnimationFrame(frame); else { ec.style.display = 'none'; if (vid) try { vid.pause(); } catch (e) {} }
   };
