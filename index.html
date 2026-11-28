@@ -249,7 +249,7 @@ every year.</div>
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 37 · Nov 28 2026</div>
+  <div id="build">build 38 · Nov 28 2026</div>
   <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
@@ -732,8 +732,16 @@ function buildScenery() {
       // than they are tall; only the church spires stand high; few windows, and few of them lit.
       // Build 13: Seattle's towers in place of the old town's low houses and spires (see tower()). The far row (i = 1) holds the
       // tall towers and, once each, the four special shapes; the near row (i = 2), mostly hidden behind the street, lower blocks.
-      const far = i === 1, specials = far ? { 380: 'mast', 420: 'mast', 548: 'col', 596: 'crown', 1395: 'old' } : {}      /* build 20: no needle (owner); build 26: the masts, the tall stepped tower and the crowned one stand in the gap left of his building at the start, as in the dream */, done = {};
+      const far = i === 1, specials = far ? { 1700: 'old' } : {}      /* build 20: no needle (owner); build 26: the masts, the tall stepped tower and the crowned one stand in the gap left of his building at the start, as in the dream */, done = {};
+      // BUILD 38 (owner: "can you include city skyline from opening explosion in background if it's appropriate"): the dream's own skyline,
+      // tower by tower in its order (DREAM_SKY), stands in the far row from SK0, seen behind the underpass and his street at the start;
+      // the made-up towers fill the rest of the row
+      const SKK = 1.62 * s, SKH = 2.53 * s, SK0 = 548 - (864 - 40) * SKK, SKX = a => SK0 + (a - 40) * SKK, SK1 = SKX(1170);      // the stepped tower at 548, where build 27 put it (seen in the gap left of his building at the start)
+      if (far) { for (const [a, b, tp] of DREAM_SKY) { const x = SKX(a), w = (b - a) * SKK; tower(x, gy(x + w / 2), w, (295 - tp) * SKH, s); }
+        tower(SKX(864), gy(SKX(884)), 41 * SKK, (295 - 58) * SKH, s, 'col'); tower(SKX(872), gy(SKX(902)), 60 * SKK, (295 - 68) * SKH, s, 'crown');
+        for (let x = SKX(40); x < SK1; x += rr(5, 11) * SKK) { const w = rr(5, 10) * SKK; tower(x, gy(x + w / 2), w, rr(10, 22) * SKH, s); } }      // the low city along the shore
       for (let x = near ? field : -50 * s - R() * 50 * s; x < edge;) {
+        if (far && x > SK0 - 40 && x < SK1) { x = SK1 + rr(10, 30) * s; continue; }      // build 38: the dream's skyline stands here
         const tp = clamp((edge - x) / (260 * s), .35, 1) * clamp(.55 + (x - field) / 260, .55, 1);
         const sp = Object.keys(specials).find(k => !done[k] && x > +k - 40);
         if (sp) { done[sp] = true; const kind = specials[sp], w = { mast: 16, needle: 44, col: 66, crown: 50, old: 22 }[kind] * s, h = { mast: 360, needle: 560, col: 600, crown: 470, old: 330 }[kind] * s * (sp === '515' ? .85 : 1); tower(x, gy(x + w / 2), w, h, s, kind); x += (kind === 'needle' ? w * 1.4 : w) + rr(4, 10) * s; continue; }
@@ -3078,6 +3086,12 @@ function start() {
 // (?x=, ?at=). The dream is painted small (640 x 360) and stretched up to cover the screen, so it is soft.
 const DW = 640, DH = 360, SEA = 292;
 let DREAM = null;
+// the dream's skyline, traced by hand from the owner's photograph of Seattle across the bay (build 20): [left, right, top] in the photo
+// (shore at y 295); 'col' (the tall dark tower in rounded steps) at 864..905 top 58, 'crown' at 872..932 top 68. Also stands in Level 1's
+// far row (build 38), so the city the dream destroys is the one behind the street.
+const DREAM_SKY = [[40, 62, 262], [60, 100, 245], [100, 140, 238], [160, 190, 240], [195, 215, 250], [222, 248, 248], [250, 275, 208], [280, 305, 210], [318, 345, 205], [355, 372, 205], [372, 400, 215],
+    [408, 450, 180], [455, 470, 222], [474, 508, 168], [512, 524, 214], [526, 554, 168], [555, 571, 200], [573, 619, 165], [624, 650, 203], [652, 674, 222], [677, 713, 165], [716, 721, 196],
+    [722, 789, 122], [790, 819, 180], [821, 868, 137], [906, 936, 130], [936, 970, 132], [972, 994, 160], [995, 1035, 100], [1035, 1070, 135], [1071, 1125, 90], [1126, 1170, 115], [1140, 1170, 140]];;
 function bakeDream() {
   const R2 = rng(2100), r = (a, b) => a + (b - a) * R2(), city = mk(DW, DH), hills = mk(DW, DH), lit = [];
   const small = g => g.setTransform(.6, 0, 0, .6, 330 * .4, SEA * .4);      // the city small and low across the water, most of the picture sky
@@ -3091,9 +3105,7 @@ function bakeDream() {
   // BUILD 20 (owner: "map skyline of Seattle more closely but remove space needle"): the towers traced by hand, building by building, from the
   // owner's photograph of the skyline across the bay (photo x 40..1170 and heights above the shore at y 295, scaled by k); the needle is left out.
   // [left, right, top] in the photo; 'col' = the tall dark one in rounded steps, 'crown' = the one under a pointed crown.
-  const SKY = [[40, 62, 262], [60, 100, 245], [100, 140, 238], [160, 190, 240], [195, 215, 250], [222, 248, 248], [250, 275, 208], [280, 305, 210], [318, 345, 205], [355, 372, 205], [372, 400, 215],
-    [408, 450, 180], [455, 470, 222], [474, 508, 168], [512, 524, 214], [526, 554, 168], [555, 571, 200], [573, 619, 165], [624, 650, 203], [652, 674, 222], [677, 713, 165], [716, 721, 196],
-    [722, 789, 122], [790, 819, 180], [821, 868, 137], [906, 936, 130], [936, 970, 132], [972, 994, 160], [995, 1035, 100], [1035, 1070, 135], [1071, 1125, 90], [1126, 1170, 115], [1140, 1170, 140]];
+  const SKY = DREAM_SKY;
   const k = .41, X0 = 172, px = x => X0 + (x - 40) * k, py = y => SEA - (295 - y) * k * 1.12;
   for (const [a, b, tp] of SKY) T(px(a), (b - a) * k, py(tp));
   { const x = px(864), w = (905 - 864) * k, y = py(58); c.beginPath(); c.moveTo(x, SEA); c.lineTo(x, y + 12); c.quadraticCurveTo(x + w * .12, y + 7, x + w * .3, y + 7); c.lineTo(x + w * .3, y + 3); c.quadraticCurveTo(x + w * .5, y - 1, x + w * .7, y + 3); c.lineTo(x + w * .7, y + 7); c.quadraticCurveTo(x + w * .88, y + 7, x + w, y + 12); c.lineTo(x + w, SEA); c.fill(); }      // the tall dark tower in rounded steps
