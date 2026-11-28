@@ -256,7 +256,7 @@ every year.</div>
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 112 · Nov 28 2026</div>
+  <div id="build">build 113 · Nov 28 2026</div>
   <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
@@ -1226,7 +1226,7 @@ function ambience() {
   if (!AC || G.t % 8) return;
   const now = AC.currentTime, w = warm((P.x - G.cam) / VW);
   // build 385 (owner: "when you open book, let's not make it raining since that's level 1"): no rain on the title and contents
-  rainG.gain.setTargetAtTime(G.state === 'title' ? 0 : RAIN_VOL * (1 - w) * LOOK.rain / .6 + RAIN_VOL * .7 * G.gloom, now, G.state === 'title' ? .1 : .4);
+  rainG.gain.setTargetAtTime(G.state === 'title' ? 0 : (RAIN_VOL * (1 - w) * LOOK.rain / .6 + RAIN_VOL * .7 * G.gloom) * (1 - .85 * (G.hushA || 0)), now, G.state === 'title' ? .1 : .4);
   const hum = musOn() ? 0 : 1;      // the old hum steps aside while a piece of music plays
   padG.gain.setTargetAtTime(.055 * hum, now, .8);
   warmG.gain.setTargetAtTime((.05 * w + .04 * G.gateOpen) * hum, now, .8);
@@ -1349,7 +1349,7 @@ function reset() {
     pli: null, obst: null, flare: 0, gloom: 0, gloomTo: 0, gateOpen: 0, act: null, actT: 0, ring: null, auto: null, finale: null, guard: 0, idle: 0, wins: 0,
     evanDone: !!TEST_X, evanGone: TEST_X ? 1 : 0, neigh: TEST_X > NEIGH_X + 300, gateSeen: false, walked: false, touched: false, leaving: false, fam: TEST_X > HOME_X ? 2 : 0, door: 0,      // build 13 (owner: "as far as we know pilgrim has no family, for now"): his door stays shut
     doorShut: false, roll: TEST_X ? { t: 999, x: 0, y: 0 } : null, runZone: !!TEST_X && TEST_X < RUN_END, outSaid: false, watched: TEST_X > WATCH_X, ears: TEST_X > HOME_X });
-  G.lf = null; G.sunUp = 0; G.waitFn = null; G.drone = null; G.tank = null; G.train = null; G.hornFar = false; G.gateTried = null; G.gateOpening = null; G.gateOpts = null; G.sentryAway = false; G.sentryTw = 0;  G.tvRun = !!TEST_X && TEST_X > TV_RUN_A; G.phGo = !!TEST_X && TEST_X > EVAN_X; G.phFade = G.phGo ? 1 : 0; if (ROW[0] && !ROW[0].who) ROW[0].open = 1;      // build 16: the party: the door of the building beside his (to the left), lit from the start
+  G.lf = null; G.sunUp = 0; G.waitFn = null; G.drone = null; G.tank = null; G.train = null; G.hornFar = false; G.gateTried = null; G.hushT = 0; G.hushA = 0; G.gateOpening = null; G.gateOpts = null; G.sentryAway = false; G.sentryTw = 0;  G.tvRun = !!TEST_X && TEST_X > TV_RUN_A; G.phGo = !!TEST_X && TEST_X > EVAN_X; G.phFade = G.phGo ? 1 : 0; if (ROW[0] && !ROW[0].who) ROW[0].open = 1;      // build 16: the party: the door of the building beside his (to the left), lit from the start
   G.through = false; G.homeTo = null; G.autoRun = 0; G.calm = 0; G.doorSaid = false; G.choiceKind = null; G.sawLight = !!TEST_X && TEST_X > EVAN_X; G.nchose = false; G.alone = false;
   G.zoom = 1 - (1 - ZOOM_GATE) * smooth(GATE - 1300, GATE - 380, START_X);      // starting near the gate (?at=gate): already drawn back
   G.evan.pt = TEST_X ? 239 : 0; G.evan.go = false; G.evan.st = EVS_META.frames * 100; downs.clear(); pushing = false; keys.r = keys.push = false;
@@ -1629,19 +1629,26 @@ const SENTRY_STOP = [[SN, 'That\'s far enough. The gate\'s shut.']];
 const GUARD_ASK = [[PG, 'Let us through. Please.']], GUARD_ASK1 = [[PG, 'Let me through. Please.']];
 const GUARD_YES = [[YM, 'It\'s me. Open up.'], [SN, '...You? Out here?'], [YM, 'We\'re leaving.'], [SN, 'Go on, then. I never saw you.']];
 const GUARD_NO = [[SN, 'Orders. Nobody goes out. Go home, friend.']];
+// BUILD 111, FACE THE GUARD (owner: "confront guard--their dialogue should be more intense--basically he gets past by the spirit"; DRAFTED in the
+// script app, scene 6, waiting for approval; shown, not recorded): he does not plead; he stands his ground; on his quiet last word the rain
+// hushes and the far light swells behind him, and the sentry, shaken, opens the gate. No weapon is touched (PG).
+const FACE = [[PG, 'Open the gate.'], [SN, 'You deaf? Nobody goes out. Turn around.'], [PG, 'No.'], [SN, 'I said turn around. I won\'t say it again.'],
+  [PG, 'This city is going to burn. I\'ve seen it. I\'m not staying. And you shouldn\'t either.', null, () => { G.flare = 1.2; lightSwell(); G.hushT = 360; }],
+  [SN, '...Who are you?'], [PG, 'Nobody. Let me go.'], [SN, 'Go. Before I change my mind.']];
 const TANK_WAIT = [[PG, 'Wait.']], TANK_NOW = [[PG, 'Now.']];
 const TRAIN_SEE = [[PG, 'A train. It\'s going out.']], TRAIN_RUN = [[YM, 'It\'s moving!'], [PG, 'Run.']], TRAIN_RUN1 = [[PG, 'Run.']];
-const GATE_ALL = [...SENTRY_STOP, ...GUARD_ASK, ...GUARD_ASK1, ...GUARD_YES, ...GUARD_NO, ...TANK_WAIT, ...TANK_NOW, ...TRAIN_SEE, ...TRAIN_RUN];
+const GATE_ALL = [...FACE, ...SENTRY_STOP, ...GUARD_ASK, ...GUARD_ASK1, ...GUARD_YES, ...GUARD_NO, ...TANK_WAIT, ...TANK_NOW, ...TRAIN_SEE, ...TRAIN_RUN];
 function gateChoice() {
   if (!G.hornFar) { G.hornFar = true; trainHorn(.025); }      // build 78: a train's horn, far off: the third way
-  const L = { guard: 'Ask the guard', tank: 'Wait for the tank', train: 'Jump the train' }, tried = G.gateTried || {};
-  G.gateOpts = ['guard', 'train'].filter(k => !tried[k]);      // build 109 (owner: "Remove it from list of options"): the tank way is gone (its code is kept, unused)
+  const L = { face: 'Face the guard', guard: 'Ask the guard', tank: 'Wait for the tank', train: 'Jump the train' }, tried = G.gateTried || {};
+  G.gateOpts = ['face', 'tank', 'train'].filter(k => !tried[k]);      // build 111 (owner): face the guard (in place of asking him), the tank coming back, the train
   if (G.gateOpts.length === 1) { G.choiceKind = 'gate'; G.state = 'choice'; pick(true); return; }      // build 110: alone, once the guard has said no, the train is the only way left: he takes it
   offer('gate', ...G.gateOpts.map(k => L[k]));
 }
 // the gate opens by itself (the sentry hauls it from beyond): the light, the tune, then on through it (as when it was pushed)
 function openGate(sneak) { G.state = 'wait'; G.gateOpening = { sneak }; }
 function gateTick() {
+  G.hushA = (G.hushA || 0) + (((G.hushT || 0) > 0 ? 1 : 0) - (G.hushA || 0)) * .03; if (G.hushT > 0) G.hushT--;      // build 111: the hush as he faces the guard
   const o = G.gateOpening; if (!o) return;
   G.gateOpen = Math.min(1, G.gateOpen + .005);
   if (G.gateOpen >= 1) { G.gateOpening = null; gateOpened(); const go = () => { G.through = true; G.throughT = G.t; G.state = 'play'; G.idle = 0; caption(END); }; if (o.sneak) talk(TANK_NOW, go); else go(); }
@@ -1797,8 +1804,9 @@ function pick(home) {
     choiceEl.className = ''; document.body.classList.remove('talking'); document.getElementById('chThird').style.display = 'none'; G.choiceKind = null;
     const way = G.gateOpts[home === true ? 0 : home === false ? 1 : 2];
     try { localStorage.setItem('pp-gate', way); } catch (e) {}
-    if (way === 'guard') talk(G.alone ? GUARD_ASK1 : GUARD_ASK, () => G.alone ? talk(GUARD_NO, () => { (G.gateTried = G.gateTried || {}).guard = 1; gateChoice(); }) : talk(GUARD_YES, () => openGate(false)));
-    else if (way === 'tank') talk(TANK_WAIT, () => { G.state = 'wait'; if (G.tank) G.tank.leave = 1; later(330, () => { G.sentryAway = true; openGate(true); }); });
+    if (way === 'face') talk(FACE, () => openGate(false));
+    else if (way === 'guard') talk(G.alone ? GUARD_ASK1 : GUARD_ASK, () => G.alone ? talk(GUARD_NO, () => { (G.gateTried = G.gateTried || {}).guard = 1; gateChoice(); }) : talk(GUARD_YES, () => openGate(false)));
+    else if (way === 'tank') talk(TANK_WAIT, () => { if (G.tank && TANK_IM) tankBack(); else { G.state = 'wait'; later(60, () => openGate(false)); } });      // build 111: it comes back for them
     else talk(TRAIN_SEE, () => { trainGo(); talk(G.alone ? TRAIN_RUN1 : TRAIN_RUN, toTrain); });
     return;
   }
@@ -2453,6 +2461,7 @@ function acts() {
     if (!P.stand && G.ring) G.ring = null;
     if (P.x > G.walkFrom + 230 && G.guard <= 0) next(true);      // build 110: not before her words have been heard
   }
+  if (G.act === 'tankjump' && G.actT === 20 && G.tank) { dMore.textContent = 'jump on ✦'; G.ring = () => [tankDeckX(G.tank, G.camDraw ?? G.cam, .62), tankDeckY(G.tank) - 10]; }      // build 111
   if (G.act === 'gate') {
     if (G.actT === 40) { G.ring = () => [DOORM - G.cam, GY - 110]; }
     if (pushHeld()) { G.ring = null; G.gateOpen = Math.min(1, G.gateOpen + .0042); if (G.gateOpen >= 1) gateOpened(); }
@@ -2894,8 +2903,8 @@ function drawDrone(cam) {
 // picture (sources/tank: gen-tank.py, cut-tank.py; assets/tank.webp), no markings, gun level, toned to its level like the port: on its own
 // level between the rails and the fence (p .7), well behind him, at real scale (2.6 m high against a man's 1.8 m; 61 px a metre at p .7).
 // It waits past the drone and, as he comes, rolls slowly toward the town (about 5 km/h) with a little shudder and a low rumble made in code.
-const TANK = { a: 9650, p: .7, k: .213, gnd: 904, go: 8500, run: 380 }; let TANK_IM = null, TANK_SND = null;      // build 108 (owner: "The tank should roll by well before barricade"): it sets off as he reaches 8500 (was 9400), so it rolls out and stops by the barricade while he is still well back
-function bakeTank(im) { const out = {}; for (const [n, i] of [['cool', 0], ['warm', 1]]) { const c = mk(im.width, im.height), q = c.getContext('2d'); q.drawImage(im, 0, 0); q.globalCompositeOperation = 'source-atop'; q.fillStyle = css(layerCol(.7)[i], .8); q.fillRect(0, 0, im.width, im.height); out[n] = c; } return out; }
+const TANK = { a: 9650, p: .95, k: .289, gnd: 904, deck: [60, 330, 405], go: 8500, run: 380 }; let TANK_IM = null, TANK_SND = null;      // build 108 (owner: "The tank should roll by well before barricade"): it sets off as he reaches 8500 (was 9400), so it rolls out and stops by the barricade while he is still well back
+function bakeTank(im) { const out = {}; for (const [n, i] of [['cool', 0], ['warm', 1]]) { const c = mk(im.width, im.height), q = c.getContext('2d'); q.drawImage(im, 0, 0); q.globalCompositeOperation = 'source-atop'; q.fillStyle = css(layerCol(TANK.p)[i], .8); q.fillRect(0, 0, im.width, im.height); out[n] = c; } return out; }
 function tankSound(v) {
   if (!AC || muted) { if (TANK_SND) TANK_SND.g.gain.value = 0; return; }
   if (!TANK_SND) { try {
@@ -2923,24 +2932,68 @@ function farGunfire() {
 }
 function tankTick() {      // build 71: its movement in the update, not the drawing (it moved only when drawn)
   if (!TANK_IM) return; const T = G.tank || (G.tank = { a: TANK.a, go: false });
-  // build 72 (owner: "Tank should still be pretty close to barrier just precedes it by a few secs"): it comes out from behind the
-  // barricade's slope only a few seconds before he reaches the barricade, rolls a short way (TANK.run) and stops there, its engine idling
+  // build 109 (owner: "The tank - how can you make it continue on and not come back"): it rolls out from behind the barricade's slope as he
+  // reaches TANK.go, eases up to speed and keeps on toward the town, past him, and is gone once it is far behind (T.gone)
   if (P.x > TANK.go) T.go = true;
-  if (T.leave) { T.leave++; T.v = 1; if (T.leave > 170) T.a += Math.min(2.2, (T.leave - 170) * .035); }      // build 74 (the tank way): it pivots round, then rolls out behind the barricade
-  // build 109 (owner: "The tank - how can you make it continue on and not come back"): it no longer stops by the barricade; it rolls
-  // out, eases up to speed and keeps on toward the town, past him, and is gone for good once it is far behind
+  if (T.ret) tankRide(T);
   else if (T.go && !T.gone) { T.ru = (T.ru || 0) + 1; T.v = 1.7 * smooth(0, 110, T.ru); T.a -= T.v; if (T.a < P.x - 2600) { T.gone = true; T.v = 0; } }
-  tankSound(T.go && !T.gone ? (T.leave ? .24 : T.v > .05 ? .16 : .09) * (1 - smooth(250, 1300, Math.abs(T.a - P.x))) : 0);
+  tankSound(T.go && !T.gone ? (T.v > .05 ? .16 : .09) * (1 - smooth(250, 1300, Math.abs(T.a - P.x))) : 0);
   farGunfire();
 }
-function drawTank(cam) {
-  const T = G.tank; if (!TANK_IM || !T || T.gone) return;
-  const x = lineUp(T.a, TANK.p) - cam * TANK.p, base = HORIZON + 140 * TANK.p, w = TANK_IM.cool.width * TANK.k, h = TANK_IM.cool.height * TANK.k;
+// BUILD 111, THE TANK WAY (owner: "If traveler selects tank as option, it returns and he can 'jump on back' ... at right moment"; then "Tank comes
+// out of gate and back thru it"; "They need to really crouch on back not to be seen"): "Wait."; he steps back from the gate; the sentry hauls it
+// open and the tank comes out through it, onto the road (T.road: drawn in front of the barricade at TW_P, cut off inside the gateway), rolls
+// past him toward the town and stops; swings round (seen end on for a moment); comes back toward the gate, and as its low rear deck comes level
+// with him it stops and the gold prompt asks for the jump; a touch and he hops up ("Now."), the young man after him; both duck down behind
+// its turret, out of sight (drawn behind the tank, sunk below the turret's line); it rolls in through the gate, and the level ends.
+const TW_P = .97;      // the tank's depth on the road, just behind where he walks
+const tankP = T => T.p || TANK.p, tankK = T => TANK.k * tankP(T) / TANK.p;
+const tankDeckX = (T, cam, f) => { const p = tankP(T), x = lineUp(T.a, p) - cam * p, d = TANK.deck, px = lerp(d[0], d[1], f) - TANK_IM.cool.width / 2; return x + px * tankK(T) * (T.dir || -1) * (T.sx ?? 1); };
+const tankDeckY = T => HORIZON + 140 * tankP(T) + 2 - (TANK.gnd - TANK.deck[2]) * tankK(T);
+const tankAt = (T, sx) => (sx + (G.camDraw ?? G.cam) * tankP(T) - 325) / tankP(T) + 325;      // the road place whose tank centre is at screen x
+function tankBack() {
+  const T = G.tank; Object.assign(T, { gone: false, go: true, road: true, p: TW_P, dir: -1, sx: 1, v: 0, ru: 0, ret: 'back', h: null, pOn: false, dk: 0 });
+  T.a = tankAt(T, DOORM - (G.camDraw ?? G.cam) + TANK_IM.cool.width * tankK(T) * .55);      // waiting just inside the gateway, out of sight
+  G.state = 'auto'; G.auto = { dir: -1, to: P.x - 330, then: () => { G.state = 'wait'; P.face = 1; T.ret = 'open'; } };      // he steps back from the gate
+  if (G.pli && G.pli.mode === 'follow') G.pli.mode = 'tankrun';
+}
+function tankRide(T) {
+  const cam = G.camDraw ?? G.cam, px = P.x - cam, cx = lineUp(T.a, tankP(T)) - cam * tankP(T), W = TANK_IM.cool.width * tankK(T);
+  if (T.ret === 'open') { G.gateOpen = Math.min(.999, G.gateOpen + .006); if (G.gateOpen > .6) { T.ret = 'out'; T.ru = 0; } }      // the sentry hauls it open
+  else if (T.ret === 'out') { T.ru++; T.v = 1.5 * smooth(0, 80, T.ru); const stopX = px - 300 - W * .1; if (cx < stopX + 160) T.v *= Math.max(0, (cx - stopX) / 160); T.a -= T.v; if (cx <= stopX + 1) { T.ret = 'turn'; T.tu = 0; T.v = 0; } }
+  else if (T.ret === 'turn') { T.tu++; const u = smooth(0, 150, T.tu); T.sx = Math.cos(Math.PI * u); if (T.tu >= 150) { T.dir = 1; T.sx = 1; T.ret = 'come'; T.ru = 0; } }      // swings round: end on for a moment
+  else if (T.ret === 'come') { const dx = tankDeckX(T, cam, .55); T.ru++; T.v = 1.2 * smooth(0, 60, T.ru) * Math.max(0, Math.min(1, (px - dx) / 120)); T.a += T.v;
+    if (px - dx < 3) { T.ret = 'wait'; T.v = 0; talk([[TIP, isTouch ? 'Touch the tank to jump on.' : 'Touch the tank (or the space bar) to jump on.', 'tankjump']]); } }
+  else if (T.ret === 'hop') { T.h.t++; if (T.h.t >= 40) { T.dk = Math.min(1, T.dk + 1 / 30); if (T.dk >= 1) { T.ret = 'ride'; T.ru = 0; } } }
+  else if (T.ret === 'ride') { T.ru++; T.v = 1.3 * smooth(0, 120, T.ru); T.a += T.v; P.x = tankDeckX(T, cam, T.h.f) + cam;
+    if (cx - W / 2 > DOOR0 - cam + 40 && !T.done) { T.done = true; finish(); } }      // in through the gate: the end
+  const p = G.pli;
+  if (p && p.mode === 'tankrun') { p.face = P.face; const tx = P.x + 55; if (p.x > tx) p.x = Math.max(tx, p.x - 2); }
+  if (p && p.mode === 'tankhop') p.h.t = Math.min(40, p.h.t + 1);
+}
+function tankJump() {      // the touch: he hops up onto the rear deck, the young man after him
+  const T = G.tank; if (!T || T.ret !== 'wait') return; const cam = G.camDraw ?? G.cam;
+  T.ret = 'hop'; T.h = { t: 0, x0: P.x - cam, f: .62 }; T.dk = 0; T.pOn = true; G.ring = null; next(true); G.state = 'wait'; caption(TANK_NOW);
+  const p = G.pli; if (p && p.mode === 'tankrun') { p.mode = 'tankhop'; p.face = 1; p.h = { t: -14, x0: p.x - cam, f: .3 }; }
+}
+function drawTank(cam, pass) {
+  const T = G.tank; if (!TANK_IM || !T || T.gone || !!T.road !== (pass === 'road')) return;
+  const p = tankP(T), K = tankK(T), x = lineUp(T.a, p) - cam * p, base = HORIZON + 140 * p, w = TANK_IM.cool.width * K, h = TANK_IM.cool.height * K;
   if (x + w < -40 || x - w > VW + 40) return;
-  const jit = T.v > .05 ? Math.sin(G.t * 1.9) * .35 + Math.sin(G.t * .7) * .25 : 0, y = base + 2 - TANK.gnd * TANK.k + jit, wm = warm(x / VW), c = ctx;
-  const tu = T.leave ? smooth(20, 170, T.leave) : 0, sx = -Math.cos(Math.PI * tu);      // build 74: pivoting, it shows end on for a moment
-  c.save(); c.translate(x, 0); c.scale(Math.sign(sx || 1) * Math.max(.22, Math.abs(sx)), 1);      // the picture faces right; it rolls left, toward the town
+  const jit = T.v > .05 ? Math.sin(G.t * 1.9) * .35 + Math.sin(G.t * .7) * .25 : 0, y = base + 2 - TANK.gnd * K + jit, wm = warm(x / VW), c = ctx;
+  c.save();
+  if (T.road) { const f = GATE_P && GATE_META ? gateFit() : null, hy = f ? f.y + GATE_META.hole[1] * f.k : GY - 236;      // build 111: on the road it is cut off inside the gateway
+    c.beginPath(); c.rect(-9999, -9999, DOOR0 - cam + 9999, 99999); c.rect(DOOR0 - cam, hy, DOOR1 - DOOR0, 9999); c.clip(); }
+  // the two riding: up onto its rear deck in front of it; then, ducking down behind its turret, behind it and out of sight
+  const hop = (hh, im, meta, behind) => { if (!!behind !== (T.dk > 0)) return; const u = clamp(hh.t / 40), e = u * u * (3 - 2 * u), d = T.dk || 0, qx = tankDeckX(T, cam, lerp(hh.f, hh.f + .8, d)), qy = tankDeckY(T) + 105 * d, k = lerp(1, p, e);
+    drawFrame(im, meta, lerp(hh.x0, qx, e), lerp(GY, qy, e) - Math.sin(Math.PI * u) * 26 + 1, 1, 1, CHR_K * k); };
+  const riders = behind => { const p2 = G.pli; if (p2 && p2.mode === 'tankhop' && p2.h.t >= 0) { const [W, M, S, SM] = pliSet(); hop(p2.h, p2.h.t < 32 ? W[4] : S, p2.h.t < 32 ? M : SM, behind); }
+    if (T.h && T.pOn) hop(T.h, ...(T.h.t < 32 && PW.ready ? [PW[10], PW_META] : PST.ready ? [PST[0], PST_META] : [PW[0], PW_META]), behind); };
+  riders(true);
+  c.save(); c.translate(x, 0); c.scale((T.dir || -1) * (Math.sign(T.sx ?? 1) || 1) * Math.max(.22, Math.abs(T.sx ?? 1)), 1);      // the picture faces right: toward the town it is mirrored; swinging round it shows end on for a moment
   c.drawImage(TANK_IM.cool, -w / 2, y, w, h); if (wm > .01) { c.globalAlpha = wm; c.drawImage(TANK_IM.warm, -w / 2, y, w, h); c.globalAlpha = 1; }
+  c.restore();
+  riders(false);
   c.restore();
 }
 // THE ONLOOKERS (build 52; owner: "when [he] runs can we not have doors fly open but instead a little crowd of curious onlookers: 'why is he
@@ -3443,7 +3496,7 @@ function drawWorld() {
   const gcol = layerCol(1), wAt = x => warm((x - cam) / VW), on = (x, w = 0, m = 80) => x < cam + VW + m && x + w > cam - m;
   // the lane just behind the road: a low bank a little paler than the road, with his house and a few things on it
   ctx.fillStyle = hGrad(ctx, ...layerCol(.93)); ctx.fillRect(0, LEVELS.home.base, VW, GY - LEVELS.home.base + 2);
-  farLamps(cam, 'win'); underpass(cam, 'back'); drawPort(cam); farLamps(cam, 'port');      /* the crane lamps just after the port (on the cranes, under the train, the tank and all nearer) */ drawOutTrain(cam, true); drawTank(cam); drawRow(cam); home(cam); drawSmoke(cam); drawPoles(cam); drawLevel('mid', cam); drawWatchers(cam); busStop(cam); drawCrowd(cam); drawWheat(false); drawDrone(cam);          // the wheat behind him
+  farLamps(cam, 'win'); underpass(cam, 'back'); drawPort(cam); farLamps(cam, 'port');      /* the crane lamps just after the port (on the cranes, under the train, the tank and all nearer) */ drawOutTrain(cam, true); drawTank(cam, 'lane'); drawRow(cam); home(cam); drawSmoke(cam); drawPoles(cam); drawLevel('mid', cam); drawWatchers(cam); busStop(cam); drawCrowd(cam); drawWheat(false); drawDrone(cam);          // the wheat behind him
   ctx.setTransform(1, 0, 0, 1, 0, OYD); drawFog('lane'); ctx.setTransform(DPR, 0, 0, DPR, 0, OYD);
   lightThrough();      // build 79: the far light's glow, seen through the rain over the rooftops where the buildings hide it      // mist lying along the lane, round the houses' feet and in the wheat
   ctx.save(); ctx.translate(-cam, 0);
@@ -3540,6 +3593,7 @@ function drawWorld() {
     ctx.save(); ctx.translate(DOORM, GY + 4); ctx.scale(330, 26); ctx.globalCompositeOperation = 'screen'; ctx.fillStyle = g; ctx.fillRect(-1, -.2, 2, 1.2); ctx.restore();
   }
   ctx.restore();
+  drawTank(cam, 'road');      // build 111: the tank way: the tank on the road, in front of the barricade, coming out of and going back in through the gate
   // the people
   TALKM = talkMove(E);
   if (Math.abs(G.evan.x - cam - VW / 2) < VW) { const t = G.evan.pt ? (G.evan.pt < 239 ? G.evan.pt : 212 + 27 * (.5 + .5 * Math.sin(G.t / 50))) : G.evan.idle || 0; const pa = 1 - (G.phFade || 0);
@@ -3551,14 +3605,14 @@ function drawWorld() {
   TALKM = talkMove(O);
   if (G.obst && G.obst.x > cam - 100) { const [W, M, S, SM] = obsSet(); walker(G.obst, W[Math.floor(G.obst.anim ?? M.rest[0]) % W.length], M, S, SM, G.obst.face || (G.obst.mode === 'home' ? -1 : 1), G.obst.al ?? 1); }
   TALKM = talkMove(PL);
-  if (G.pli && G.pli.mode !== 'gone' && G.pli.mode !== 'trainhop') { const [W, M, S, SM] = pliSet(); figure(G.pli.x, a => walker(G.pli, W[Math.floor(G.pli.anim ?? 0) % W.length], M, S, SM, G.pli.face || 1, a * (G.pli.al ?? 1))); }
+  if (G.pli && G.pli.mode !== 'gone' && G.pli.mode !== 'trainhop' && G.pli.mode !== 'tankhop') { const [W, M, S, SM] = pliSet(); figure(G.pli.x, a => walker(G.pli, W[Math.floor(G.pli.anim ?? 0) % W.length], M, S, SM, G.pli.face || 1, a * (G.pli.al ?? 1))); }
   { const dxs = P.x - cam - doorX(cam), a = G.door * smooth(300, 60, Math.abs(dxs)); RIM = a > .02 ? { dir: dxs > 0 ? -1 : 1, a } : null; }      // the door's light on him
   TALKM = talkMove(C);
   // build 74: the sentry beyond the gate, facing the town; for the tank he turns to watch it go out (a short dissolve to his mirror)
   if (SNT.ready && SENTRY_X - cam < VW + 120) { TALKM = talkMove(SN); const L = SNT.length, t = G.t * .133 % (2 * L - 2), f = SNT[Math.floor(t < L ? t : 2 * L - 2 - t)]; G.sentryTw = Math.min(1, (G.sentryTw || 0) + (G.sentryAway ? .04 : 0)); const k = G.sentryTw;
     if (k < 1) drawFrame(f, SNT_META, SENTRY_X - cam, GY, -1, k < .5 ? 1 : 2 * (1 - k)); if (k > 0) drawFrame(f, SNT_META, SENTRY_X - cam, GY, 1, k < .5 ? 2 * k : 1); }
   TALKM = talkMove(C);
-  figure(P.x, a => drawChristian(P.x - cam, P.y + 1, P.face, G.train && G.train.pOn ? 0 : a)); RIM = null; TALKM = null;
+  figure(P.x, a => drawChristian(P.x - cam, P.y + 1, P.face, (G.train && G.train.pOn) || (G.tank && G.tank.pOn) ? 0 : a)); RIM = null; TALKM = null;
   // birds in the air
   ctx.lineCap = 'round'; ctx.strokeStyle = css(mix(gcol[0], gcol[1], warm(.5)), .9);
   for (const f of G.flyers) {
@@ -3595,7 +3649,7 @@ function drawWorld() {
     const y = s.y + Math.sin(G.t / 26 + s.ph) * 4, tw = .82 + .18 * Math.sin(G.t / 11 + s.ph * 3);
     glow(x, y, 54, .5 * tw * s.a); glow(x, y, 17, s.a);
   }
-  if (G.state !== 'title' && !(G.train && G.train.pOn)) glow(P.x - cam, GY - 84, 210 + G.got * 2.2, (.1 + Math.min(.2, G.got * .0045)) * dim * (1 - intoGate(P.x)));   // the warmth he carries
+  if (G.state !== 'title' && !(G.train && G.train.pOn) && !(G.tank && G.tank.pOn)) glow(P.x - cam, GY - 84, 210 + G.got * 2.2, (.1 + Math.min(.2, G.got * .0045)) * dim * (1 - intoGate(P.x)));   // the warmth he carries
   for (const m of G.motes) { const x = m.x - cam, tw = (.75 + .25 * Math.sin(G.t / 9 + m.tw)) * (m.a ?? 1); glow(x, m.y, 26, .5 * tw * dim); glow(x, m.y, 8.5, tw * dim); }
   for (const g of G.glints) { const x = g.x - cam * g.par, a = Math.sin(Math.PI * g.t / 56); glow(x, g.y, 34, .6 * a); glow(x, g.y, 12, .8 * a); }      // build 102: a soft round glint only (its four-pointed star of lines read as a cross)
   for (const t of G.taps) { ctx.globalAlpha = .5 * (1 - t.t / 26); ctx.strokeStyle = '#fff3d0'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(t.x, t.y, 6 + t.t * 1.3, 0, 6.2832); ctx.stroke(); }
@@ -3603,7 +3657,7 @@ function drawWorld() {
   ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
   // zoomed out (see draw()): the rain falls through the sky above the old top edge too
   // falling rain
-  const n = Math.round(LOOK.rain * drops.length);
+  const n = Math.round(LOOK.rain * drops.length * (1 - .85 * (G.hushA || 0)));      // build 111: the rain hushes as he faces the guard
   ctx.strokeStyle = css(mix(PAL.hazeC, [255, 255, 255], .5)); ctx.lineCap = 'round'; ctx.lineWidth = 1.1;
   for (let i = 0; i < n; i++) {
     const d = drops[i]; d.y += d.v * STEPS; d.x -= d.v * .2 * STEPS; if (d.y > VH + 20) { d.y = -30; d.x = Math.random() * (VW + 160); }
@@ -3674,6 +3728,7 @@ stage.addEventListener('pointerdown', e => {
     if (HL.on && G.act) { HL.touch(sx, sy); return; }
     if (G.act === 'hand') { SL.touch(sx, sy); return; }
     if (G.act === 'light') { const l = lightPos(); if (Math.hypot(sx - l.x, sy - l.y) < 95) lightTouched(); else G.actT = Math.max(G.actT, 149); return; }
+    if (G.act === 'tankjump') { tankJump(); return; }      // build 111: any touch jumps
     if (G.act === 'walkon') { downs.set(e.pointerId, G.t); return; }
     if (G.act === 'gate') { if (Math.abs(sx - (DOORM - G.cam)) < 120 && sy > GY - 340 && sy < GY + 40) { pushing = true; pushId = e.pointerId; } else G.actT = Math.max(G.actT, 39); return; }
     next(); return;
@@ -3708,6 +3763,7 @@ addEventListener('keydown', e => {
   if (G.state === 'dialog') {
     if (G.act === 'gate' || G.act === 'walkon' || (RM.on && RM.HOLDS.includes(G.act))) keys.push = true;
     else if (G.act === 'light') { if (!e.repeat) lightTouched(); }
+    else if (G.act === 'tankjump') { if (!e.repeat) tankJump(); }
     else if (CR.on && G.act) { if (!e.repeat) CR.key(); }
     else if (RM.on && G.act) { if (!e.repeat) RM.key(); }
     else if (HL.on && G.act) { if (!e.repeat) HL.key(); }
