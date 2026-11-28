@@ -256,7 +256,7 @@ every year.</div>
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 107 · Nov 28 2026</div>
+  <div id="build">build 108 · Nov 28 2026</div>
   <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
@@ -910,11 +910,12 @@ const FIELD_END = 1650;      // where the wheat field ends and the street begins
 // wheat along the road, from just past the last cottage to short of the city wall.
 const TOWN_END = { 1: 5600, 2: 6600 }, FIELD2 = [6700, 9000];
 // build 71 (owner: "put a little space between [the lights] and gate so we get nice shot with tank"): the run ends and the two men stand 300 sooner (RUN_END was 7700, NEIGH_X 8350)
-const EVAN_X = 420, HOME_X = 2150, RUN_END = 7400, NEIGH_X = 8050, GATE_STOP = 9770, DOOR0 = 9855, DOOR1 = 10085, DOORM = 9970;      // build 494 (owner: "run a little farther before he stops (no houses in view) ... path thru a field indicating outskirts of town"): everything from his stop on is 1400 further      // build 110: the street after his house is 900 longer, so each line is said where it belongs while he runs, and the road from the neighbours to the gate 600 longer (owner: "need more space here for obstinate and pliable to catch up and narration to read")      // build 100: a 2.6 m gateway (88 units to a metre)      // build 91: the gateway is wider (was 7006 to 7120), so the painted gatehouse is bigger
+// build 108 (owner: "put some space between two bad guys and barricade"): 500 sooner again (RUN_END was 7400, NEIGH_X 8050), so about 1900 of clear road lie between them and the barricade
+const EVAN_X = 420, HOME_X = 2150, RUN_END = 6900, NEIGH_X = 7550, GATE_STOP = 9770, DOOR0 = 9855, DOOR1 = 10085, DOORM = 9970;      // build 494 (owner: "run a little farther before he stops (no houses in view) ... path thru a field indicating outskirts of town"): everything from his stop on is 1400 further      // build 110: the street after his house is 900 longer, so each line is said where it belongs while he runs, and the road from the neighbours to the gate 600 longer (owner: "need more space here for obstinate and pliable to catch up and narration to read")      // build 100: a 2.6 m gateway (88 units to a metre)      // build 91: the gateway is wider (was 7006 to 7120), so the painted gatehouse is bigger
 // SKIP AHEAD (owner, build 89: "is there a way to skip ahead to a moment?"): add ?at=NAME to the link. Each name starts
 // the level just before that moment, after Evangelist. (?x=N still works for any place on the road; ?level=2 starts
 // at the Slough of Despond.)
-const AT = { door: 1500, neighbours: 3950, obstinate: 7700, gate: 9600 };
+const AT = { door: 1500, neighbours: 3950, obstinate: 7200, gate: 9600 };
 let TEST_X = +(new URLSearchParams(location.search).get('x')) || AT[new URLSearchParams(location.search).get('at')] || 0, START_X = TEST_X || HOME_X - 280;   // he starts beside his own door; ?x=3600 starts further along, after Evangelist (for testing)
 // (build 472, owner: "if i play and then click worldly wise after completely level it should take me to start of level then, right?"):
 // a link's place (at=, x=, room=) is used by the FIRST level start only; then it is cleared from the address, so choosing a
@@ -2847,7 +2848,7 @@ function drawPort(cam) {
 // why guys showed up)"): as he nears the end of his run (DRONE_A) it comes in fast from the right, drops to hang just over his head,
 // keeps over him a few seconds, then turns and flies back off to the right, the way the two men will come from. It moves by its
 // place relative to him (rx, ry), so it keeps over him whether he runs, walks or stops. Its hum is louder and has a higher whine.
-const DRONE_A = 6750; let DRONE_SND = null;
+const DRONE_A = 6250; let DRONE_SND = null;      // build 108: 500 sooner, with the run's end
 function droneSound(v, pitch = 1) {
   if (!AC || muted) { if (DRONE_SND) DRONE_SND.g.gain.value = 0; return; }
   if (!DRONE_SND) { try {
@@ -2889,7 +2890,7 @@ function drawDrone(cam) {
 // picture (sources/tank: gen-tank.py, cut-tank.py; assets/tank.webp), no markings, gun level, toned to its level like the port: on its own
 // level between the rails and the fence (p .7), well behind him, at real scale (2.6 m high against a man's 1.8 m; 61 px a metre at p .7).
 // It waits past the drone and, as he comes, rolls slowly toward the town (about 5 km/h) with a little shudder and a low rumble made in code.
-const TANK = { a: 9650, p: .7, k: .213, gnd: 904, go: 9400, run: 380 }; let TANK_IM = null, TANK_SND = null;
+const TANK = { a: 9650, p: .7, k: .213, gnd: 904, go: 8500, run: 380 }; let TANK_IM = null, TANK_SND = null;      // build 108 (owner: "The tank should roll by well before barricade"): it sets off as he reaches 8500 (was 9400), so it rolls out and stops by the barricade while he is still well back
 function bakeTank(im) { const out = {}; for (const [n, i] of [['cool', 0], ['warm', 1]]) { const c = mk(im.width, im.height), q = c.getContext('2d'); q.drawImage(im, 0, 0); q.globalCompositeOperation = 'source-atop'; q.fillStyle = css(layerCol(.7)[i], .8); q.fillRect(0, 0, im.width, im.height); out[n] = c; } return out; }
 function tankSound(v) {
   if (!AC || muted) { if (TANK_SND) TANK_SND.g.gain.value = 0; return; }
