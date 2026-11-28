@@ -202,7 +202,7 @@ body.portrait:not(.playing) #rot{display:none}
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 27 · Nov 28 2026</div>
+  <div id="build">build 29 · Nov 28 2026</div>
   <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
@@ -1275,6 +1275,8 @@ const HEARD = new Set();                   // lines already heard to the end (th
 const C = 'Christian', E = 'Evangelist', N = '', O = 'Obstinate', PL = 'Pliable', W = 'His wife';
 // build 16: the 2100 telling's people (the owner's script app; no narrator): the pilgrim, Phillip, the radio, the friend at the party
 const PG = 'Pilgrim', PH = 'Phillip', RD = 'Radio', FR = 'Friend';
+// build 27: scenes 4 to 6 (the script app, approved): the townswoman, a man in a doorway, the big man (the old Obstinate's figure), the young man (the old Pliable's)
+const TW = 'Townswoman', DM = 'A man in a doorway', BM = 'Big man', YM = 'Young man';
 // TIP: a line that tells the child what to do (owner, build 108: "narrator should only say what's relevant to story - little
 // side messages can tell user what to do"). Shown like a hint (quiet italics, no name), never spoken, inside a talk.
 const TIP = 'tip';
@@ -1391,7 +1393,7 @@ async function say(who, txt) {
 }
 // fetch every line's recording quietly, in story order, while the child is already playing
 async function fetchVoices() {
-  const all = [...INTRO, ...PARTY_NO, ...FIELDS, ...EVAN, ...ASK_GO, ...ASK_NO, ...EVAN2, ...NAME_ASK, ...NAME_THANKS, ...GONE, ...RUNS, ...DOOR_WORDS, ...FAMILY, ...LIFE, ...WATCH, ...FETCH, ...NEIGH_CALL]; for (const c of CAPS) all.push(...c.lines); all.push(...NEIGH, ...HOME, ...ONWARD, ...PART, ...GATEWORDS, ...END);
+  const all = [...INTRO, ...PARTY_NO, ...FIELDS, ...EVAN, ...ASK_GO, ...ASK_NO, ...EVAN2, ...NAME_ASK, ...NAME_THANKS, ...GONE, ...NEIGH_BURN, ...NEIGH_HOME, ...RUNS, ...DOOR_WORDS, ...FAMILY, ...LIFE, ...WATCH, ...FETCH, ...NEIGH_CALL]; for (const c of CAPS) all.push(...c.lines); all.push(...NEIGH, ...HOME, ...ONWARD, ...PART, ...GATEWORDS, ...END);
   for (const [who, txt] of all) { if (who === TIP) continue; const v = vox(who, txt); await v.raw; await voxBuf(v); }
 }
 function caption(arr) { for (const l of arr) G.capQ.push(l); }
@@ -1457,11 +1459,14 @@ const FAMILY = [
 ];
 const LIFE = [[C, 'Life! Life! Eternal life!', 'quick']];      // said as he runs ('quick': they pass as soon as they are heard)
 // {19} to {24}: the neighbours come out while he is still running; two set out to fetch him back, and overtake him
-const WATCH = [[N, 'The neighbors also came out to see him run.', 'quick'], [N, 'Some mocked. Some threatened. And some cried after him to come back.', 'quick']];
-const FETCH = [[N, 'Two of them, Obstinate and Pliable, set out to bring him back by force.']];
+// BUILD 27: SCENE 4, BACK DOWN THE STREET (approved; no narrator): said as he runs past the party and the doorways (1 Peter 4:4: they think it strange)
+const WATCH = [[FR, 'Where are you going? The night\'s just starting!', 'quick'], [TW, 'He\'s lost his mind.', 'quick'], [DM, 'Thinks he\'s better than us now.', 'quick']];
+const FETCH = [];      // build 27: no narrator
 // build 175 had the first two called out as the two caught up with him; since build 506 (owner) they are said once they have met (the book, {19}): NEIGH_CALL opens the talk NEIGH
 // (people() below)
-const NEIGH_CALL = [[C, 'Neighbors, why have you come?'], [O, 'To persuade you to go back with us.']];
+// BUILD 27: SCENE 5, TWO NEIGHBOURS CATCH UP (approved), then choice 4 (pick: 'neigh'), the young man comes, the big man goes home (PART)
+const NEIGH_CALL = [[BM, 'Come back. You\'re scaring people.'], [PG, 'We\'ve wasted enough time. Come with me.'], [BM, 'And leave everything we have?']];
+const NEIGH_BURN = [[PG, 'It\'s all going to burn.']], NEIGH_HOME = [[PG, 'Then go home.']];
 const NEIGH = [
   [C, 'That cannot be. Come with me instead, good neighbors.'],
   [O, 'What! And leave our friends and our comforts behind us?'],      // {20}; then the child chooses (the choice is ours, not the book's)
@@ -1471,11 +1476,7 @@ const HOME = [
   [C, 'No. I cannot stay here. My burden is too heavy.', null, () => { G.gloomTo = 0; }],
 ];
 const ONWARD = [[C, 'Yes. All you leave behind is not worth a little of what I seek. Come with me, and see for yourselves.']];
-const PART = [       // {21} to {24}
-  [O, 'Tush! Away with your book. Come, Pliable, let\'s go home without him.'],
-  [PL, 'If what Christian says is true, the things he seeks are better than ours. I will go with him.'],
-  [O, 'What! More fools still? I\'m going home.'],
-];
+const PART = [[YM, 'If what you say is true... I\'ll come.'], [BM, 'Then you\'re both fools. I\'m going home.']];      // build 27
 // FOR LEVEL 2 (owner, build 68: "pliable's discussion with christian should move to beginning of level 2"). In the book
 // ({25} to {28}) Christian and Pliable "went talking over the plain" after Obstinate has gone back, and that talk ends
 // with both of them falling into the Slough of Despond ({29}). These four lines were said on the road to the gate here
@@ -1486,11 +1487,13 @@ const LEVEL2_OPENING = [
   [PL, 'Tell me more of the place where we are going.'],
   [C, 'There shall be no more crying, nor sorrow. We shall shine like the sun.'],
 ];
+// BUILD 27: SCENE 6, THE BARRICADE (approved)
 const GATEWORDS = [
-  [N, 'At the edge of the city stood the city gate. It was shut.'],      // vision chat: "the city gate", so it is not taken for the wicket-gate
-  [TIP, isTouch ? 'Hold the gate to push it open.' : 'Hold the gate (or the space bar) to push it open.', 'gate'],      // build 108: a side message, not the storyteller
+  [YM, 'They\'ve walled the city in.'],
+  [PG, 'Then we go through.'],
+  [TIP, isTouch ? 'Hold the gate to push it open.' : 'Hold the gate (or the space bar) to push it open.', 'gate'],      // a side message, never spoken
 ];
-const END = [[N, 'Christian and Pliable left the city behind. The shining light was ahead of them.']];
+const END = [];      // build 27: no narrator
 
 // ---------- the choice: go home, or go on ----------
 const choiceEl = document.getElementById('choice');
@@ -1504,6 +1507,11 @@ const nameChoice = () => offer('name', 'And who are you?', 'Thank you.', '(say n
 function pick(home) {
   if (G.state !== 'choice') return;
   const kind = G.choiceKind;
+  if (kind === 'neigh') {      // build 27: choice 4; either way the young man comes and the big man goes home
+    choiceEl.className = ''; document.body.classList.remove('talking'); G.choiceKind = null; G.nchose = true;
+    talk(home === true ? NEIGH_BURN : NEIGH_HOME, () => { G.obst.wait = true; G.pli.mode = 'follow'; P.turn = 1; caption(PART); });
+    return;
+  }
   if (kind === 'party' || kind === 'ask' || kind === 'name') {      // build 16: the new scenes' choices
     choiceEl.className = ''; document.body.classList.remove('talking'); document.getElementById('chThird').style.display = 'none'; G.choiceKind = null;
     if (kind === 'party') {
@@ -1942,7 +1950,7 @@ function people() {
     if (o.x <= P.x - 235) { o.x += 2.2; p.x += 2.2; }        // hurrying after him, but still walking; they wait a step behind while words are said
     // build 506 (owner: "shouldn't christian not respond to pliable and obstinant till they meet?"): the book, {19}: "they overtook
     // him. Then said Christian, Neighbours, wherefore are ye come?": he speaks only once they have caught him up
-    if (o.x > P.x - 235 && G.state === 'play' && !saying()) { o.mode = p.mode = 'talk'; o.called = true; P.turn = -1; talk([...NEIGH_CALL, ...NEIGH], choose); }
+    if (o.x > P.x - 235 && G.state === 'play' && !saying()) { o.mode = p.mode = 'talk'; o.called = true; P.turn = -1; talk(NEIGH_CALL, () => offer('neigh', 'It\'s all going to burn.', 'Then go home.')); }      // build 27: choice 4
   }
   // Standing (owner: they should stand while talking, not freeze mid-stride): once a walker has come to rest, his painted
   // standing pose dissolves in (st 0 = walking picture, 1 = standing picture); before he walks again it dissolves out.
@@ -2986,7 +2994,7 @@ function drawDream(c, u, fire) {
 // THE DREAM IS A VIDEO TOO (build 21; owner: "The nuclear bomb needs an animation to make it realistic"): a photo-real dusk skyline after the
 // traced one (no Space Needle; sources/dream/skyline.png), then a video from it: the flash behind the towers at about 2 s, the fireball and
 // the cloud rising, the camera tilting up after it (sources/dream/blast.mp4, 10 s). Silent. The code-drawn dream stays as the fallback.
-const DREAMVID = (() => { try { const v = document.createElement('video'); v.src = 'assets/dream.' + (v.canPlayType('video/mp4; codecs="avc1.640028"') ? 'mp4' : 'webm') + '?v=27'; v.muted = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('muted', ''); v.preload = 'auto'; v.load(); return v; } catch (e) { return null; } })();
+const DREAMVID = (() => { try { const v = document.createElement('video'); v.src = 'assets/dream.' + (v.canPlayType('video/mp4; codecs="avc1.640028"') ? 'mp4' : 'webm') + '?v=29'; v.muted = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('muted', ''); v.preload = 'auto'; v.load(); return v; } catch (e) { return null; } })();
 const EYEVID = (() => { try { const v = document.createElement('video'); v.src = 'assets/eyes-open.' + (v.canPlayType('video/mp4; codecs="avc1.640028"') ? 'mp4' : 'webm') + '?v=25';      /* H.264 where it plays, else VP9 */ v.muted = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('muted', ''); v.preload = 'auto'; v.load(); return v; } catch (e) { return null; } })();
 function wakeEyes(then) {
   const ec = document.getElementById('eyes'); if (!ec) { setTimeout(then, 1700); return; }
@@ -2996,7 +3004,7 @@ function wakeEyes(then) {
   const dv = DREAMVID && DREAMVID.readyState >= 2 ? DREAMVID : null;      // build 21: the dream is a real video when it has loaded (else the code-drawn one)
   // build 26: the video's first frame is HELD (the calm city, VH ms) before it plays, and it goes to white just after the city is gone
   // (video s VW0..VW1), so the darkest part of the blast is not shown; then white, then black
-  const VH = 3000, VW0 = 5.4, VW1 = 6.8, FL = 3600, DR = dv ? VH + VW1 * 1000 + 1300 : FL + 6700;
+  const VH = 3000, VW0 = 5.0, VW1 = 6.3, FL = 3600, DR = dv ? VH + VW1 * 1000 + 1300 : FL + 6700;
   if (dv) { try { dv.pause(); dv.currentTime = 0; } catch (e) {} } let dvOn = false;
   // build 21: his eyes are a real video (assets/eyes-open.mp4, 7.5 s: asleep in bed to 2 s, waking 2.5 to 4.5 s, a blink near 6 s, awake); D.inn..D.hold span it
   const D = { black: 400, inn: 1200, shut: 1000, open: 2500, hold: 2300, out: 1500 };
