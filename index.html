@@ -1935,6 +1935,11 @@ const figC = mk(8, 8), shC = mk(8, 8), FEET_SINK = 9;
 // which picture he is in: running (fingers in his ears, from his run video), standing, or walking
 // build 30: the 2100 pilgrim's walk (assets/pilgrim-walk.pack, one whole stride from sources/pilgrim/walk.mp4, heels down at 10 and 28),
 // in Level 1 only; standing he holds the stride's feet-together picture (PW_STAND). His run, turn and weeping are still the old figure.
+// build 106 (owner, of the flip when Phillip points: "Can we have him turn more naturally ... quick but very natural"; then "Please do"):
+// his turn round, from sources/pilgrim/turn.mp4 (made for this in the opening-artistry chat: head, then shoulders and pack, one small
+// pivoting step, about a second), video frames 8..44 at the walk's size (--height 463, toned to the walk): frame 0 faces right, the last
+// left. Played BACKWARDS for his turn toward the light (left to right), at the video's own pace (24 a second), then he stands (PST[0]).
+const PTN = [], PTN_META = {"ax": 134, "ground": 304, "frames": 37, "step": 24 / 60};
 const PW = [], PW_META = {"ax": 132, "ground": 299, "frames": 37, "vpx": 5.1, "rest": [10, 28]}, PW_STAND = 6, PW_STEP = PW_META.vpx * CHR_K;
 const pwOn = () => PW.ready && !SL.on && !HL.on && !CR.on;
 const pwFrame = () => ((Math.floor(P.anim) % PW.length) + PW.length) % PW.length;
@@ -1943,7 +1948,7 @@ const pwFrame = () => ((Math.floor(P.anim) % PW.length) + PW.length) % PW.length
 // Stopping, he walks on to loop frame 31 and plays the start backwards to stand (P.stand.st 13 -> 0); setting off, it plays forwards (P.sp 0 -> 13) and joins the loop at 31.
 const PST = [], PST_META = {"ax": 132, "ground": 300, "frames": 14}, PST_JOIN = 31, PST_END = 13;
 const pstOn = () => pwOn() && PST.ready;
-const chrPose = () => pwOn() && !P.turnV && !P.weep && !P.run ? (P.stand ? (PST.ready && P.stand.pf == null ? [PST[Math.round(P.stand.st || 0)], PST_META] : [PW[P.stand.pf ?? PW_STAND], PW_META]) : P.sp != null && PST.ready ? [PST[Math.min(PST_END, Math.floor(P.sp))], PST_META] : [PW[pwFrame()], PW_META]) : P.turnV && TURN.ready ? [TURN[Math.min(TURN.length - 1, Math.floor(P.turnV.t))], TURN_META] : P.weep && WEEP.ready ? [WEEP[Math.min(WEEP.length - 1, Math.floor(P.weep.t))], WEEP_META] : P.run ? (([set, meta]) => [set[((Math.floor(P.ranim) % set.length) + set.length) % set.length], meta])(runNow()) : P.stand ? [STD[stdFrame()], STD_META] : [CHR[chrFrame()], CHR_META];
+const chrPose = () => P.turnV && P.turnV.n && PTN.ready ? [PTN[Math.max(0, PTN.length - 1 - Math.floor(P.turnV.t))], PTN_META] : pwOn() && !P.turnV && !P.weep && !P.run ? (P.stand ? (PST.ready && P.stand.pf == null ? [PST[Math.round(P.stand.st || 0)], PST_META] : [PW[P.stand.pf ?? PW_STAND], PW_META]) : P.sp != null && PST.ready ? [PST[Math.min(PST_END, Math.floor(P.sp))], PST_META] : [PW[pwFrame()], PW_META]) : P.turnV && TURN.ready ? [TURN[Math.min(TURN.length - 1, Math.floor(P.turnV.t))], TURN_META] : P.weep && WEEP.ready ? [WEEP[Math.min(WEEP.length - 1, Math.floor(P.weep.t))], WEEP_META] : P.run ? (([set, meta]) => [set[((Math.floor(P.ranim) % set.length) + set.length) % set.length], meta])(runNow()) : P.stand ? [STD[stdFrame()], STD_META] : [CHR[chrFrame()], CHR_META];
 // Walking and standing join frame to frame. Running does not, so going into or out of the run the old picture dissolves
 // into the new one over a fifth of a second (the new one comes in on top, then the old one goes: nothing shows through).
 // n = ticks; quick = the new picture is there at once and the old one fades off it (used into and out of the run:
@@ -2163,7 +2168,7 @@ let TURN = []; const TURN_META = {"ax": 90, "ground": 302, "frames": 30, "step":
 // BUILD 109 (owner: "shouldn't christian turn to see where evangelist is pointing before viewer can click and he says I
 // think i do"): on "Do you see that shining light?" he turns round to look where Evangelist points (turnToLight); only
 // when he has turned (turnedToLight) can the light be touched, and then he answers "I think I do."
-function turnToLight() { if (P.face > 0) return; if (pwOn()) { P.turn = 1; return; } if (TURN.ready && P.stand) P.turnV = { t: 0 }; else if (BACK && P.stand) { P.turnTo = 1; P.wantBack = true; } else P.turn = 1; }
+function turnToLight() { if (P.face > 0) return; if (pwOn()) { if (PTN.ready && P.stand) { P.turnV = { t: 0, n: 1 }; return; } P.turn = 1; return; } if (TURN.ready && P.stand) P.turnV = { t: 0 }; else if (BACK && P.stand) { P.turnTo = 1; P.wantBack = true; } else P.turn = 1; }
 const turnedToLight = () => P.face > 0 && !P.turnV && !P.turnTo && !P.turn;
 // build 79 (owner: "The sound effect when I click the light is kinda corny"): no quick rising harp chord; one low, soft swell,
 // an open fifth (G and D, an octave apart) that breathes in over about a second and dies away slowly
@@ -2233,7 +2238,7 @@ function update() {
   // build 180 (owner: "can he look up a little when he points at light"): on "Do you see that shining light?" he lifts his
   // head a little toward it (a tilt of the standing picture at the neck, in drawFrame), until he walks on
   if (dir) P.lookUp = 0; P.lookA = (P.lookA || 0) + ((P.lookUp ? 1 : 0) - (P.lookA || 0)) * .035;
-  if (P.turnV && (dir || (P.turnV.t += TURN_META.step) >= TURN_META.frames - 1)) { if (dir) poseChange(6, true); P.turnV = null; P.face = 1; P.stand = { t: QUIET[0] }; }      // the turn is done (or the child walks on)
+  if (P.turnV && (dir || (P.turnV.t += P.turnV.n ? PTN_META.step : TURN_META.step) >= (P.turnV.n ? PTN.length : TURN_META.frames) - 1)) { if (dir) poseChange(6, true); P.turnV = null; P.face = 1; P.stand = { t: QUIET[0] }; }      // the turn is done (or the child walks on)
   if (P.turnTo && (P.bk || 0) >= .99) { P.face = P.turnTo; P.turnTo = 0; P.wantBack = false; }      // half way through his turn: now he faces the light
   if (P.wantBack && !P.turnTo && (dir > 0 || G.state === 'play')) P.wantBack = false;      // the child holds to run on: he turns away
   P.bk = Math.max(0, Math.min(1, (P.bk || 0) + (P.wantBack && P.stand ? .022 : -.07)));
@@ -4168,7 +4173,7 @@ document.getElementById('on2').onclick = () => SL.on ? go3() : HL.on ? go5() : g
 (async function boot() {
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.fillStyle = '#5d6b80'; ctx.fillRect(0, 0, VW, VH);
   await new Promise(r => setTimeout(r, 30));
-  const chr = Promise.all([loadPack('christian-walk', CHR), loadPack('pilgrim-walk', PW).catch(() => {}), loadPack('pilgrim-run', PR).catch(() => {}), loadPack('pilgrim-start', PST).catch(() => {}), loadPack('christian-stand', STD), 
+  const chr = Promise.all([loadPack('christian-walk', CHR), loadPack('pilgrim-walk', PW).catch(() => {}), loadPack('pilgrim-run', PR).catch(() => {}), loadPack('pilgrim-start', PST).catch(() => {}), loadPack('pilgrim-turn', PTN).catch(() => {}), loadPack('christian-stand', STD), 
     // build 89 (owner: "when I first open link house isn't there then flickers there"): what the first picture shows (his
     // house and its row, the trees, his wife in the door) now loads before "Open the book" appears, not after
     Promise.resolve().then(() => { HOUSE = bakeTint(streetFront('h'), HOUSE_DEPTH, HOUSE_DETAIL); for (const key of ['b', 'c']) NB[key] = bakeTint(streetFront(key), HOUSE_DEPTH, HOUSE_DETAIL); buildRow(); }),      // build 13: city buildings drawn in code, not the cottage paintings
