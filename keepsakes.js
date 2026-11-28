@@ -29,9 +29,11 @@ const KS = (() => {
   style.textContent = `
 /* (build 663) ONE RIBBON in place of the pause, sound and auto-walk buttons: the book's own red ribbon hangs at the top of
    the picture; a touch on it opens the contents page (the menu) */
-#ribbon{position:absolute;right:5%;top:0;width:clamp(15px,2.3vw,23px);aspect-ratio:16/27;border:none;padding:0;background:none;display:none;cursor:pointer;opacity:.85;z-index:5;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5));-webkit-tap-highlight-color:transparent}
-#ribbon::after{content:'';position:absolute;inset:-4px -18px -20px -18px}
-#ribbon:active{opacity:1}
+#ribbon{position:absolute;right:max(10px,1.6%);top:max(8px,1.6%);width:clamp(34px,4.6vw,44px);height:clamp(34px,4.6vw,44px);border-radius:50%;border:1px solid rgba(244,236,220,.42);background:rgba(16,18,26,.42);padding:0;display:none;cursor:pointer;z-index:5;-webkit-tap-highlight-color:transparent}
+#ribbon i{position:absolute;left:30%;right:30%;height:1.6px;border-radius:1px;background:rgba(244,236,220,.85)}
+#ribbon i:nth-child(1){top:34%}#ribbon i:nth-child(2){top:49%}#ribbon i:nth-child(3){top:64%}
+#ribbon::after{content:'';position:absolute;inset:-10px}
+#ribbon:active{background:rgba(16,18,26,.7)}
 body.playing #ribbon{display:block}
 .kscover{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 50%,rgba(22,18,14,.72),rgba(8,8,12,.9));touch-action:none;-webkit-user-select:none;user-select:none}
 .kscover.on{display:flex;animation:ksfade .45s ease both}
@@ -386,11 +388,10 @@ body.portrait #ksmenu .kspage{width:92vw;max-height:80vh;font-size:clamp(15px,4.
 
   // ---------- the overlays ----------
   const mkEl = (html) => { const d = document.createElement('div'); d.innerHTML = html.trim(); return d.firstChild; };
-  const pauseBtn = mkEl(`<button id="ribbon" aria-label="The contents"></button>`);
+  const pauseBtn = mkEl(`<button id="ribbon" aria-label="Menu"><i></i><i></i><i></i></button>`);
   document.getElementById('stage').appendChild(pauseBtn);
-  { const tr = document.querySelector('.tribbon'); pauseBtn.style.background = (tr && tr.style.background) || 'linear-gradient(90deg,#5d1712,#8c2a20 45%,#6a1b15)'; }
-  const NAMES = ['The City of Destruction', 'The Slough of Despond', 'Mr. Worldly Wiseman', 'The Interpreter’s House', 'The Cross'], ROMAN = ['I.', 'II.', 'III.', 'IV.', 'V.'];
-  const menu = mkEl(`<div id="ksmenu" class="kscover"><div class="kspage"><div class="kspin"><div class="kh">THE CONTENTS.</div><div class="krule"></div><div class="klv"></div><div class="krule d"></div>
+  const NAMES = ['The city', 'The fields', 'The mountain', 'The house', 'The steeple'], ROMAN = ['1.', '2.', '3.', '', '4.'];
+  const menu = mkEl(`<div id="ksmenu" class="kscover"><div class="kspage"><div class="kspin"><div class="kh">THE WAY</div><div class="krule"></div><div class="klv"></div><div class="krule d"></div>
     <div class="kfoot"><button data-snd="1">Sound<b></b></button><button data-auto="1">He walks on by himself<b></b></button></div></div></div><div class="khint">Touch outside the page to go on</div></div>`);
   const book = mkEl(`<div id="ksbook" class="kscover"><div class="bible"><div class="spread"><div class="edges"></div><div class="page L"></div><div class="page R"></div>
     <div class="leaf"><div class="face front"></div><div class="face back"></div></div><div class="spine"></div><div class="ribbon"></div><div class="page scratch"></div></div></div>
