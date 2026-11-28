@@ -1,7 +1,7 @@
 {
- "name": "Pilgrim's Progress",
+ "name": "P2100",
  "id": "./",
- "short_name": "Pilgrim",
+ "short_name": "P2100",
  "start_url": "./",
  "scope": "./",
  "display": "fullscreen",

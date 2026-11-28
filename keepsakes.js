@@ -463,7 +463,8 @@ body.portrait #ksmenu .kspage{width:90vw;max-height:80vh;font-size:clamp(18px,5.
   function renderMenu() {
     const lv = curLv(), ps = MO.POINTS[lv - 1][2], all = typeof ED !== 'undefined' && ED.on, far = all ? ps.length - 2 : Math.max(MO.reached(lv), MO.here()), now = MO.here();
     let h = '';
-    NAMES.forEach((n, i) => { if (i === 3) return; h += `<button class="kl${i + 1 === lv ? ' here' : ''}" ${i + 1 === lv ? '' : `data-go="${i + 1}"`}><i>${ROMAN[i]}</i><span>${n}</span></button>`;
+    NAMES.forEach((n, i) => { if (i >= 2) return;      // build 85: the levels not yet redone (3, 4, 5) are not offered
+      h += `<button class="kl${i + 1 === lv ? ' here' : ''}" ${i + 1 === lv ? '' : `data-go="${i + 1}"`}><i>${ROMAN[i]}</i><span>${n}</span></button>`;
       if (i + 1 === lv) h += '<div class="km">' + ps.map((p, j) => j > far || j === ps.length - 1 || (/^[67] /.test(p[0]) && !darkOn()) ? '' : `<button data-m="${j}"${j === now ? ' class="now"' : ''}><span>${p[2] || p[0]}</span></button>`).join('') + '</div>'; });
     menu.querySelector('.klv').innerHTML = h;
     // in his hand: every piece of writing on the note shaken letter by letter, as on the title's note (SCRAWL, index.html)

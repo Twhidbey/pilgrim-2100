@@ -1555,7 +1555,7 @@ const CR = (() => {
     const e = document.getElementById('endc');
     e.querySelector('h1').textContent = 'The Cross';
     e.querySelectorAll('p')[0].textContent = 'His burden fell from his back, and he went on his way singing.';
-    e.querySelectorAll('p')[1].textContent = 'Next: the Hill Difficulty (not yet built)';
+    e.querySelectorAll('p')[1].textContent = 'Next: not yet built';
     document.getElementById('on2').style.display = 'none';
   }
   function touch(px, py) {

@@ -944,7 +944,7 @@ const HL = (() => {
     const e = document.getElementById('endc');
     e.querySelector('h1').textContent = 'At the gate';
     e.querySelectorAll('p')[0].textContent = 'He knocked, and one came to the gate, named Good-will.';
-    e.querySelectorAll('p')[1].textContent = 'Next: the Cross';
+    e.querySelectorAll('p')[1].textContent = 'Next: The steeple';
     document.getElementById('on2').style.display = '';
   }
   function turnC(d, k = 1) { if (C3.face === d) return; if (TURN.length) C3.tv = { t: d > 0 ? 0 : TURN.length - 1, d, k }; else C3.face = d; }

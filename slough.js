@@ -86,7 +86,8 @@ const SL = (() => {
   // build 65 (owner: "he's got to be in [the] middle (much larger pool, swept out by current) so [boat] is only reasonable way to
   // help him out"; "Motorboat, for now free parts"): the far bank and the oak stand WIDEN further off, so where he sticks fast
   // (STUCK_X, unchanged) is out in the middle of a wide water; Help comes to him there in a small motorboat (BOAT, below)
-  const WIDEN = 520, BANK0 = -160 + WIDEN, HOME0 = -1010;                       // where each bank meets the water
+  const WIDEN = 1200, BANK0 = -160 + WIDEN, HOME0 = -1010;      // build 86 (owner: "The space between shores should be much longer"): 1200, was 520
+                        // where each bank meets the water
   const WU = u => HOME0 + u * (BANK0 - HOME0);      // a place a fraction u of the way across (the pools were laid out in fractions of the old width)
   const poolT = (x, yy) => { const w = smooth(WU(.282), WU(.923), x); return .86 - .52 * w - .13 * (1 - w) * smooth(30, 90, yy); };      // build 257: near the home bank a few pools open in the foreground too (the mud under the men stays mud)
   const poolN = (x, yy) => .72 * cloudN(x * .009, yy * .3 + 3) + .28 * cloudN(x * .024 + 9, yy * .55 + 1);      // build 260: less of the fine noise (fewer small islands: the critics' "camouflage")
@@ -113,7 +114,7 @@ const SL = (() => {
   const WADE0 = FALL_X + 70;      // build 119: falling, Christian pitches on this much further, so the two are not on top of each other in the mire
   // Help kneels at the edge of the far bank; Christian must come to where his hand meets Help's (measured in slough-lab.html)
   // build 65: Help kneels in his boat's bow where he knelt on the bank before (the boat's deck at the old bank's height, DECK)
-  const HX = -126, GRASP = { dx: -(82 - 15 + 129), dy: 283 - 55 }, DECK = -6;      // build 76: the deck, where his standing picture matches the haul's end (stand-match.py)
+  const HX = 74, GRASP = { dx: -(82 - 15 + 129), dy: 283 - 55 }, DECK = -6;      // build 76: the deck, where his standing picture matches the haul's end (stand-match.py)
   const HY = () => DECK + 4;
   const STUCK_X = HX + (360 - 640) * (288 / 463 * CHR_K), STUCK_Y = () => HY() + GRASP.dy * CHR_K;
   const MD_IN = 16, MD_FAR = 28, REACH_F = 88, REACH_X = HX - 82;      // build 260: see DEEP IN THE MIRE in update()
@@ -145,7 +146,7 @@ const SL = (() => {
   // It comes in from the right out of the mist (BOAT_IN), the motor cut part way so it glides to a stop beside him; after the
   // lift it backs slowly (FERRY) until its stern lies against the far bank; when he goes on his way it leaves, bow first.
   const BOAT_IN = 680, BOAT_T = 460, BOW = -132, STERN = 418,      // build 76: the bow left of where he climbs aboard
-    FERRY = BANK0 + 12 - (HX + STERN), FERRY_T = 640;
+    FERRY = BANK0 + 12 - (HX + STERN), FERRY_T = 600;
   let boatOff = 0, boatV = 0, ferryT = 0, leaveT = 0, motor = null;
   const inBoat = x => help && x > HX + boatOff + BOW + 10 && x < HX + boatOff + STERN - 2;
   const standY = x => inBoat(x) ? DECK : bankY(x);
@@ -602,7 +603,7 @@ const SL = (() => {
   // the Pliable talk is said while they walk, a line at a time, at places along the plain
   const OPEN_AT = [START - 1, -1590];      // build 391: two lines now (Pliable's "let's walk faster" and Christian's "I cannot go fast" cut)      // build 368: the first line is said as the level opens (the storyteller's line before it was cut)
   function choose2() {
-    document.getElementById('chHome').textContent = alone ? 'Go back' : 'Go back, as Pliable did';
+    document.getElementById('chHome').textContent = alone ? 'Go back' : 'Go back, as the young man did';
     document.getElementById('chOn').textContent = 'Struggle on to the gate';
     choose();
   }
@@ -752,8 +753,8 @@ const SL = (() => {
     const e = document.getElementById('endc');
     e.querySelector('h1').textContent = 'Out of the Slough';
     e.querySelectorAll('p')[0].textContent = 'Help set him upon sound ground, and he went on his way.';
-    e.querySelectorAll('p')[1].textContent = 'Next: Mr. Worldly Wiseman';
-    document.getElementById('on2').style.display = '';
+    e.querySelectorAll('p')[1].textContent = 'More of his way is still to come.';
+    document.getElementById('on2').style.display = 'none';      // build 85: Level 3 is not redone yet, so the card does not go on to it
   }
   // a touch: on the water it makes rings; in the act, Help's hand takes his
   const handPt = () => NEWR() ? [HX + HAND[0], HAND[1]] : [HX - 82 * CHR_K, HY() - 55 * CHR_K];
@@ -874,7 +875,7 @@ const SL = (() => {
     } else if (ph === 'wade') {
       // build 120 (owner: "can we make christian move across possibly happen quicker? it's a bit of a slog"): he makes more
       // ground with each heave (.55 a tick, was .32: about 14 s of holding, was 24); the tune still has a note for each footfall
-      const p = clamp((C2.x - WADE0) / (STUCK_X - WADE0)), v = want && !C2.tv ? lerp(.58, .42, smooth(0, 1, p)) : 0;      // build 406 (owner: "draw out his movement across slough a tad"): .58 a tick slowing to .42 by the far bank (was .7 all the way), as the going gets heavier      // (build 183: DEEP 8, was 22: more of him shows at the far bank, head, shoulders and chest; owner: "show a bit more of Christian at the far bank")
+      const p = clamp((C2.x - WADE0) / (STUCK_X - WADE0)), v = want && !C2.tv ? lerp(.58, .42, smooth(0, 1, p)) * (NEWR() ? 1.35 : 1) : 0;      // build 406 (owner: "draw out his movement across slough a tad"): .58 a tick slowing to .42 by the far bank (was .7 all the way), as the going gets heavier      // (build 183: DEEP 8, was 22: more of him shows at the far bank, head, shoulders and chest; owner: "show a bit more of Christian at the far bank")
       C2.x = Math.min(STUCK_X, C2.x + v); if (!C2.tv) C2.face = 1;
       waStep(v ? .2 : .08);
       if (v) { C2.anim += v / CHR_STEP * 3; footfall(); } else C2.anim = stepAnim(C2.anim, 0, CHR_STEP, CHR_META);
@@ -1090,14 +1091,14 @@ const SL = (() => {
     // so the whole crown is in the picture (the top of the screen must be above about 640 units over the water: wl / z)
     // build 202: wading he starts on the left third, close, with open mud ahead; the camera draws back as he nears the far
     // bank, so the oak comes into the picture as his goal
-    else if (ph === 'wade' || ph === 'stuck') { const q = smooth(.45, 1, p); t = { cx: lerp(C2.x + 150, -290, q), z: lerp(1.05, .9, q), wl: lerp(335, 365, q) }; }      // build 183: a little closer at the far bank (was .6); Help's coming draws it back to .6 for the oak
+    else if (ph === 'wade' || ph === 'stuck') { const q = smooth(.45, 1, p); t = { cx: lerp(C2.x + 150, HX - 164, q), z: lerp(1.05, .9, q), wl: lerp(335, 365, q) }; }      // build 183: a little closer at the far bank (was .6); Help's coming draws it back to .6 for the oak
     // build 202: "he could not get out" is seen close, as he struggles at the far bank; only when Help comes does the camera
     // draw back to the whole oak
-    else if (ph === 'help' && !help) t = { cx: -290, z: .9, wl: 365 };
-    else if (ph === 'help' || ph === 'drawn') t = { cx: -240, z: .6, wl: 392 };
-    else if (ph === 'ferry') t = { cx: -240 + boatOff * .8, z: .6, wl: 392 };      // build 65: it follows the boat to the far bank
-    else if (ph === 'hist') t = { cx: -300, z: .6, wl: 400 };      // build 65: the boat at the far bank and the home bank both in the picture      // its left edge stays right of where the mire begins      // build 417: back far enough to see the home bank, where the labourers come
-    else if (ph === 'look' && goldT > 40) t = { cx: -300, z: .62, wl: 400 };      // build 368 (C): the camera draws back from bank to bank while the lights find the steps
+    else if (ph === 'help' && !help) t = { cx: HX - 164, z: .9, wl: 365 };      // build 86: the cameras of the rescue go with HX
+    else if (ph === 'help' || ph === 'drawn') t = { cx: HX - 114, z: .6, wl: 392 };
+    else if (ph === 'ferry') t = { cx: HX - 114 + boatOff * .8, z: .6, wl: 392 };      // build 65: it follows the boat to the far bank
+    else if (ph === 'hist') t = { cx: (HOME0 + HX + FERRY + STERN) / 2 + 60, z: .4, wl: 400 };      // build 86: from the boat at the bank back over the wide water      // build 65: the boat at the far bank and the home bank both in the picture      // its left edge stays right of where the mire begins      // build 417: back far enough to see the home bank, where the labourers come
+    else if (ph === 'look' && goldT > 40) t = { cx: (HOME0 + HX + FERRY + STERN) / 2 + 60, z: .4, wl: 400 };      // build 368 (C): the camera draws back from bank to bank while the lights find the steps
     else t = { cx: Math.max(-330 + FERRY, C2.x + 120), z: .66, wl: 425 };
     const e = ph === 'plain' ? .06 : .02;
     cam.cx += (t.cx - cam.cx) * e; cam.z += (t.z - cam.z) * e; cam.wl += (t.wl - cam.wl) * e;

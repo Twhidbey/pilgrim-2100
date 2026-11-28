@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Pilgrim">
+<meta name="apple-mobile-web-app-title" content="P2100">
 <meta name="theme-color" content="#1b1c22">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="assets/icon-180.png?v=75">
@@ -17,11 +17,11 @@
 if (/[?&]edit(=|&|$)/.test(location.search)) {
   document.querySelector('link[rel=manifest]').href = 'edit.webmanifest';
   document.querySelector('link[rel=apple-touch-icon]').href = 'assets/icon-edit-180.png?v=75';
-  document.querySelector('meta[name=apple-mobile-web-app-title]').content = 'PP Editor';
-  document.title = "Pilgrim's Progress (editor)";
+  document.querySelector('meta[name=apple-mobile-web-app-title]').content = 'P2100 Editor';
+  document.title = "P2100 (editor)";
 }
 </script>
-<title>Pilgrim's Progress</title>
+<title>P2100</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=La+Belle+Aurore&family=Herr+Von+Muellerhoff&family=Nanum+Pen+Script&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
 <style>
@@ -230,9 +230,9 @@ every year.</div>
         <div id="levels" style="display:none">
           <button class="lv" data-lv="1"><i>1.</i>The city</button>
           <button class="lv" data-lv="2"><i>2.</i>The fields</button>
-          <button class="lv" data-lv="3"><i>3.</i>The mountain</button>
+          <button class="lv" data-lv="3" style="display:none"><i>3.</i>The mountain</button>
           <button class="lv" data-lv="4" style="display:none"><i>&ndash;</i>The house</button>
-          <button class="lv" data-lv="5"><i>4.</i>The steeple</button>
+          <button class="lv" data-lv="5" style="display:none"><i>4.</i>The steeple</button>
           <button class="lvx" id="darkRooms" style="display:none"><i></i>Shew the darker rooms</button>
         </div>
       </div></div>
@@ -242,14 +242,14 @@ every year.</div>
   </div>
   <div id="endc" class="card">
     <h1 style="font-size:calc(var(--s,1) * 44px)">Out of the city</h1>
-    <p>He went on toward the light, and Pliable with him.</p>
-    <p style="color:rgba(244,236,220,.7)">Next: the Slough of Despond</p>
+    <p>He went on toward the light.</p>
+    <p style="color:rgba(244,236,220,.7)">Next: The fields</p>
     <button class="btn" id="on2">Go on</button>
     <button class="btn" id="again">Walk again</button>
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 83 · Nov 28 2026</div>
+  <div id="build">build 86 · Nov 28 2026</div>
   <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
@@ -2356,6 +2356,7 @@ function acts() {
 }
 function finish() {
   G.state = 'end'; G.ended = false; SL.preload();
+  document.querySelector('#endc p').textContent = G.alone ? 'He went on toward the light, alone.' : 'He went on toward the light, and the young man with him.';      // build 84: no old names
 }
 
 // ---------- drawing ----------
@@ -2842,6 +2843,35 @@ function drawTank(cam) {
 // The video was asked for a slow turn but added a passer-by in front of them; only its clean end is used. Each turns to keep facing him
 // as he passes (the picture mirrored, with a short dissolve), one after another along the row, as the old doorway watchers did.
 const CROWD = [[4250, 51], [4400, 47], [4520, 44], [4640, 44]].map(([a, ax], i) => ({ a, f: -1, pk: [], meta: { ax, ground: 292, frames: 60 }, o: i * 13 }));
+// THE BUS STOP (build 84; owner, with a photo of a city bus stop sign: "Can you make people he passes waiting for bus. Use bus stop sign").
+// The onlookers wait at a bus stop: a plain grey pole, a sign panel at the top after the photo (a dark band and a light strip at its
+// head, a dark square with a small bus in it, a light timetable block, a blue band at its foot; no words, only faint lines), and the
+// slim timetable holder half way down the pole. Its colours are only a breath, held toward the layer's tone like the port's boxes.
+const BUS_A = 4170;
+function busStop(cam) {
+  const L = LEVELS.mid, p = L.par, x = lineUp(BUS_A, p) - cam * p; if (x < -60 || x > VW + 60) return;
+  const c = ctx, base = L.base + 2 - FEET_SINK, MH = 270 * CHR_K * L.k, wm = warm(x / VW);
+  const lay = layerCol(L.depth), tone = mix(lay[0], lay[1], wm), C = (rgb, a) => css(mix(tone, rgb, a));
+  const top = base - MH * 1.62, pw = Math.max(1.5, MH * .022), sw = MH * .24, sh = MH * .38, sx = x - sw * .5 + pw * .5;
+  c.fillStyle = C([40, 42, 46], .45); c.fillRect(x - pw / 2, top, pw, base - top + 2);      // the pole
+  c.fillStyle = C([30, 30, 32], .35); c.fillRect(sx - 1, top - 1, sw + 2, sh + 2);      // the panel's dark edge
+  const band = (y0, h, rgb, a) => { c.fillStyle = C(rgb, a); c.fillRect(sx, top + sh * y0, sw, sh * h); };
+  band(0, 1, [214, 170, 62], .24);      // the yellow body
+  band(0, .06, [160, 52, 44], .26); c.fillStyle = C([64, 120, 70], .26); c.fillRect(sx + sw * .3, top, sw * .7, sh * .12);      // the red and green head
+  c.fillStyle = C([24, 24, 26], .45); c.fillRect(sx + sw * .06, top + sh * .1, sw * .42, sh * .26);      // the dark square
+  c.fillStyle = C([236, 236, 230], .38);      // a small bus in it: a rounded body, a windscreen dark, two wheels
+  const bx = sx + sw * .12, by = top + sh * .14, bw = sw * .3, bh = sh * .17;
+  c.fillRect(bx, by, bw, bh); c.fillStyle = C([24, 24, 26], .45); c.fillRect(bx + bw * .15, by + bh * .15, bw * .7, bh * .35);
+  c.fillStyle = C([236, 236, 230], .38); c.fillRect(bx + bw * .1, by + bh, bw * .22, bh * .18); c.fillRect(bx + bw * .68, by + bh, bw * .22, bh * .18);
+  band(.42, .3, [238, 238, 232], .24);      // the timetable block
+  c.fillStyle = C([120, 120, 120], .3); for (let i = 0; i < 4; i++) c.fillRect(sx + sw * .1, top + sh * (.47 + i * .06), sw * (i % 2 ? .5 : .7), Math.max(.6, sh * .015));
+  band(.8, .2, [44, 78, 140], .28);      // the blue foot
+  c.fillStyle = C([236, 236, 230], .3); c.fillRect(sx + sw * .06, top + sh * .85, sw * .12, sh * .1);      // the small square at its corner
+  const hy = base - MH * .95, hw = pw * 2.6, hh = MH * .3;      // the timetable holder on the pole
+  c.fillStyle = C([30, 30, 32], .3); c.fillRect(x - hw / 2 - .6, hy - .6, hw + 1.2, hh + 1.2);
+  c.fillStyle = C([236, 236, 230], .3); c.fillRect(x - hw / 2, hy, hw, hh);
+  c.fillStyle = C([120, 120, 120], .3); for (let i = 1; i < 8; i++) c.fillRect(x - hw * .3, hy + hh * i / 8, hw * .6, Math.max(.5, hh * .012));
+}
 function drawCrowd(cam) {
   const L = LEVELS.mid, p = L.par, y = L.base + 2 - FEET_SINK, K = CHR_K * L.k;
   for (const w of CROWD) {
@@ -3289,7 +3319,7 @@ function drawWorld() {
   const gcol = layerCol(1), wAt = x => warm((x - cam) / VW), on = (x, w = 0, m = 80) => x < cam + VW + m && x + w > cam - m;
   // the lane just behind the road: a low bank a little paler than the road, with his house and a few things on it
   ctx.fillStyle = hGrad(ctx, ...layerCol(.93)); ctx.fillRect(0, LEVELS.home.base, VW, GY - LEVELS.home.base + 2);
-  underpass(cam, 'back'); drawPort(cam); drawTank(cam); drawRow(cam); home(cam); drawSmoke(cam); drawPoles(cam); drawLevel('mid', cam); drawWatchers(cam); drawCrowd(cam); drawWheat(false); drawDrone(cam);          // the wheat behind him
+  underpass(cam, 'back'); drawPort(cam); drawTank(cam); drawRow(cam); home(cam); drawSmoke(cam); drawPoles(cam); drawLevel('mid', cam); drawWatchers(cam); busStop(cam); drawCrowd(cam); drawWheat(false); drawDrone(cam);          // the wheat behind him
   ctx.setTransform(1, 0, 0, 1, 0, OYD); drawFog('lane'); ctx.setTransform(DPR, 0, 0, DPR, 0, OYD);
   lightThrough();      // build 79: the far light's glow, seen through the rain over the rooftops where the buildings hide it      // mist lying along the lane, round the houses' feet and in the wheat
   ctx.save(); ctx.translate(-cam, 0);
@@ -3574,7 +3604,7 @@ let runN = 0;
 // the child was last in (kept on the device; ?level=2 in the link overrides it): its button is the bright one, and its
 // own scene is the picture behind the title (Level 2: the oak over the bog, SL.title()). Any level can be chosen.
 const store = { get() { try { return +localStorage.getItem('pp-level') || 0; } catch (e) { return 0; } }, set(n) { try { localStorage.setItem('pp-level', n); } catch (e) {} } };
-const LV = (q => TEST_X ? 1 : q ? (+q >= 2 && +q <= 5 ? +q : 1) : store.get() >= 2 && store.get() <= 5 ? store.get() : 1)(new URLSearchParams(location.search).get('level'));
+const LV = (q => TEST_X ? 1 : q ? (+q >= 2 && +q <= 5 ? +q : 1) : store.get() === 2 ? 2 : 1)      /* build 85 (owner: "Remove the levels we haven't redone"): only 1 and 2 are offered; ?level=3 and 5 still open the old levels for tests */(new URLSearchParams(location.search).get('level'));
 // NO BOOK AFTER LEVEL 1 (build BNEXT; owner: "i'm not sure christian should have book in his hand" ... "Everywhere please" ...
 // "That's expensive! Any way w[e can] do it without spending that much"): Bunyan's opening picture has "a book in his
 // hand", so Level 1 keeps it; after that his walking, standing and turning pictures are copies with the book painted out
@@ -4061,7 +4091,7 @@ document.getElementById('on2').onclick = () => SL.on ? go3() : HL.on ? go5() : g
   for (const [who, txt] of INTRO) vox(who, txt);          // the first words, ready before Begin is pressed
 })();
 </script>
-<script src="slough.js?v=82"></script>
+<script src="slough.js?v=86"></script>
 <script src="hill.js?v=662"></script>
 <script src="rooms.js?v=2"></script>
 <script src="heaven.js?v=547"></script>

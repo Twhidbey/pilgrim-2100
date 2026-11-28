@@ -1,6 +1,6 @@
 {
- "name": "Pilgrim's Progress (editor)",
- "short_name": "PP Editor",
+ "name": "P2100 (editor)",
+ "short_name": "P2100 Editor",
  "id": "./?edit",
  "start_url": "./?edit",
  "scope": "./",
