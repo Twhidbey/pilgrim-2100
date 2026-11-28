@@ -22,3 +22,13 @@ step-wood-0..5.mp3, step-gravel-0..3.mp3 (the crunch), step-leaves-0..3.mp3 (the
   https://opengameart.org/content/different-steps-on-wood-stone-leaves-gravel-and-mud
   Licence: CC0 (public domain)
   Changes: trimmed, levelled, some lowered or raised in pitch and layered for weight on a phone speaker.
+
+tank-rumble.mp3 (build 71: the tank by the barricade in Level 1)
+  Layered from "Engine-loop heavy vehicle/tank" by Nayckron, OpenGameArt.org
+  https://opengameart.org/content/engine-loop-heavy-vehicletank
+  Licence: CC-BY 3.0 (https://creativecommons.org/licenses/by/3.0/)
+  and "rumble fx", OpenGameArt.org
+  https://opengameart.org/content/rumble-fx
+  Licence: CC0 (public domain)
+  Changes: the engine loop lowered about 22% and played twice, the rumble's middle looped with a crossfade, the two mixed,
+  softened above 1.8 kHz. The changed file is shared under CC-BY 3.0.

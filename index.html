@@ -249,7 +249,7 @@ every year.</div>
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 70 · Nov 28 2026</div>
+  <div id="build">build 71 · Nov 28 2026</div>
   <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
@@ -268,8 +268,11 @@ const OBS_META={"ax": 95, "ground": 307, "frames": 32, "vpx": 6.0, "rest": [23]}
 // on his walk's feet-together frame (rest), so the dissolve from walking to standing never changes his legs. Level 2 keeps the old Pliable.
 // build 52 (owner): the big man muscular in a ball cap and puffy jacket, a pistol holstered; the young man in a beanie, a rifle slung on his back
 const BMW = [], BMW_META = {"ax": 132, "ground": 307, "frames": 36, "vpx": 5.4, "rest": [22]}, YMW = [], YMW_META = {"ax": 132, "ground": 299, "frames": 33, "vpx": 5.0, "rest": [0]};
-const obsSet = () => BMW.ready ? [BMW, BMW_META, BMW[22], BMW_META] : [OBS, OBS_META, OBS_ST, OBS_ST_META];
-const pliSet = () => YMW.ready && !SL.on ? [YMW, YMW_META, YMW[0], YMW_META] : [PLI, PLI_META, PLI_ST, PLI_ST_META];
+// build 71 (owner: "they stand there half walking half standing awkwardly - can we make them just stand"): their standing
+// pictures are their videos' first frames (a real stand, video frame 0), not a walk frame
+const BMS = [], BMS_META = {"ax": 130, "ground": 303}, YMS = [], YMS_META = {"ax": 134, "ground": 304};
+const obsSet = () => BMW.ready ? [BMW, BMW_META, BMS[0] || BMW[22], BMS[0] ? BMS_META : BMW_META] : [OBS, OBS_META, OBS_ST, OBS_ST_META];
+const pliSet = () => YMW.ready && !SL.on ? [YMW, YMW_META, YMS[0] || YMW[0], YMS[0] ? YMS_META : YMW_META] : [PLI, PLI_META, PLI_ST, PLI_ST_META];
 const EVA_META={"ax": 82, "ground": 311, "frames": 80, "src": [0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 46, 49, 52, 55, 58, 61, 64, 67, 70, 73, 76, 79, 82, 85, 88, 91, 94, 97, 100, 103, 106, 109, 112, 115, 118, 121, 124, 127, 130, 133, 136, 139, 142, 145, 148, 151, 154, 157, 160, 163, 166, 169, 172, 175, 178, 180, 182, 184, 186, 188, 190, 192, 194, 196, 198, 200, 202, 204, 206, 208, 210, 212, 216, 220, 224, 228, 232, 236]};
 const STD_META={"ax": 101, "ground": 302, "frames": 79, "src": [0, 2, 4, 6, 8, 10, 12, 14, 16, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35, 37, 39, 41, 43, 45, 47, 49, 51, 53, 55, 57, 59, 61, 63, 65, 67, 69, 71, 73, 75, 77, 79, 81, 83, 85, 87, 89, 91, 93, 95, 96, 100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 140, 144, 148, 152, 156, 160, 164, 168, 172, 176, 180, 184, 188, 192, 196, 200, 204, 208, 212]};
 
@@ -898,11 +901,12 @@ const FIELD_END = 1650;      // where the wheat field ends and the street begins
 // near row (2), as a place on the road (the far row ends earlier, so no house is in view when he stops). FIELD2: the
 // wheat along the road, from just past the last cottage to short of the city wall.
 const TOWN_END = { 1: 5600, 2: 6600 }, FIELD2 = [6700, 9000];
-const EVAN_X = 420, HOME_X = 2150, RUN_END = 7700, NEIGH_X = 8350, GATE_STOP = 9770, DOOR0 = 9855, DOOR1 = 10085, DOORM = 9970;      // build 494 (owner: "run a little farther before he stops (no houses in view) ... path thru a field indicating outskirts of town"): everything from his stop on is 1400 further      // build 110: the street after his house is 900 longer, so each line is said where it belongs while he runs, and the road from the neighbours to the gate 600 longer (owner: "need more space here for obstinate and pliable to catch up and narration to read")      // build 100: a 2.6 m gateway (88 units to a metre)      // build 91: the gateway is wider (was 7006 to 7120), so the painted gatehouse is bigger
+// build 71 (owner: "put a little space between [the lights] and gate so we get nice shot with tank"): the run ends and the two men stand 300 sooner (RUN_END was 7700, NEIGH_X 8350)
+const EVAN_X = 420, HOME_X = 2150, RUN_END = 7400, NEIGH_X = 8050, GATE_STOP = 9770, DOOR0 = 9855, DOOR1 = 10085, DOORM = 9970;      // build 494 (owner: "run a little farther before he stops (no houses in view) ... path thru a field indicating outskirts of town"): everything from his stop on is 1400 further      // build 110: the street after his house is 900 longer, so each line is said where it belongs while he runs, and the road from the neighbours to the gate 600 longer (owner: "need more space here for obstinate and pliable to catch up and narration to read")      // build 100: a 2.6 m gateway (88 units to a metre)      // build 91: the gateway is wider (was 7006 to 7120), so the painted gatehouse is bigger
 // SKIP AHEAD (owner, build 89: "is there a way to skip ahead to a moment?"): add ?at=NAME to the link. Each name starts
 // the level just before that moment, after Evangelist. (?x=N still works for any place on the road; ?level=2 starts
 // at the Slough of Despond.)
-const AT = { door: 1500, neighbours: 3950, obstinate: 8000, gate: 9600 };
+const AT = { door: 1500, neighbours: 3950, obstinate: 7700, gate: 9600 };
 let TEST_X = +(new URLSearchParams(location.search).get('x')) || AT[new URLSearchParams(location.search).get('at')] || 0, START_X = TEST_X || HOME_X - 280;   // he starts beside his own door; ?x=3600 starts further along, after Evangelist (for testing)
 // (build 472, owner: "if i play and then click worldly wise after completely level it should take me to start of level then, right?"):
 // a link's place (at=, x=, room=) is used by the FIRST level start only; then it is cleared from the address, so choosing a
@@ -916,12 +920,13 @@ const BEAT = 58, NOTE = { D: 62, E: 64, G: 67, A: 69, B: 71, d: 74 };
 // at the end of the run (6250); now it waits until after the choice, on the walk with Pliable to the gate (8560), the
 // fourth just before the gate (9200), and the run's music plays on until he tires (RUN_END)
 // build 69 (owner: yes to moving the light that hung at the young man's head in scene 5): the third phrase begins past
-// where the two men stand (8700, was 8560) and its lights only come, slowly, once the big man has stood aside (wait); the fourth is 100 on (9300)
+// where the two men stand and its lights only come, slowly, once both men have stood aside and he has passed the young man (wait);
+// build 71: with the standoff 300 sooner, the third phrase is at 8400 and the fourth at 9000, so the last 360 before the barricade are clear
 const PHRASES = [
   { x: 1770, back: true, at: 0, n: [[0, 'D'], [1, 'G'], [3, 'B'], [3.5, 'G'], [4, 'B'], [6, 'A'], [7, 'G'], [9, 'E'], [10, 'D']] },
   { x: 1100, back: true, at: 12, n: [[0, 'D'], [1, 'G'], [3, 'B'], [3.5, 'G'], [4, 'B'], [6, 'A'], [7, 'd']] },
-  { x: 8700, at: 24, wait: true, n: [[0, 'B'], [1, 'd'], [2.5, 'B'], [3, 'd'], [3.5, 'B'], [4, 'G'], [6, 'D'], [7, 'E'], [8.5, 'G'], [9, 'G'], [9.5, 'E'], [10, 'D']] },
-  { x: 9300, at: 36, n: [[0, 'D'], [1, 'G'], [3, 'B'], [3.5, 'G'], [4, 'B'], [6, 'A'], [7, 'G']] },
+  { x: 8400, at: 24, wait: true, n: [[0, 'B'], [1, 'd'], [2.5, 'B'], [3, 'd'], [3.5, 'B'], [4, 'G'], [6, 'D'], [7, 'E'], [8.5, 'G'], [9, 'G'], [9.5, 'E'], [10, 'D']] },
+  { x: 9000, at: 36, n: [[0, 'D'], [1, 'G'], [3, 'B'], [3.5, 'G'], [4, 'B'], [6, 'A'], [7, 'G']] },
 ];
 // the whole tune, sung through once when the gate opens, with a low note under each bar
 const TUNE = [], BASS = [43, 43, 48, 43, 43, 43, 50, 50, 43, 43, 48, 43, 43, 50, 43, 43];
@@ -1087,8 +1092,8 @@ function knockBuf(seed) {
 // step in Level 1's wheat). stepOn(surface, v, heavy) plays one, with the burden's quiet creak by heavy; sfx.step stands in until loaded.
 const STEP_N = { grass: 6, dirt: 6, stone: 6, gravel: 4, wood: 6, leaves: 4 };
 const STEP_FILES = Object.entries(STEP_N).flatMap(([k, n]) => [...Array(n).keys()].map(i => 'step-' + k + '-' + i));
-const SFX_V = 492, SFX_FILES = [...STEP_FILES, 'knock-0', 'knock-1', 'knock-2', 'knock-3', 'bog-fall-a', 'bog-fall-b', 'bog-lift', 'bog-bubbles',
-  ...[0, 1, 2, 3, 4, 5].map(i => 'bog-wade-' + i), ...[0, 1, 2].map(i => 'bog-plop-' + i), ...[0, 1, 2].map(i => 'bog-suck-' + i), 'bog-heave-0', 'bog-heave-1'], SFXB = {};
+const SFX_V = 493, SFX_FILES = [...STEP_FILES, 'knock-0', 'knock-1', 'knock-2', 'knock-3', 'bog-fall-a', 'bog-fall-b', 'bog-lift', 'bog-bubbles',
+  ...[0, 1, 2, 3, 4, 5].map(i => 'bog-wade-' + i), ...[0, 1, 2].map(i => 'bog-plop-' + i), ...[0, 1, 2].map(i => 'bog-suck-' + i), 'bog-heave-0', 'bog-heave-1', 'tank-rumble'], SFXB = {};
 const SFXL = {}, sfxLast = {};
 // build 506 (owner: "the footprints sounds ... needs to be lowered too (make consistent rule please)"): THE RULE FOR FOOTSTEPS: every
 // footfall of his in every level is played at STEP_VOL, walking 1, running STEP_RUN; the wheat's rustle .8 of a step, a squelch in
@@ -1571,7 +1576,7 @@ const HOME = [
   [C, 'No. I cannot stay here. My burden is too heavy.', null, () => { G.gloomTo = 0; }],
 ];
 const ONWARD = [[C, 'Yes. All you leave behind is not worth a little of what I seek. Come with me, and see for yourselves.']];
-const PART = [[YM, '...If it\'s real, I\'ll come.'], [BM, 'Then you\'re both fools.']];      // build 64: only after "Do you see that light?"
+const PART = [[YM, '...If it\'s real, I\'ll come.']];      // build 64: only after "Do you see that light?"; build 71 (owner: "big guy doesn't say anything after he leaves"): his "Then you're both fools." cut
 // FOR LEVEL 2 (owner, build 68: "pliable's discussion with christian should move to beginning of level 2"). In the book
 // ({25} to {28}) Christian and Pliable "went talking over the plain" after Obstinate has gone back, and that talk ends
 // with both of them falling into the Slough of Despond ({29}). These four lines were said on the road to the gate here
@@ -1675,7 +1680,7 @@ const runNow = () => PR.ready && pwOn() ? [PR, PR_META] : G.ears || !RUNP.ready 
 function coverEars() { if (G.ears) return; if (P.run) poseChange(8, true); G.ears = true; }
 const CHR = [], PLI = [], OBS = [], EVA = [], STD = [], RUN = [], CHR_K = .52, RUN_STEP = RUN_META.vpx * CHR_K, RUNV = RUN_STEP * .4,   // the run at its video's own speed (24 frames a second)
    CHR_STEP = CHR_META.vpx * CHR_K, PLI_STEP = PLI_META.vpx * CHR_K, OBS_STEP = OBS_META.vpx * CHR_K;
-const PACK_V = 48;                          // bump when the .pack files change, so phones fetch the new ones
+const PACK_V = 49;                          // bump when the .pack files change, so phones fetch the new ones
 // SOLID FIGURES (build 202; owner: "in both level 2 and 3, pilgrims sprite is clear in spots. we need to fix this"). The
 // figures were cut from their white paper by how white each pixel is, so the white paper showing inside the watercolour
 // (highlights on the cloak, the pack, the hood) was cut away too and the scene showed through those spots (2 to 7 per cent
@@ -2034,7 +2039,7 @@ function update() {
   // build 51 (owner: "when [he] runs can we not have doors fly open"): the neighbours' doors stay shut (a little crowd of onlookers is to come)
   if (!G.tvRun && P.x > TV_RUN_A - 240 && P.x < TV_RUN_A + 400 && !SPK) { G.tvRun = true; tvNews(); }      // build 51: the news from the window as he runs by
   if (G.roll) G.roll.t++; if (G.hint === 'roll' && --G.rollT <= 0) clearHint('roll');
-  people(); gather(); motes(); effects(); capTick(); acts(); ambience(); opening();
+  people(); gather(); if (!SL.on && !HL.on && !CR.on) { droneTick(); tankTick(); } motes(); effects(); capTick(); acts(); ambience(); opening();
   if (G.state === 'play') story();
   const target = Math.max(0, Math.min(LEVEL_W - VW, P.x - VW * (G.evanDone ? .38 : .62) + P.face * 40));      // room in front of him, whichever way he is going
   G.cam += (target - G.cam) * .05;
@@ -2112,7 +2117,7 @@ function people() {
 // ... too video gamey?"; agreed: the tune pulls the child on, a swarm by his head was a pickup counter). Only a soft
 // warmth round him still grows a little (G.got).
 function gather() {
-  const way = !G.obst || (G.obst.mode !== 'block' && G.obst.mode !== 'talk');      // the men no longer stand in his way
+  const still = w => w && (w.mode === 'block' || w.mode === 'talk'), way = !still(G.obst) && !still(G.pli) && !(G.pli && G.pli.mode === 'follow' && G.pli.x > P.x - 20);      // the men no longer stand in his way (build 71: nor the young man ahead of him)
   for (const s of LIGHTS) if (s.wait) s.a = way ? Math.min(1, s.a + .008) : 0;
   for (const s of LIGHTS) if (!s.got && s.a > .5 && s.x - P.x < 22 && s.x - P.x > -60) {
     s.got = true; G.got++; note(s.midi, .075, 2.8);
@@ -2579,27 +2584,40 @@ function drawPort(cam) {
 // big man's place (road 8950), drawn in code: a dark body, two rotors seen side on (soft blurred discs), a camera under it. It turns
 // to watch him, drifts along to keep him in view, and lifts away as he nears the barricade. Its hum is made in code (two detuned saw
 // tones through a low-pass, wobbling a little), through the effects' own loudness (SFXG), stronger as he comes near.
-const DRONE_A = 8950; let DRONE_SND = null;
-function droneSound(v) {
+// build 71 (owner: "can we have drone show up before guys and whirr over head then back to the right (like it scouted him and that's
+// why guys showed up)"): as he nears the end of his run (DRONE_A) it comes in fast from the right, drops to hang just over his head,
+// keeps over him a few seconds, then turns and flies back off to the right, the way the two men will come from. It moves by its
+// place relative to him (rx, ry), so it keeps over him whether he runs, walks or stops. Its hum is louder and has a higher whine.
+const DRONE_A = 6750; let DRONE_SND = null;
+function droneSound(v, pitch = 1) {
   if (!AC || muted) { if (DRONE_SND) DRONE_SND.g.gain.value = 0; return; }
   if (!DRONE_SND) { try {
-    const g = AC.createGain(), lp = AC.createBiquadFilter(), o1 = AC.createOscillator(), o2 = AC.createOscillator(), lfo = AC.createOscillator(), lg = AC.createGain();
-    g.gain.value = 0; lp.type = 'lowpass'; lp.frequency.value = 760; o1.type = o2.type = 'sawtooth'; o1.frequency.value = 168; o2.frequency.value = 175.5;
-    lfo.frequency.value = 6.3; lg.gain.value = 3.5; lfo.connect(lg); lg.connect(o1.frequency); lg.connect(o2.frequency);
-    o1.connect(lp); o2.connect(lp); lp.connect(g); g.connect(SFXG); o1.start(); o2.start(); lfo.start(); DRONE_SND = { g };
+    const g = AC.createGain(), lp = AC.createBiquadFilter(), o1 = AC.createOscillator(), o2 = AC.createOscillator(), o3 = AC.createOscillator(), g3 = AC.createGain(), lfo = AC.createOscillator(), lg = AC.createGain();
+    g.gain.value = 0; lp.type = 'lowpass'; lp.frequency.value = 2400; o1.type = o2.type = 'sawtooth'; o1.frequency.value = 168; o2.frequency.value = 175.5;
+    o3.type = 'triangle'; o3.frequency.value = 342; g3.gain.value = .5;      // the rotors' whine, an octave up, so a phone's small speaker carries it
+    lfo.frequency.value = 6.3; lg.gain.value = 3.5; lfo.connect(lg); lg.connect(o1.frequency); lg.connect(o2.frequency); lg.connect(o3.frequency);
+    o1.connect(lp); o2.connect(lp); o3.connect(g3); g3.connect(lp); lp.connect(g); g.connect(SFXG); o1.start(); o2.start(); o3.start(); lfo.start(); DRONE_SND = { g, os: [o1, o2, o3], f0: [168, 175.5, 342] };
   } catch (e) { return; } }
-  const g = DRONE_SND.g.gain, t = AC.currentTime; g.cancelScheduledValues(t); g.setTargetAtTime(v, t, .25); g.setTargetAtTime(0, t + .5, .3);      // falls silent by itself if the level stops drawing it
+  const g = DRONE_SND.g.gain, t = AC.currentTime; g.cancelScheduledValues(t); g.setTargetAtTime(v, t, .2); g.setTargetAtTime(0, t + .5, .3);      // falls silent by itself if the level stops drawing it
+  DRONE_SND.os.forEach((o, i) => o.frequency.setTargetAtTime(DRONE_SND.f0[i] * pitch, t, .15));      // it whines higher as it speeds up
+}
+function droneTick() {
+  if (!G.drone) { if (P.x < DRONE_A || (TEST_X && TEST_X > DRONE_A)) return; G.drone = { ph: 'in', t: 0, rx: 760, ry: -310, f: -1, vx: 0 }; }
+  const D = G.drone; if (D.ph === 'gone') return; D.t++;
+  const rx0 = D.rx;
+  if (D.ph === 'in') { const u = Math.min(1, D.t / 170), e = 1 - Math.pow(1 - u, 3); D.rx = lerp(760, 18, e); D.ry = lerp(-310, -212, e); if (u >= 1) { D.ph = 'hover'; D.t = 0; } }
+  else if (D.ph === 'hover') { D.rx = 18 + Math.sin(D.t / 40) * 14; D.ry = -212 + Math.sin(D.t / 55) * 5; if (D.t > 200) { D.ph = 'out'; D.t = 0; } }
+  else if (D.ph === 'out') { const u = D.t / 190; D.rx = 18 + 900 * u * u; D.ry = -212 - 110 * u; if (u >= 1) { D.ph = 'gone'; droneSound(0); return; } }
+  D.vx = D.rx - rx0;
+  D.f += ((D.ph === 'out' && D.t > 25 ? 1 : -1) - D.f) * .06;      // it faces him, then turns away to leave
+  const near = 1 - smooth(120, 900, Math.abs(D.rx)); droneSound(.13 * near, 1 + Math.min(.25, Math.abs(D.vx) * .03));
 }
 function drawDrone(cam) {
-  const D = G.drone || (G.drone = { x: DRONE_A, y: GY - 250, f: -1, up: 0 });
-  if (P.x > DRONE_A - 650) { const tx = clamp(P.x + 260, DRONE_A, DRONE_A + 420); D.x += (tx - D.x) * .012; }      // it keeps a little ahead of him
-  if (P.x > DRONE_A + 380) D.up = Math.min(1, D.up + .004);      // and lifts away
-  D.f += ((P.x < D.x ? -1 : 1) - D.f) * .05;      // it turns to watch him
-  const bob = Math.sin(G.t / 37) * 4 + Math.sin(G.t / 13) * 1.2, x = D.x - cam, y = D.y + bob - D.up * D.up * 330;
-  const near = 1 - smooth(300, 1100, Math.abs(D.x - P.x)); droneSound(D.up < 1 ? .05 * near * (1 - D.up) : 0);
+  const D = G.drone; if (!D || D.ph === 'gone') return;
+  const bob = Math.sin(G.t / 37) * 3 + Math.sin(G.t / 13) * 1, x = P.x + D.rx - cam, y = GY + D.ry + bob;
   if (x < -60 || x > VW + 60 || y < -40) return;
   const c = ctx, col = css(mix(layerCol(.92)[0], layerCol(.92)[1], warm(x / VW))), s = 1, f = D.f;
-  c.save(); c.translate(x, y); c.rotate(-.06 * f + Math.sin(G.t / 29) * .02);
+  c.save(); c.translate(x, y); c.rotate(-.06 * f + clamp(D.vx * .012, -.22, .22) + Math.sin(G.t / 29) * .02);      // leaning into its flight
   c.fillStyle = col; c.beginPath(); if (c.roundRect) c.roundRect(-13 * s, -4 * s, 26 * s, 8 * s, 3 * s); else c.rect(-13 * s, -4 * s, 26 * s, 8 * s); c.fill();      // the body
   c.fillRect(-25 * s, -2 * s, 50 * s, 2.4 * s);      // the arms, side on
   for (const ax of [-25, 25]) { c.fillRect(ax * s - 1.2, -6 * s, 2.4, 5 * s);      // the motor posts and the spinning rotors, a soft blur
@@ -2623,13 +2641,21 @@ function tankSound(v) {
     const og = AC.createGain(); og.gain.value = .35; o2.connect(og);
     o.connect(lp); og.connect(lp); n.connect(nf); nf.connect(ng); ng.connect(lp); lp.connect(g); g.connect(SFXG); o.start(); o2.start(); n.start(); TANK_SND = { g };
   } catch (e) { return; } }
-  const g = TANK_SND.g.gain, t = AC.currentTime; g.cancelScheduledValues(t); g.setTargetAtTime(v, t, .3); g.setTargetAtTime(0, t + .5, .4);
+  // build 71 (owner: "need rumbling sound - check that free sound site"): a recorded rumble (assets/sfx/tank-rumble.mp3: a heavy engine
+  // loop and a low rumble from OpenGameArt, see CREDITS.txt), looped, takes the place of the code engine once it has loaded
+  if (!TANK_SND.rec && SFXB['tank-rumble']) { try { const r = AC.createBufferSource(), rg = AC.createGain(); r.buffer = SFXB['tank-rumble']; r.loop = true; rg.gain.value = 0; r.connect(rg); rg.connect(SFXG); r.start(); TANK_SND.rec = rg; } catch (e) {} }
+  const t = AC.currentTime;
+  for (const [g, k] of TANK_SND.rec ? [[TANK_SND.g.gain, 0], [TANK_SND.rec.gain, 2.6]] : [[TANK_SND.g.gain, 1]]) { g.cancelScheduledValues(t); g.setTargetAtTime(v * k, t, .3); g.setTargetAtTime(0, t + .5, .4); }
+}
+function tankTick() {      // build 71: its movement in the update, not the drawing (it moved only when drawn)
+  if (!TANK_IM) return; const T = G.tank || (G.tank = { a: TANK.a, go: false });
+  // build 71: it sets off once he is past the last lights (was 900 before it), so it comes out from behind the barricade on the clear road before it
+  if (P.x > TANK.a - 560) T.go = true; if (T.go) T.a = Math.max(TANK.a - 2600, T.a - 1.15);      // rolling toward the town
+  tankSound(T.go ? .16 * (1 - smooth(250, 1300, Math.abs(T.a - P.x))) : 0);
 }
 function drawTank(cam) {
-  if (!TANK_IM) return; const T = G.tank || (G.tank = { a: TANK.a, go: false });
-  if (P.x > TANK.a - 900) T.go = true; if (T.go) T.a = Math.max(TANK.a - 2600, T.a - 1.9);      // rolling toward the town
+  const T = G.tank; if (!TANK_IM || !T) return;
   const x = lineUp(T.a, TANK.p) - cam * TANK.p, base = HORIZON + 140 * TANK.p, w = TANK_IM.cool.width * TANK.k, h = TANK_IM.cool.height * TANK.k;
-  const near = 1 - smooth(250, 1300, Math.abs(T.a - P.x)); tankSound(T.go ? .16 * near : 0);
   if (x + w < -40 || x - w > VW + 40) return;
   const jit = T.go ? Math.sin(G.t * 1.9) * .35 + Math.sin(G.t * .7) * .25 : 0, y = base + 2 - TANK.gnd * TANK.k + jit, wm = warm(x / VW), c = ctx;
   c.save(); c.translate(x, 0); c.scale(-1, 1);      // the picture faces right; it rolls left, toward the town
@@ -3837,7 +3863,7 @@ document.getElementById('on2').onclick = () => SL.on ? go3() : HL.on ? go5() : g
   // If it is not ready by its line he simply stands (WEEP.ready is checked there).
   loadPack('christian-weep', WEEP).catch(() => {}).then(() => loadPack('christian-turn', TURN)).then(() => bookLoaded('TURN')).catch(() => {}).then(nbLoad);
   Promise.all([loadPack('evangelist', EVA), loadPack('evangelist-stand', EVS), loadPack('phillip-stand', PHS).catch(() => {}), loadPack('phillip-point', PHP).catch(() => {})]).then(() => Promise.all([loadImg('family.webp').then(im => { FAM = im; if (im) FAM_SH = mkShadow(im); }), Promise.resolve().then(() => { const B = barricade(); GATE_P = bakeTint(B.gate, .42, .4); WALL_P = bakeTint(B.wall, .42, .4); }), ...['a', 'b', 'c'].map(key => loadImg('neighbor-' + key + '.webp').then(im => { WATCH_IM[key] = im; })), ...['a', 'b', 'c'].map(key => loadPack('neighbor-' + key, WATCH_PACK[key]).catch(() => {})), loadImg('christian-back.webp').then(im => { BACK = im; }), loadPack('christian-run', RUN), loadPack('christian-run-plain', RUNP)]))
-    .then(() => Promise.all([loadPack('obstinate', OBS), loadPack('pliable', PLI), loadPack('bigman-walk', BMW).catch(() => {}), ...CROWD.map((w, i) => loadPack('crowd-' + (i + 1), w.pk).catch(() => {})), loadImg('tank.webp').then(im => { if (im) TANK_IM = bakeTank(im); }), loadPack('youngman-walk', YMW).catch(() => {}), loadImg('obstinate-stand.webp').then(im => { OBS_ST = im; }), loadImg('pliable-stand.webp').then(im => { PLI_ST = im; })]));
+    .then(() => Promise.all([loadPack('obstinate', OBS), loadPack('pliable', PLI), loadPack('bigman-walk', BMW).catch(() => {}), ...CROWD.map((w, i) => loadPack('crowd-' + (i + 1), w.pk).catch(() => {})), loadImg('tank.webp').then(im => { if (im) TANK_IM = bakeTank(im); }), loadPack('youngman-walk', YMW).catch(() => {}), loadPack('bigman-stand', BMS).catch(() => {}), loadPack('youngman-stand', YMS).catch(() => {}), loadImg('obstinate-stand.webp').then(im => { OBS_ST = im; }), loadImg('pliable-stand.webp').then(im => { PLI_ST = im; })]));
   for (const [who, txt] of INTRO) vox(who, txt);          // the first words, ready before Begin is pressed
 })();
 </script>
