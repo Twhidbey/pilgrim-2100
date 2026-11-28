@@ -202,7 +202,7 @@ body.portrait:not(.playing) #rot{display:none}
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 25 · Nov 27 2026</div>
+  <div id="build">build 26 · Nov 28 2026</div>
   <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
@@ -1317,7 +1317,8 @@ function fitWords(box) {
 const TXT_MIN = 16, TXT_MAX = 21, TXT_K = .036, TXT_MIN_UP = 11, TXT_K_UP = .052;
 addEventListener('resize', () => { if (dlg.classList.contains('on')) fitWords(dlg.querySelector('.txt')); });
 function words(who, txt, cls) {
-  dWho.textContent = who; dTxt.textContent = txt; dlg.className = 'on ' + cls;
+  const shown = who !== RD;      // build 26 (owner: "radio voice does not need script below"): the radio is heard, never written
+  dWho.textContent = shown ? who : ''; dTxt.textContent = shown ? txt : ''; dlg.className = 'on ' + cls;
   const box = dlg.querySelector('.txt'); box.style.animation = 'none'; void box.offsetWidth; box.style.animation = '';
   fitWords(box);
   if (!cls.includes('hint')) say(who, txt); else hush();
