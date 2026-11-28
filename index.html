@@ -262,7 +262,7 @@ every year.</div>
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 114 · Nov 28 2026</div>
+  <div id="build">build 115 · Nov 28 2026</div>
   <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
@@ -284,6 +284,9 @@ const BMW = [], BMW_META = {"ax": 132, "ground": 307, "frames": 36, "vpx": 5.4, 
 // build 71 (owner: "they stand there half walking half standing awkwardly - can we make them just stand"): their standing
 // pictures are their videos' first frames (a real stand, video frame 0), not a walk frame
 const SNT = [], SNT_META = {"ax": 132, "ground": 303, "frames": 80};      // build 77: the sentry
+// build 115 (owner: "guard lifts gun and trains it on them as they walk but doesn't shoot"): the sentry raises his rifle (sources/gate/aim.mp4):
+// pictures 0..65 are video frames 0..130 every 2nd (hands out, the rifle off his shoulder, up to aim), 66..101 the held aim, every 3rd
+const SNA = [], SNA_META = {"ax": 184, "ground": 304, "frames": 102}, SNA_FROM = 24, SNA_HOLD = 66;
 const BMS = [], BMS_META = {"ax": 130, "ground": 303}, YMS = [], YMS_META = {"ax": 134, "ground": 304};
 const obsSet = () => BMW.ready ? [BMW, BMW_META, BMS[0] || BMW[22], BMS[0] ? BMS_META : BMW_META] : [OBS, OBS_META, OBS_ST, OBS_ST_META];
 const pliSet = () => YMW.ready && !SL.on ? [YMW, YMW_META, YMS[0] || YMW[0], YMS[0] ? YMS_META : YMW_META] : [PLI, PLI_META, PLI_ST, PLI_ST_META];
@@ -1355,7 +1358,7 @@ function reset() {
     pli: null, obst: null, flare: 0, gloom: 0, gloomTo: 0, gateOpen: 0, act: null, actT: 0, ring: null, auto: null, finale: null, guard: 0, idle: 0, wins: 0,
     evanDone: !!TEST_X, evanGone: TEST_X ? 1 : 0, neigh: TEST_X > NEIGH_X + 300, gateSeen: false, walked: false, touched: false, leaving: false, fam: TEST_X > HOME_X ? 2 : 0, door: 0,      // build 13 (owner: "as far as we know pilgrim has no family, for now"): his door stays shut
     doorShut: false, roll: TEST_X ? { t: 999, x: 0, y: 0 } : null, runZone: !!TEST_X && TEST_X < RUN_END, outSaid: false, watched: TEST_X > WATCH_X, ears: TEST_X > HOME_X });
-  G.lf = null; G.sunUp = 0; G.waitFn = null; G.drone = null; G.tank = null; G.train = null; G.hornFar = false; G.gateTried = null; G.hushT = 0; G.hushA = 0; G.gateOpening = null; G.gateOpts = null; G.sentryAway = false; G.sentryTw = 0;  G.tvRun = !!TEST_X && TEST_X > TV_RUN_A; G.phGo = !!TEST_X && TEST_X > EVAN_X; G.phFade = G.phGo ? 1 : 0; if (ROW[0] && !ROW[0].who) ROW[0].open = 1;      // build 16: the party: the door of the building beside his (to the left), lit from the start
+  G.lf = null; G.sunUp = 0; G.waitFn = null; G.drone = null; G.tank = null; G.train = null; G.hornFar = false; G.gateTried = null; G.hushT = 0; G.hushA = 0; G.gateOpening = null; G.gateOpts = null; G.sentryAway = false; G.sentryTw = 0; G.sentryAim = null;  G.tvRun = !!TEST_X && TEST_X > TV_RUN_A; G.phGo = !!TEST_X && TEST_X > EVAN_X; G.phFade = G.phGo ? 1 : 0; if (ROW[0] && !ROW[0].who) ROW[0].open = 1;      // build 16: the party: the door of the building beside his (to the left), lit from the start
   G.through = false; G.homeTo = null; G.autoRun = 0; G.calm = 0; G.doorSaid = false; G.choiceKind = null; G.sawLight = !!TEST_X && TEST_X > EVAN_X; G.nchose = false; G.alone = false;
   G.zoom = 1 - (1 - ZOOM_GATE) * smooth(GATE - 1300, GATE - 380, START_X);      // starting near the gate (?at=gate): already drawn back
   G.evan.pt = TEST_X ? 239 : 0; G.evan.go = false; G.evan.st = EVS_META.frames * 100; downs.clear(); pushing = false; keys.r = keys.push = false;
@@ -1631,23 +1634,27 @@ const GATE_ALONE = [];      // build 64: the young man stayed behind: the pilgri
 // its flatcar's empty deck, the young man after him, and it carries them out behind the barricade (trainTick, drawOutTrain). The way taken is kept (pp-gate).
 // Words approved in the script app (scene 6, build 106): all recorded (the sentry's in build 112, voice B).
 const SN = 'Sentry', SENTRY_X = DOOR1 + 45;
+const outX = () => DOOR1 + 90;      // where they go out through the gateway
 const SENTRY_STOP = [[SN, 'That\'s far enough. The gate\'s shut.']];
 const GUARD_ASK = [[PG, 'Let us through. Please.']], GUARD_ASK1 = [[PG, 'Let me through. Please.']];
 const GUARD_YES = [[YM, 'It\'s me. Open up.'], [SN, '...You? Out here?'], [YM, 'We\'re leaving.'], [SN, 'Go on, then. I never saw you.']];
 const GUARD_NO = [[SN, 'Orders. Nobody goes out. Go home, friend.']];
 // BUILD 111, FACE THE GUARD (owner: "confront guard--their dialogue should be more intense--basically he gets past by the spirit"; DRAFTED in the
 // script app, scene 6, waiting for approval; shown, not recorded): he does not plead; he stands his ground; on his quiet last word the rain
-// hushes and the far light swells behind him, and the sentry, shaken, opens the gate. No weapon is touched (PG).
+// hushes and the far light swells behind him.
+// Build 115 (owner: "\"Confront the guard\" - he doesn't say they can go, they just do with confidence"; "guard lifts gun and trains it on them as they
+// walk but doesn't shoot"): the sentry never gives leave ("Go. Before I change my mind." and "Let me go." are cut); the gate is opened and they
+// walk through; he raises his rifle (SNA) and keeps it on them, silent, and never fires.
 const FACE = [[PG, 'Open the gate.'], [SN, 'You deaf? Nobody goes out. Turn around.'], [PG, 'No.'], [SN, 'I said turn around. I won\'t say it again.'],
   [PG, 'This city is going to burn. I\'ve seen it. I\'m not staying. And you shouldn\'t either.', null, () => { G.flare = 1.2; lightSwell(); G.hushT = 360; }],
-  [SN, '...Who are you?'], [PG, 'Nobody. Let me go.'], [SN, 'Go. Before I change my mind.']];
+  [SN, '...Who are you?'], [PG, 'Nobody.']];
 const TANK_WAIT = [[PG, 'Wait.']], TANK_NOW = [[PG, 'Now.']];
 const TRAIN_SEE = [[PG, 'A train. It\'s going out.']], TRAIN_RUN = [[YM, 'It\'s moving!'], [PG, 'Run.']], TRAIN_RUN1 = [[PG, 'Run.']];
 const GATE_ALL = [...FACE, ...SENTRY_STOP, ...GUARD_ASK, ...GUARD_ASK1, ...GUARD_YES, ...GUARD_NO, ...TANK_WAIT, ...TANK_NOW, ...TRAIN_SEE, ...TRAIN_RUN];
 function gateChoice() {
   if (!G.hornFar) { G.hornFar = true; trainHorn(.025); }      // build 78: a train's horn, far off: the third way
-  const L = { face: 'Face the guard', guard: 'Ask the guard', tank: 'Wait for the tank', train: 'Jump the train' }, tried = G.gateTried || {};
-  G.gateOpts = ['face', 'tank', 'train'].filter(k => !tried[k]);      // build 111 (owner): face the guard (in place of asking him), the tank coming back, the train
+  const L = { face: 'Confront the guard', guard: 'Ask the guard', tank: 'Wait for the tank', train: 'Jump the train' }, tried = G.gateTried || {};
+  G.gateOpts = ['face', 'tank', 'train'].filter(k => !tried[k]);      // build 111 (owner): confront the guard (in place of asking him), the tank coming back, the train
   if (G.gateOpts.length === 1) { G.choiceKind = 'gate'; G.state = 'choice'; pick(true); return; }      // build 110: alone, once the guard has said no, the train is the only way left: he takes it
   offer('gate', ...G.gateOpts.map(k => L[k]));
 }
@@ -1655,6 +1662,8 @@ function gateChoice() {
 function openGate(sneak) { G.state = 'wait'; G.gateOpening = { sneak }; }
 function gateTick() {
   G.hushA = (G.hushA || 0) + (((G.hushT || 0) > 0 ? 1 : 0) - (G.hushA || 0)) * .03; if (G.hushT > 0) G.hushT--;      // build 111: the hush as he faces the guard
+  const A = G.sentryAim;      // build 115: the sentry's aim: he faces the gateway and keeps the rifle on them as they walk into it
+  if (A && SNA.ready) { A.t++; A.fk = clamp((A.fk ?? 0) + (A.face > 0 ? .07 : -.07)); }
   const o = G.gateOpening; if (!o) return;
   G.gateOpen = Math.min(1, G.gateOpen + .005);
   if (G.gateOpen >= 1) { G.gateOpening = null; gateOpened(); const go = () => { G.through = true; G.throughT = G.t; G.state = 'play'; G.idle = 0; caption(END); }; if (o.sneak) talk(TANK_NOW, go); else go(); }
@@ -1810,7 +1819,7 @@ function pick(home) {
     choiceEl.className = ''; document.body.classList.remove('talking'); document.getElementById('chThird').style.display = 'none'; G.choiceKind = null;
     const way = G.gateOpts[home === true ? 0 : home === false ? 1 : 2];
     try { localStorage.setItem('pp-gate', way); } catch (e) {}
-    if (way === 'face') talk(FACE, () => openGate(false));
+    if (way === 'face') talk(FACE, () => { G.sentryAim = { t: 0, face: -1 }; openGate(false); });      // build 115: they just go; he raises his rifle and keeps it on them
     else if (way === 'guard') talk(G.alone ? GUARD_ASK1 : GUARD_ASK, () => G.alone ? talk(GUARD_NO, () => { (G.gateTried = G.gateTried || {}).guard = 1; gateChoice(); }) : talk(GUARD_YES, () => openGate(false)));
     else if (way === 'tank') talk(TANK_WAIT, () => { if (G.tank && TANK_IM) tankBack(); else { G.state = 'wait'; later(60, () => openGate(false)); } });      // build 111: it comes back for them
     else talk(TRAIN_SEE, () => { trainGo(); talk(G.alone ? TRAIN_RUN1 : TRAIN_RUN, toTrain); });
@@ -1882,7 +1891,7 @@ const runNow = () => PR.ready && pwOn() ? [PR, PR_META] : G.ears || !RUNP.ready 
 function coverEars() { if (G.ears) return; if (P.run) poseChange(8, true); G.ears = true; }
 const CHR = [], PLI = [], OBS = [], EVA = [], STD = [], RUN = [], CHR_K = .52, RUN_STEP = RUN_META.vpx * CHR_K, RUNV = RUN_STEP * .4,   // the run at its video's own speed (24 frames a second)
    CHR_STEP = CHR_META.vpx * CHR_K, PLI_STEP = PLI_META.vpx * CHR_K, OBS_STEP = OBS_META.vpx * CHR_K;
-const PACK_V = 52;                          // bump when the .pack files change, so phones fetch the new ones
+const PACK_V = 53;                          // bump when the .pack files change, so phones fetch the new ones
 // SOLID FIGURES (build 202; owner: "in both level 2 and 3, pilgrims sprite is clear in spots. we need to fix this"). The
 // figures were cut from their white paper by how white each pixel is, so the white paper showing inside the watercolour
 // (highlights on the cloak, the pack, the hood) was cut away too and the scene showed through those spots (2 to 7 per cent
@@ -2061,7 +2070,7 @@ function walkTick(dir, max) {
   }
   if (!P.vx) return;
   // the way is shut until the gate opens; and wait for Evangelist's pictures if the phone is still fetching them
-  const lim = G.gateOpen >= 1 ? (G.through ? DOOR1 + 90 : OLD_W - 30) : DOOR0 - 44, lo = !EVA.ready && !G.evanDone ? EVAN_X + 205 : 30;
+  const lim = G.gateOpen >= 1 ? (G.through ? outX() : OLD_W - 30) : DOOR0 - 44, lo = !EVA.ready && !G.evanDone ? EVAN_X + 205 : 30;
   const ns = narrStop(), lo2 = ns && ns.lo != null ? Math.max(lo, Math.min(P.x, ns.lo)) : lo, lim2 = ns && ns.hi != null ? Math.min(lim, Math.max(P.x, ns.hi)) : lim;
   const nx = clamp(P.x + P.vx, lo2, lim2), moved = Math.abs(nx - P.x), f0 = pwOn() ? pwFrame() : chrFrame();
   P.x = nx; let down = false;
@@ -2300,7 +2309,7 @@ function story() {
   if (!G.obst && !G.neigh && P.x > NEIGH_X - 700 && OBS.ready && PLI.ready) { G.obst = { x: NEIGH_X + 190, mode: 'block', st: 1, al: 0, face: -1 }; G.pli = { x: NEIGH_X + 275, mode: 'block', st: 1, al: 0, face: -1 }; }
   if (!G.neigh && G.obst && P.x > NEIGH_X && G.state === 'play' && !saying()) { G.neigh = true; G.obst.mode = G.pli.mode = 'talk'; talk(NEIGH_CALL, () => offer('neigh', 'Nothing you\'d want. It\'s all going to burn.', 'Let me pass.')); }
   if (!G.gateSeen && P.x > GATE_STOP) { G.gateSeen = true; const w = G.alone ? GATE_ALONE : GATEWORDS; const ask = () => talk(SENTRY_STOP, gateChoice); if (w.length) talk(w, ask); else ask(); }      // build 74: the sentry, then choice 6
-  if (G.through && !G.leaving && P.x >= DOOR1 + 89) { G.state = 'auto'; G.leaving = true; clearHint('walk'); }      // through the gate (the child walked him there): Pliable follows, then the end
+  if (G.through && !G.leaving && P.x >= outX() - 1) { G.state = 'auto'; G.leaving = true; clearHint('walk'); }      // through the gate (the child walked him there): Pliable follows, then the end
   if (G.homeTo && P.x <= G.homeTo.to + 1) { const h = G.homeTo; G.homeTo = null; clearHint('walk'); h.then(); return; }
   if (G.homeTo && P.stand && G.idle === 150) hint('walk', 'Hold to walk back toward home.');
   if (G.through && P.stand && G.idle === 200) hint('walk', 'Hold to walk through the gate.');
@@ -2325,14 +2334,14 @@ function people() {
   if (p && p.mode === 'follow') p.face = 1;
   if (G.leaving && (!p || p.mode !== 'follow')) { G.leaving = false; finish(); }      // build 64: through the gate alone
   if (p && p.mode === 'follow') {                             // Pliable keeps a little behind Christian, hurrying only if he falls back
-    const gap = (G.leaving ? DOOR1 + 90 : P.x - 70) - p.x;      // at the end he follows Christian in through the gate and on
+    const gap = (G.leaving ? outX() : P.x - 70) - p.x;      // at the end he follows Christian in through the gate and on
     if (G.leaving && gap < 4) { G.leaving = false; p.mode = 'gone'; finish(); }      // through the gate: he stays gone
     if (gap > 14) p.go = true; if (gap < 1) p.go = false;
   }
   if (p) {
     const still = p.mode === 'talk' || p.mode === 'block' || (p.mode === 'follow' && !p.go);
     p.st = clamp((p.st || 0) + (still && rest(p, pliSet()[1]) && pliSet()[2] ? .035 : -.06));
-    if (p.mode === 'follow' && p.go && p.st <= 0) { const gap = (G.leaving ? DOOR1 + 90 : P.x - 70) - p.x; p.x += Math.max(0, Math.min(gap, gap > 46 ? 2 : MAXV)); }
+    if (p.mode === 'follow' && p.go && p.st <= 0) { const gap = (G.leaving ? outX() : P.x - 70) - p.x; p.x += Math.max(0, Math.min(gap, gap > 46 ? 2 : MAXV)); }
   }
   if (o) { const m = obsSet()[1]; o.anim = stepAnim(o.anim ?? m.rest[0], Math.abs(o.x - (o.px ?? o.x)), m.vpx * CHR_K, m); o.px = o.x; }
   if (p) { const m = pliSet()[1]; p.anim = stepAnim(p.anim ?? m.rest[0], Math.abs(p.x - (p.px ?? p.x)), m.vpx * CHR_K, m); p.px = p.x; }
@@ -3616,7 +3625,11 @@ function drawWorld() {
   TALKM = talkMove(C);
   // build 74: the sentry beyond the gate, facing the town; for the tank he turns to watch it go out (a short dissolve to his mirror)
   if (SNT.ready && SENTRY_X - cam < VW + 120) { TALKM = talkMove(SN); const L = SNT.length, t = G.t * .133 % (2 * L - 2), f = SNT[Math.floor(t < L ? t : 2 * L - 2 - t)]; G.sentryTw = Math.min(1, (G.sentryTw || 0) + (G.sentryAway ? .04 : 0)); const k = G.sentryTw;
-    if (k < 1) drawFrame(f, SNT_META, SENTRY_X - cam, GY, -1, k < .5 ? 1 : 2 * (1 - k)); if (k > 0) drawFrame(f, SNT_META, SENTRY_X - cam, GY, 1, k < .5 ? 2 * k : 1); }
+    const A = G.sentryAim && SNA.ready ? G.sentryAim : null;      // build 115: he raises the rifle at the video's pace (12 pictures a second), then holds it, breathing (8 a second, back and forth), facing the gateway they walk into
+    if (A) { const r = SNA_FROM + A.t * .2, h = (A.t - (SNA_HOLD - SNA_FROM) / .2) * .133, n = SNA.length - SNA_HOLD, q = h % (2 * n - 2), i = r < SNA_HOLD ? Math.floor(r) : SNA_HOLD + Math.floor(q < n ? q : 2 * n - 2 - q), m = Math.min(1, A.t / 12), x = SENTRY_X - cam;
+      if (m < 1) drawFrame(f, SNT_META, x, GY, -1, 1 - m);
+      if (A.fk < 1) drawFrame(SNA[i], SNA_META, x, GY, -1, m * (A.fk < .5 ? 1 : 2 * (1 - A.fk))); if (A.fk > 0) drawFrame(SNA[i], SNA_META, x, GY, 1, m * (A.fk < .5 ? 2 * A.fk : 1)); }
+    else { if (k < 1) drawFrame(f, SNT_META, SENTRY_X - cam, GY, -1, k < .5 ? 1 : 2 * (1 - k)); if (k > 0) drawFrame(f, SNT_META, SENTRY_X - cam, GY, 1, k < .5 ? 2 * k : 1); } }
   TALKM = talkMove(C);
   figure(P.x, a => drawChristian(P.x - cam, P.y + 1, P.face, (G.train && G.train.pOn) || (G.tank && G.tank.pOn) ? 0 : a)); RIM = null; TALKM = null;
   // birds in the air
@@ -4341,7 +4354,7 @@ document.getElementById('on2').onclick = () => SL.on ? go3() : HL.on ? go5() : g
   // If it is not ready by its line he simply stands (WEEP.ready is checked there).
   loadPack('christian-weep', WEEP).catch(() => {}).then(() => loadPack('christian-turn', TURN)).then(() => bookLoaded('TURN')).catch(() => {}).then(nbLoad);
   Promise.all([loadPack('evangelist', EVA), loadPack('evangelist-stand', EVS), loadPack('phillip-stand', PHS).catch(() => {}), loadPack('phillip-point', PHP).catch(() => {})]).then(() => Promise.all([loadImg('family.webp').then(im => { FAM = im; if (im) FAM_SH = mkShadow(im); }), Promise.resolve().then(() => { const B = barricade(); GATE_P = bakeTint(B.gate, .42, .4); WALL_P = bakeTint(B.wall, .42, .4); }), ...['a', 'b', 'c'].map(key => loadImg('neighbor-' + key + '.webp').then(im => { WATCH_IM[key] = im; })), ...['a', 'b', 'c'].map(key => loadPack('neighbor-' + key, WATCH_PACK[key]).catch(() => {})), loadImg('christian-back.webp').then(im => { BACK = im; }), loadPack('christian-run', RUN), loadPack('christian-run-plain', RUNP)]))
-    .then(() => Promise.all([loadPack('obstinate', OBS), loadPack('pliable', PLI), loadPack('bigman-walk', BMW).catch(() => {}), ...CROWD.map((w, i) => loadPack('crowd-' + (i + 1), w.pk).catch(() => {})), loadImg('tank.webp').then(im => { if (im) TANK_IM = bakeTank(im); }), loadPack('youngman-walk', YMW).catch(() => {}), loadPack('bigman-stand', BMS).catch(() => {}), loadPack('sentry-stand', SNT).catch(() => {}), loadPack('youngman-stand', YMS).catch(() => {}), loadImg('obstinate-stand.webp').then(im => { OBS_ST = im; }), loadImg('pliable-stand.webp').then(im => { PLI_ST = im; })]));
+    .then(() => Promise.all([loadPack('obstinate', OBS), loadPack('pliable', PLI), loadPack('bigman-walk', BMW).catch(() => {}), ...CROWD.map((w, i) => loadPack('crowd-' + (i + 1), w.pk).catch(() => {})), loadImg('tank.webp').then(im => { if (im) TANK_IM = bakeTank(im); }), loadPack('youngman-walk', YMW).catch(() => {}), loadPack('bigman-stand', BMS).catch(() => {}), loadPack('sentry-stand', SNT).catch(() => {}), loadPack('sentry-aim', SNA).catch(() => {}), loadPack('youngman-stand', YMS).catch(() => {}), loadImg('obstinate-stand.webp').then(im => { OBS_ST = im; }), loadImg('pliable-stand.webp').then(im => { PLI_ST = im; })]));
   for (const [who, txt] of INTRO) vox(who, txt);          // the first words, ready before Begin is pressed
 })();
 </script>
