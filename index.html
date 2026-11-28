@@ -249,7 +249,7 @@ every year.</div>
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 55 · Nov 28 2026</div>
+  <div id="build">build 56 · Nov 28 2026</div>
   <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
@@ -266,9 +266,10 @@ const PLI_META={"ax": 98, "ground": 298, "frames": 32, "vpx": 6.0, "rest": [0, 1
 const OBS_META={"ax": 95, "ground": 307, "frames": 32, "vpx": 6.0, "rest": [23]};
 // build 42: the big man and the young man of scene 5 as 2100 figures (sources/townsfolk: gen-man.py, video-walk.py), in Level 1 only; each stands
 // on his walk's feet-together frame (rest), so the dissolve from walking to standing never changes his legs. Level 2 keeps the old Pliable.
-const BMW = [], BMW_META = {"ax": 132, "ground": 308, "frames": 40, "vpx": 5.2, "rest": [13]}, YMW = [], YMW_META = {"ax": 132, "ground": 299, "frames": 32, "vpx": 5.2, "rest": [20]};
-const obsSet = () => BMW.ready ? [BMW, BMW_META, BMW[13], BMW_META] : [OBS, OBS_META, OBS_ST, OBS_ST_META];
-const pliSet = () => YMW.ready && !SL.on ? [YMW, YMW_META, YMW[20], YMW_META] : [PLI, PLI_META, PLI_ST, PLI_ST_META];
+// build 52 (owner): the big man muscular in a ball cap and puffy jacket, a pistol holstered; the young man in a beanie, a rifle slung on his back
+const BMW = [], BMW_META = {"ax": 132, "ground": 307, "frames": 36, "vpx": 5.4, "rest": [22]}, YMW = [], YMW_META = {"ax": 132, "ground": 299, "frames": 33, "vpx": 5.0, "rest": [0]};
+const obsSet = () => BMW.ready ? [BMW, BMW_META, BMW[22], BMW_META] : [OBS, OBS_META, OBS_ST, OBS_ST_META];
+const pliSet = () => YMW.ready && !SL.on ? [YMW, YMW_META, YMW[0], YMW_META] : [PLI, PLI_META, PLI_ST, PLI_ST_META];
 const EVA_META={"ax": 82, "ground": 311, "frames": 80, "src": [0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 46, 49, 52, 55, 58, 61, 64, 67, 70, 73, 76, 79, 82, 85, 88, 91, 94, 97, 100, 103, 106, 109, 112, 115, 118, 121, 124, 127, 130, 133, 136, 139, 142, 145, 148, 151, 154, 157, 160, 163, 166, 169, 172, 175, 178, 180, 182, 184, 186, 188, 190, 192, 194, 196, 198, 200, 202, 204, 206, 208, 210, 212, 216, 220, 224, 228, 232, 236]};
 const STD_META={"ax": 101, "ground": 302, "frames": 79, "src": [0, 2, 4, 6, 8, 10, 12, 14, 16, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35, 37, 39, 41, 43, 45, 47, 49, 51, 53, 55, 57, 59, 61, 63, 65, 67, 69, 71, 73, 75, 77, 79, 81, 83, 85, 87, 89, 91, 93, 95, 96, 100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 140, 144, 148, 152, 156, 160, 164, 168, 172, 176, 180, 184, 188, 192, 196, 200, 204, 208, 212]};
 
@@ -1321,7 +1322,7 @@ function reset() {
     pli: null, obst: null, flare: 0, gloom: 0, gloomTo: 0, gateOpen: 0, act: null, actT: 0, ring: null, auto: null, finale: null, guard: 0, idle: 0, wins: 0,
     evanDone: !!TEST_X, evanGone: TEST_X ? 1 : 0, neigh: TEST_X > NEIGH_X + 300, gateSeen: false, walked: false, touched: false, leaving: false, fam: TEST_X > HOME_X ? 2 : 0, door: 0,      // build 13 (owner: "as far as we know pilgrim has no family, for now"): his door stays shut
     doorShut: false, roll: TEST_X ? { t: 999, x: 0, y: 0 } : null, runZone: !!TEST_X && TEST_X < RUN_END, outSaid: false, watched: TEST_X > WATCH_X, ears: TEST_X > HOME_X });
-  G.sunUp = 0; G.waitFn = null; G.drone = null; G.tvRun = !!TEST_X && TEST_X > TV_RUN_A; G.phGo = !!TEST_X && TEST_X > EVAN_X; G.phFade = G.phGo ? 1 : 0; if (ROW[0] && !ROW[0].who) ROW[0].open = 1;      // build 16: the party: the door of the building beside his (to the left), lit from the start
+  G.sunUp = 0; G.waitFn = null; G.drone = null; G.tank = null; G.tvRun = !!TEST_X && TEST_X > TV_RUN_A; G.phGo = !!TEST_X && TEST_X > EVAN_X; G.phFade = G.phGo ? 1 : 0; if (ROW[0] && !ROW[0].who) ROW[0].open = 1;      // build 16: the party: the door of the building beside his (to the left), lit from the start
   G.through = false; G.homeTo = null; G.autoRun = 0; G.calm = 0; G.doorSaid = false; G.choiceKind = null; G.sawLight = !!TEST_X && TEST_X > EVAN_X; G.nchose = false;
   G.zoom = 1 - (1 - ZOOM_GATE) * smooth(GATE - 1300, GATE - 380, START_X);      // starting near the gate (?at=gate): already drawn back
   G.evan.pt = TEST_X ? 239 : 0; G.evan.go = false; G.evan.st = EVS_META.frames * 100; downs.clear(); pushing = false; keys.r = keys.push = false;
@@ -1534,7 +1535,8 @@ const FAMILY = [
 const LIFE = [[C, 'Life! Life! Eternal life!', 'quick']];      // said as he runs ('quick': they pass as soon as they are heard)
 // {19} to {24}: the neighbours come out while he is still running; two set out to fetch him back, and overtake him
 // BUILD 27: SCENE 4, BACK DOWN THE STREET (approved; no narrator): said as he runs past the party and the doorways (1 Peter 4:4: they think it strange)
-const WATCH = [[FR, 'Where are you going? The night\'s just starting!', 'quick'], [TW, 'He\'s lost his mind.', 'quick'], [DM, 'Thinks he\'s better than us now.', 'quick']];
+// build 52 (owner): the onlookers' words as he runs by (was the friend, "He's lost his mind.", "Thinks he's better than us now.")
+const WATCH = [[FR, 'Where are you going? The night\'s just starting!', 'quick'], [TW, 'Why is he running?', 'quick'], [DM, 'That man looks silly.', 'quick'], [TW, 'He\'s lost his mind.', 'quick']];
 const FETCH = [];      // build 27: no narrator
 // build 175 had the first two called out as the two caught up with him; since build 506 (owner) they are said once they have met (the book, {19}): NEIGH_CALL opens the talk NEIGH
 // (people() below)
@@ -1643,7 +1645,7 @@ const runNow = () => PR.ready && pwOn() ? [PR, PR_META] : G.ears || !RUNP.ready 
 function coverEars() { if (G.ears) return; if (P.run) poseChange(8, true); G.ears = true; }
 const CHR = [], PLI = [], OBS = [], EVA = [], STD = [], RUN = [], CHR_K = .52, RUN_STEP = RUN_META.vpx * CHR_K, RUNV = RUN_STEP * .4,   // the run at its video's own speed (24 frames a second)
    CHR_STEP = CHR_META.vpx * CHR_K, PLI_STEP = PLI_META.vpx * CHR_K, OBS_STEP = OBS_META.vpx * CHR_K;
-const PACK_V = 46;                          // bump when the .pack files change, so phones fetch the new ones
+const PACK_V = 48;                          // bump when the .pack files change, so phones fetch the new ones
 // SOLID FIGURES (build 202; owner: "in both level 2 and 3, pilgrims sprite is clear in spots. we need to fix this"). The
 // figures were cut from their white paper by how white each pixel is, so the white paper showing inside the watercolour
 // (highlights on the cloak, the pack, the hood) was cut away too and the scene showed through those spots (2 to 7 per cent
@@ -2500,6 +2502,49 @@ function drawDrone(cam) {
   c.fillRect(-9 * s, 4 * s, 2 * s, 4 * s); c.fillRect(7 * s, 4 * s, 2 * s, 4 * s);      // its legs
   c.restore();
 }
+// THE TANK (build 52; owner, with pictures of a modern main battle tank side on: "then a rumbling tank (see pics and scale)"). One painted
+// picture (sources/tank: gen-tank.py, cut-tank.py; assets/tank.webp), no markings, gun level, toned to its level like the port: on its own
+// level between the rails and the fence (p .7), well behind him, at real scale (2.6 m high against a man's 1.8 m; 61 px a metre at p .7).
+// It waits past the drone and, as he comes, rolls slowly toward the town (about 5 km/h) with a little shudder and a low rumble made in code.
+const TANK = { a: 9650, p: .7, k: .213, gnd: 904 }; let TANK_IM = null, TANK_SND = null;
+function bakeTank(im) { const out = {}; for (const [n, i] of [['cool', 0], ['warm', 1]]) { const c = mk(im.width, im.height), q = c.getContext('2d'); q.drawImage(im, 0, 0); q.globalCompositeOperation = 'source-atop'; q.fillStyle = css(layerCol(.7)[i], .8); q.fillRect(0, 0, im.width, im.height); out[n] = c; } return out; }
+function tankSound(v) {
+  if (!AC || muted) { if (TANK_SND) TANK_SND.g.gain.value = 0; return; }
+  if (!TANK_SND) { try {
+    const g = AC.createGain(), lp = AC.createBiquadFilter(), o = AC.createOscillator(), o2 = AC.createOscillator(), n = AC.createBufferSource(), nb = AC.createBuffer(1, AC.sampleRate * 2, AC.sampleRate), d = nb.getChannelData(0), nf = AC.createBiquadFilter(), ng = AC.createGain();
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; n.buffer = nb; n.loop = true; nf.type = 'lowpass'; nf.frequency.value = 140; ng.gain.value = .9;
+    g.gain.value = 0; lp.type = 'lowpass'; lp.frequency.value = 170; o.type = 'sawtooth'; o.frequency.value = 37; o2.type = 'square'; o2.frequency.value = 9.5;      // the engine, and the tracks' slow clatter
+    const og = AC.createGain(); og.gain.value = .35; o2.connect(og);
+    o.connect(lp); og.connect(lp); n.connect(nf); nf.connect(ng); ng.connect(lp); lp.connect(g); g.connect(SFXG); o.start(); o2.start(); n.start(); TANK_SND = { g };
+  } catch (e) { return; } }
+  const g = TANK_SND.g.gain, t = AC.currentTime; g.cancelScheduledValues(t); g.setTargetAtTime(v, t, .3); g.setTargetAtTime(0, t + .5, .4);
+}
+function drawTank(cam) {
+  if (!TANK_IM) return; const T = G.tank || (G.tank = { a: TANK.a, go: false });
+  if (P.x > TANK.a - 900) T.go = true; if (T.go) T.a = Math.max(TANK.a - 2600, T.a - 1.9);      // rolling toward the town
+  const x = lineUp(T.a, TANK.p) - cam * TANK.p, base = HORIZON + 140 * TANK.p, w = TANK_IM.cool.width * TANK.k, h = TANK_IM.cool.height * TANK.k;
+  const near = 1 - smooth(250, 1300, Math.abs(T.a - P.x)); tankSound(T.go ? .16 * near : 0);
+  if (x + w < -40 || x - w > VW + 40) return;
+  const jit = T.go ? Math.sin(G.t * 1.9) * .35 + Math.sin(G.t * .7) * .25 : 0, y = base + 2 - TANK.gnd * TANK.k + jit, wm = warm(x / VW), c = ctx;
+  c.save(); c.translate(x, 0); c.scale(-1, 1);      // the picture faces right; it rolls left, toward the town
+  c.drawImage(TANK_IM.cool, -w / 2, y, w, h); if (wm > .01) { c.globalAlpha = wm; c.drawImage(TANK_IM.warm, -w / 2, y, w, h); c.globalAlpha = 1; }
+  c.restore();
+}
+// THE ONLOOKERS (build 52; owner: "when [he] runs can we not have doors fly open but instead a little crowd of curious onlookers: 'why is he
+// running?' 'That man looks silly'"). Four ordinary people on the pavement (the 'mid' level), each its own pack (sources/crowd: gen-crowd.py,
+// video-turn.py, cut-crowd.py; assets/crowd-1..4.pack, video frames 120..239, every second one, played back and forth: small natural movements).
+// The video was asked for a slow turn but added a passer-by in front of them; only its clean end is used. Each turns to keep facing him
+// as he passes (the picture mirrored, with a short dissolve), one after another along the row, as the old doorway watchers did.
+const CROWD = [[4250, 51], [4400, 47], [4520, 44], [4640, 44]].map(([a, ax], i) => ({ a, f: -1, pk: [], meta: { ax, ground: 292, frames: 60 }, o: i * 13 }));
+function drawCrowd(cam) {
+  const L = LEVELS.mid, p = L.par, y = L.base + 2 - FEET_SINK, K = CHR_K * L.k;
+  for (const w of CROWD) {
+    if (!w.pk.ready) continue; const x = lineUp(w.a, p) - cam * p; if (x < -80 || x > VW + 80) continue;
+    w.f += ((P.x - cam > x + 6 ? 1 : -1) - w.f) * .12; const u = (w.f + 1) / 2;
+    const n = w.pk.length, t = Math.floor(G.t * .2 + w.o) % (2 * n - 2), fr = w.pk[t < n ? t : 2 * n - 2 - t];
+    if (u < .99) drawFrame(fr, w.meta, x, y, -1, u < .5 ? 1 : 2 * (1 - u), K); if (u > .01) drawFrame(fr, w.meta, x, y, 1, u < .5 ? 2 * u : 1, K);
+  }
+}
 // THE UNDERPASS (build 37; owner: "The field doesn't work for a meeting place - there no field in Queen Anne Seattle - what about an
 // under pass"). Where he wanders and Phillip meets him, a highway crosses over the street, as the interstate crosses below Queen Anne:
 // a deep concrete deck overhead (UP.a to UP.b on the road), plain concrete piers in two rows behind him (no caps or crossbeams, which
@@ -2920,7 +2965,7 @@ function drawWorld() {
   const gcol = layerCol(1), wAt = x => warm((x - cam) / VW), on = (x, w = 0, m = 80) => x < cam + VW + m && x + w > cam - m;
   // the lane just behind the road: a low bank a little paler than the road, with his house and a few things on it
   ctx.fillStyle = hGrad(ctx, ...layerCol(.93)); ctx.fillRect(0, LEVELS.home.base, VW, GY - LEVELS.home.base + 2);
-  underpass(cam, 'back'); drawPort(cam); drawRow(cam); home(cam); drawSmoke(cam); drawPoles(cam); drawLevel('mid', cam); drawWatchers(cam); drawWheat(false); drawDrone(cam);          // the wheat behind him
+  underpass(cam, 'back'); drawPort(cam); drawTank(cam); drawRow(cam); home(cam); drawSmoke(cam); drawPoles(cam); drawLevel('mid', cam); drawWatchers(cam); drawCrowd(cam); drawWheat(false); drawDrone(cam);          // the wheat behind him
   ctx.setTransform(1, 0, 0, 1, 0, OYD); drawFog('lane'); ctx.setTransform(DPR, 0, 0, DPR, 0, OYD);      // mist lying along the lane, round the houses' feet and in the wheat
   ctx.save(); ctx.translate(-cam, 0);
   const grad = hGrad(ctx, gcol[0], gcol[1], 1, 1, cam);
@@ -3658,7 +3703,7 @@ document.getElementById('on2').onclick = () => SL.on ? go3() : HL.on ? go5() : g
   // If it is not ready by its line he simply stands (WEEP.ready is checked there).
   loadPack('christian-weep', WEEP).catch(() => {}).then(() => loadPack('christian-turn', TURN)).then(() => bookLoaded('TURN')).catch(() => {}).then(nbLoad);
   Promise.all([loadPack('evangelist', EVA), loadPack('evangelist-stand', EVS), loadPack('phillip-stand', PHS).catch(() => {}), loadPack('phillip-point', PHP).catch(() => {})]).then(() => Promise.all([loadImg('family.webp').then(im => { FAM = im; if (im) FAM_SH = mkShadow(im); }), Promise.resolve().then(() => { const B = barricade(); GATE_P = bakeTint(B.gate, .42, .4); WALL_P = bakeTint(B.wall, .42, .4); }), ...['a', 'b', 'c'].map(key => loadImg('neighbor-' + key + '.webp').then(im => { WATCH_IM[key] = im; })), ...['a', 'b', 'c'].map(key => loadPack('neighbor-' + key, WATCH_PACK[key]).catch(() => {})), loadImg('christian-back.webp').then(im => { BACK = im; }), loadPack('christian-run', RUN), loadPack('christian-run-plain', RUNP)]))
-    .then(() => Promise.all([loadPack('obstinate', OBS), loadPack('pliable', PLI), loadPack('bigman-walk', BMW).catch(() => {}), loadPack('youngman-walk', YMW).catch(() => {}), loadImg('obstinate-stand.webp').then(im => { OBS_ST = im; }), loadImg('pliable-stand.webp').then(im => { PLI_ST = im; })]));
+    .then(() => Promise.all([loadPack('obstinate', OBS), loadPack('pliable', PLI), loadPack('bigman-walk', BMW).catch(() => {}), ...CROWD.map((w, i) => loadPack('crowd-' + (i + 1), w.pk).catch(() => {})), loadImg('tank.webp').then(im => { if (im) TANK_IM = bakeTank(im); }), loadPack('youngman-walk', YMW).catch(() => {}), loadImg('obstinate-stand.webp').then(im => { OBS_ST = im; }), loadImg('pliable-stand.webp').then(im => { PLI_ST = im; })]));
   for (const [who, txt] of INTRO) vox(who, txt);          // the first words, ready before Begin is pressed
 })();
 </script>
