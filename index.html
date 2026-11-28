@@ -202,7 +202,7 @@ body.portrait:not(.playing) #rot{display:none}
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 29 · Nov 28 2026</div>
+  <div id="build">build 30 · Nov 28 2026</div>
   <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
@@ -1564,7 +1564,7 @@ const runNow = () => G.ears || !RUNP.ready ? [RUN, RUN_META] : [RUNP, RUNP_META]
 function coverEars() { if (G.ears) return; if (P.run) poseChange(8, true); G.ears = true; }
 const CHR = [], PLI = [], OBS = [], EVA = [], STD = [], RUN = [], CHR_K = .52, RUN_STEP = RUN_META.vpx * CHR_K, RUNV = RUN_STEP * .4,   // the run at its video's own speed (24 frames a second)
    CHR_STEP = CHR_META.vpx * CHR_K, PLI_STEP = PLI_META.vpx * CHR_K, OBS_STEP = OBS_META.vpx * CHR_K;
-const PACK_V = 41;                          // bump when the .pack files change, so phones fetch the new ones
+const PACK_V = 42;                          // bump when the .pack files change, so phones fetch the new ones
 // SOLID FIGURES (build 202; owner: "in both level 2 and 3, pilgrims sprite is clear in spots. we need to fix this"). The
 // figures were cut from their white paper by how white each pixel is, so the white paper showing inside the watercolour
 // (highlights on the cloak, the pack, the hood) was cut away too and the scene showed through those spots (2 to 7 per cent
@@ -1631,7 +1631,12 @@ const chrFrame = () => ((Math.floor(P.anim) % CHR.length) + CHR.length) % CHR.le
 const stdFrame = () => atTime(STD_META, breathT(P.stand.t));
 const figC = mk(8, 8), shC = mk(8, 8), FEET_SINK = 9;
 // which picture he is in: running (fingers in his ears, from his run video), standing, or walking
-const chrPose = () => P.turnV && TURN.ready ? [TURN[Math.min(TURN.length - 1, Math.floor(P.turnV.t))], TURN_META] : P.weep && WEEP.ready ? [WEEP[Math.min(WEEP.length - 1, Math.floor(P.weep.t))], WEEP_META] : P.run ? (([set, meta]) => [set[((Math.floor(P.ranim) % set.length) + set.length) % set.length], meta])(runNow()) : P.stand ? [STD[stdFrame()], STD_META] : [CHR[chrFrame()], CHR_META];
+// build 30: the 2100 pilgrim's walk (assets/pilgrim-walk.pack, one whole stride from sources/pilgrim/walk.mp4, heels down at 10 and 28),
+// in Level 1 only; standing he holds the stride's feet-together picture (PW_STAND). His run, turn and weeping are still the old figure.
+const PW = [], PW_META = {"ax": 132, "ground": 299, "frames": 37, "vpx": 5.1, "rest": [10, 28]}, PW_STAND = 6, PW_STEP = PW_META.vpx * CHR_K;
+const pwOn = () => PW.ready && !SL.on && !HL.on && !CR.on;
+const pwFrame = () => ((Math.floor(P.anim) % PW.length) + PW.length) % PW.length;
+const chrPose = () => pwOn() && !P.turnV && !P.weep && !P.run ? (P.stand ? [PW[P.stand.pf ?? PW_STAND], PW_META] : [PW[pwFrame()], PW_META]) : P.turnV && TURN.ready ? [TURN[Math.min(TURN.length - 1, Math.floor(P.turnV.t))], TURN_META] : P.weep && WEEP.ready ? [WEEP[Math.min(WEEP.length - 1, Math.floor(P.weep.t))], WEEP_META] : P.run ? (([set, meta]) => [set[((Math.floor(P.ranim) % set.length) + set.length) % set.length], meta])(runNow()) : P.stand ? [STD[stdFrame()], STD_META] : [CHR[chrFrame()], CHR_META];
 // Walking and standing join frame to frame. Running does not, so going into or out of the run the old picture dissolves
 // into the new one over a fifth of a second (the new one comes in on top, then the old one goes: nothing shows through).
 // n = ticks; quick = the new picture is there at once and the old one fades off it (used into and out of the run:
@@ -1713,12 +1718,13 @@ function walkTick(dir, max) {
   }
   if (P.run) { P.stand = null; P.face = 1; P.vx = runNow()[1].vpx * CHR_K * .4; }      // each run at its own video's speed
   else if (dir) {
-    if (P.stand) { P.stand = null; P.anim = 1; }
+    if (P.stand) { P.anim = P.stand.pf != null ? P.stand.pf + .5 : 1; P.stand = null; }
     P.face = dir; P.vx = dir * max;
   } else if (!P.stand) {
-    const f = chrFrame();
+    if (pwOn()) { const f = pwFrame(); if (f === 6 || f === 24) { P.stand = { t: 0, pf: f }; P.vx = 0; if (P.turn) { P.face = P.turn; P.turn = 0; } } else P.vx = P.face * max; }
+    else { const f = chrFrame();
     if (f === 28 || f === 1) { P.stand = { t: f === 28 ? 0 : STAND_FROM_1 }; P.vx = 0; if (P.turn) { P.face = P.turn; P.turn = 0; } }
-    else P.vx = P.face * max;
+    else P.vx = P.face * max; }
   } else {
     P.vx = 0; if (P.turn) { P.face = P.turn; P.turn = 0; }
     if (!still || P.stand.t < 16 || P.stand.t >= QUIET[0]) P.stand.t += .4;      // while someone talks he finishes stopping, then holds still (no lifting of the book); build 118: once in his quiet breathing he goes on breathing through the talk
@@ -1727,9 +1733,10 @@ function walkTick(dir, max) {
   // the way is shut until the gate opens; and wait for Evangelist's pictures if the phone is still fetching them
   const lim = G.gateOpen >= 1 ? (G.through ? DOOR1 + 90 : LEVEL_W - 30) : DOOR0 - 44, lo = !EVA.ready && !G.evanDone ? EVAN_X + 205 : 30;
   const ns = narrStop(), lo2 = ns && ns.lo != null ? Math.max(lo, Math.min(P.x, ns.lo)) : lo, lim2 = ns && ns.hi != null ? Math.min(lim, Math.max(P.x, ns.hi)) : lim;
-  const nx = clamp(P.x + P.vx, lo2, lim2), moved = Math.abs(nx - P.x), f0 = chrFrame();
+  const nx = clamp(P.x + P.vx, lo2, lim2), moved = Math.abs(nx - P.x), f0 = pwOn() ? pwFrame() : chrFrame();
   P.x = nx; let down = false;
   if (P.run) { const m = runNow()[1], r0 = Math.floor(P.ranim) % m.frames; P.ranim += moved / (m.vpx * CHR_K); const r1 = Math.floor(P.ranim) % m.frames; down = r1 !== r0 && m.steps.includes(r1); }
+  else if (pwOn()) { P.anim += Math.max(moved, .25) / PW_STEP; const f1 = pwFrame(); down = f1 !== f0 && PW_META.rest.includes(f1); }
   else { P.anim += Math.max(moved, .25) / CHR_STEP; const f1 = chrFrame(); down = f1 !== f0 && CHR_META.rest.includes(f1); }
   if (down) {                                                  // a foot comes down
     // the road is wet wherever it is raining: every step sends rings out (owner loved this), fading as the weather clears
@@ -3243,7 +3250,7 @@ document.getElementById('on2').onclick = () => SL.on ? go3() : HL.on ? go5() : g
 (async function boot() {
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.fillStyle = '#5d6b80'; ctx.fillRect(0, 0, VW, VH);
   await new Promise(r => setTimeout(r, 30));
-  const chr = Promise.all([loadPack('christian-walk', CHR), loadPack('christian-stand', STD), 
+  const chr = Promise.all([loadPack('christian-walk', CHR), loadPack('pilgrim-walk', PW).catch(() => {}), loadPack('christian-stand', STD), 
     // build 89 (owner: "when I first open link house isn't there then flickers there"): what the first picture shows (his
     // house and its row, the trees, his wife in the door) now loads before "Open the book" appears, not after
     Promise.resolve().then(() => { HOUSE = bakeTint(streetFront('h'), HOUSE_DEPTH, HOUSE_DETAIL); for (const key of ['b', 'c']) NB[key] = bakeTint(streetFront(key), HOUSE_DEPTH, HOUSE_DETAIL); buildRow(); }),      // build 13: city buildings drawn in code, not the cottage paintings
