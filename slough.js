@@ -197,6 +197,25 @@ const SL = (() => {
       MECHS.push({ x: m[1], p: m[2], s: m[3], b: { c, k: im.height / 560, x0: -530, y0: -556 } }); MECHS.sort((u, v) => u.p - v.p); }; im.src = 'assets/' + m[0] + '.webp?v=11'; }); }
   // build 9: a diffuse mist of its own (soft blobs, wrapping sideways), laid over the feet of the far things
   let FARMIST = null;
+  // build 59: old oil drums in the mire: [x, parallax, kind ('u' upright, 'l' lying on its side), tilt, how far sunk, dented]
+  const OILD = [[-760, .66, 'u', -.1, 36, 1], [-380, .75, 'u', .14, 30, 0], [-337, .75, 'l', -.06, 36, 0]];
+  // one drum in its own units (88 tall, 58 across, base at 0): the body, two rolling hoops standing a little proud, the rim
+  function oilDrum(c, kind, dent, col) {
+    // one outline each (separate pieces left seams), the hoops standing proud of it
+    c.fillStyle = css(col); c.beginPath();
+    if (kind === 'l') {      // on its side: the axis across the picture, rounded ends, the hoops as bumps on its top
+      const top = [[-44, -58], [-19, -58], [-17, -59.3], [-13, -59.3], [-11, -58], [11, -58], [13, -59.3], [17, -59.3], [19, -58], [44, -58]];      // low wide hoops (tall narrow ones read as chimneys)
+      c.moveTo(-44, 0); for (const [x, y] of top) c.lineTo(x, y);
+      c.ellipse(44, -29, 6, 29, 0, -Math.PI / 2, Math.PI / 2); c.lineTo(-44, 0); c.ellipse(-44, -29, 4, 29, 0, Math.PI / 2, Math.PI * 1.5);
+      c.fill(); return;
+    }
+    const side = [[29, 0], [29, -26], [31.5, -27], [31.5, -31], [29, -32], [29, -55], [31.5, -56], [31.5, -60], [29, -61], [29.6, -86]];
+    c.moveTo(-29, 0); for (const [x, y] of side) c.lineTo(-x, y);
+    if (dent) { c.lineTo(-12, -87); c.lineTo(-3, -81); c.lineTo(8, -88.4); }
+    c.ellipse(0, -86, 29.6, 2.6, 0, dent ? Math.PI * 2 - Math.acos(8 / 29.6) : Math.PI, Math.PI * 2);      // with a dent the rim starts past it (from the left it crossed itself and left a pale notch)
+    for (const [x, y] of side.slice().reverse()) c.lineTo(x, y);
+    c.closePath(); c.fill();
+  }
   function farMist() { if (FARMIST) return FARMIST; const c = mk(512, 96), k = c.getContext('2d'); let sd = 41; const rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
     for (let i = 0; i < 46; i++) { const x = rnd() * 512, y = 30 + rnd() * 44, r = 34 + rnd() * 54, a = .1 + rnd() * .13;
       for (const dx of [-512, 0, 512]) { const g = k.createRadialGradient(x + dx, y, 0, x + dx, y, r); g.addColorStop(0, `rgba(255,255,255,${a})`); g.addColorStop(1, 'rgba(255,255,255,0)'); k.fillStyle = g; k.save(); k.translate(x + dx, y); k.scale(2.6, .5); k.translate(-x - dx, -y); k.fillRect(x + dx - r, y - r, 2 * r, 2 * r); k.restore(); } }
@@ -1089,6 +1108,19 @@ const SL = (() => {
     // build 395: the horizon back as one soft pale line across the mire (it had melted into the mist, so sky and mud were one grey)
     if (ph !== 'plain') { const h0 = hor - 5 * z, g = ctx.createLinearGradient(0, h0, 0, h0 + 12 * z), k = .28 * look.mist; g.addColorStop(0, css(LIGHT, 0)); g.addColorStop(.5, css(LIGHT, k)); g.addColorStop(1, css(LIGHT, 0)); ctx.fillStyle = g; ctx.fillRect(0, h0, VW, 12 * z); }
 
+    // build 59 (owner: "Can we put some old oil drums in slough poking out"): old steel drums half sunk in the mire, far off
+    // behind him, one tone each by depth (nearer darker), drawn in code; they come in with the mire's ghost trees, as the camera
+    // reaches the mire. No reflection (the rows are mud, not water) and no pale ring (it read as a drawn line).
+    { const aD = smooth(-1300, -1000, cx); if (aD > .01) for (const d of OILD) {
+        // each stands IN the mire's rows at its own depth (the rows' rule: parallax p = .3 + .7 q, q down from the horizon)
+        const [x, p, kind, tilt, sink, dent] = d, q = (p - .3) / .7, s = z * p * .72, gx = (x - cx * p) * z + VW / 2, gy = hor + (wl - hor) * q;
+        if (gx < -80 || gx > VW + 80) continue;
+        const col = tone(.7 - .4 * p), mud = mix(tone(.4), tone(.84), Math.pow(1 - q, 1.1));
+        ctx.save(); ctx.globalAlpha = aD; ctx.translate(gx, gy); ctx.beginPath(); ctx.rect(-90 * s, -130 * s, 180 * s, 130 * s); ctx.clip();
+        ctx.save(); ctx.scale(s, s); ctx.translate(0, sink); ctx.rotate(tilt); oilDrum(ctx, kind, dent, col); ctx.restore(); ctx.restore();
+        // the mud heaped a little round its foot, in the mud's own tone, so it sits in the mire and never floats
+        ctx.save(); ctx.globalAlpha = aD; ctx.fillStyle = css(mud); ctx.beginPath(); ctx.ellipse(gx, gy + .5 * s, (kind === 'l' ? 58 : 42) * s, 4.5 * s, 0, Math.PI, Math.PI * 2); ctx.fill(); ctx.restore();
+      } }
     // --- everything near, painted apart so the water can mirror it: banks, oak, people, steps, lights ---
     const n = nearC.getContext('2d'); n.setTransform(1, 0, 0, 1, 0, 0); n.clearRect(0, 0, nearC.width, nearC.height);
     n.setTransform(S * z, 0, 0, S * z, S * (VW / 2 - cx * z), S * wl);
