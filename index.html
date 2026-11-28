@@ -249,7 +249,7 @@ every year.</div>
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 91 · Nov 28 2026</div>
+  <div id="build">build 98 · Nov 28 2026</div>
   <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
@@ -278,7 +278,7 @@ const EVA_META={"ax": 82, "ground": 311, "frames": 80, "src": [0, 4, 8, 12, 16, 
 const STD_META={"ax": 101, "ground": 302, "frames": 79, "src": [0, 2, 4, 6, 8, 10, 12, 14, 16, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35, 37, 39, 41, 43, 45, 47, 49, 51, 53, 55, 57, 59, 61, 63, 65, 67, 69, 71, 73, 75, 77, 79, 81, 83, 85, 87, 89, 91, 93, 95, 96, 100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 140, 144, 148, 152, 156, 160, 164, 168, 172, 176, 180, 184, 188, 192, 196, 200, 204, 208, 212]};
 
 // ---------- setup ----------
-let VW = 960; const VW0 = 960, VH = 540, GY = 440, LEVEL_W = 10800, PANG = LEVEL_W - VW, GATE = 9940;      // build 494: 1400 longer: the run goes on past the last houses into the fields at the town's edge (FIELD2)
+let VW = 960; const VW0 = 960, VH = 540, GY = 440, LEVEL_W = 12000, OLD_W = 10800, PANG = OLD_W - VW, GATE = 9940;      // build 96: the level reaches 1200 further, for the rail tunnel; only the train ride's camera goes there (camMax)      // build 494: 1400 longer: the run goes on past the last houses into the fields at the town's edge (FIELD2)
 const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
 const stage = document.getElementById('stage');
 let DPR = 1;
@@ -707,7 +707,7 @@ function buildScenery() {
     R = rng(3 * 7919 + i * 977 + 11);
     // STORY LAB differs from index.html here (owner, build 35): the nearest row of houses is closer (bigger, taller, moves
     // more as he walks), and the row behind it and the mountains are raised so they still show above it.
-    const near = i === 2, par = near ? .62 : .05 + .95 * Math.pow(d, 1.6), W = VW + PANG * par + 60;
+    const near = i === 2, par = near ? .62 : .05 + .95 * Math.pow(d, 1.6), W = VW + (LEVEL_W - VW) * par + 60;
     const s = (.26 + .74 * Math.pow(d, 1.15)) * (near ? 1.3 : 1), base = lerp(280, GY, Math.pow(d, .9)) - [44, 54, 0][i];
     const edge = 420 + ((first ? GATE : TOWN_END[i]) - 420) * par;      // where the city ends in this layer (lined up with the gate until build 494; now the town's edge, before the fields)
     // STORY LAB (build 48): the level opens in a field, as the book does. The nearest row of houses only begins where the
@@ -913,7 +913,7 @@ let TEST_X = +(new URLSearchParams(location.search).get('x')) || AT[new URLSearc
 // a link's place (at=, x=, room=) is used by the FIRST level start only; then it is cleared from the address, so choosing a
 // level again (the contents, the pause menu, Play again, a reload) begins it from its start. Each level calls this once it has read it.
 function dropPlace() { const q = new URLSearchParams(location.search); if (!['at', 'x', 'room'].some(k => q.has(k))) return; ['at', 'x', 'room'].forEach(k => q.delete(k)); const t = q.toString(); try { history.replaceState(null, '', location.pathname + (t ? '?' + t : '')); } catch (e) {} TEST_X = 0; START_X = HOME_X - 280; }
-// The lights on the road are a tune: "Amazing Grace" (New Britain, 1829), one phrase per stretch of road.
+// The lights on the road were a tune (builds to 93); since build 96 no hymn is played: PHRASES only spaces the far lamps.
 // Each light is one note. They are spaced by the length of each note, so walking at his steady pace plays the tune in time.
 // A higher note floats higher. [beat, note]; BEAT = road walked per beat.
 const BEAT = 58, NOTE = { D: 62, E: 64, G: 67, A: 69, B: 71, d: 74 };
@@ -933,14 +933,21 @@ const PHRASES = [
 ];
 // the whole tune, sung through once when the gate opens, with a low note under each bar
 const TUNE = [], BASS = [43, 43, 48, 43, 43, 43, 50, 50, 43, 43, 48, 43, 43, 50, 43, 43];
-for (const ph of PHRASES) for (const [b, k] of ph.n) TUNE.push([ph.at + b, NOTE[k]]);
+// build 96 (owner: "No amazing grace in this game please"): TUNE is left empty, so nothing sings the hymn (the gate, cross.js); PHRASES now only
+// spaces the far lamps along the road (their notes are LAMP_LINE, in the music's key)
 const HARM = [55, 59, 62, 67, 50, 57];     // notes for lights set free by a touch (they fit under the tune)
 const LIGHTS = [], LAMPS = [], THINGS = [], FLOCKS = [], CAPS = [];
 function buildLevel() {
   LIGHTS.length = LAMPS.length = FLOCKS.length = CAPS.length = 0;
   if (typeof PORTLIT !== 'undefined') { PORTLIT.clear(); FARLIT.clear(); }      // build 91: every walk lights its lamps afresh
   const light = (x, midi, wait, tube, port) => LIGHTS.push({ x, y: tube ? UP.dy + 6 : GY - 60 - clamp(midi - 62, -6, 12) * 5.2, midi, got: false, ph: rnd() * 6, wait, a: wait ? 0 : 1, tube: tube || port, port, gt: 0 });
-  for (const ph of PHRASES) for (const [b, k] of ph.n) light(ph.x + (ph.back ? -b : b) * (ph.bt || BEAT), NOTE[k], !!ph.wait, !!ph.tube, !!ph.port);      // 'back': a phrase met walking left, out into the field
+  // build 94 (owner: "make lights have notes that fit with sound track somehow - and ... make both sets of lights (later ones too) match"):
+  // both sets of far lamps (the city's windows on the walk to Phillip, the cranes' lamps near the barricade) play the SAME short line of
+  // notes, taken from Level 1's own music (l1-city2100 centres on C with F and G strongest: measured by chroma), not the hymn's G major,
+  // so they sit inside the soundtrack; each set starts the line afresh. (Build 96: no Amazing Grace anywhere in the game.)
+  const LAMP_LINE = [55, 60, 67, 65, 60, 67, 72, 67, 65, 60, 55, 60], cnt = { tube: 0, port: 0 };
+  for (const ph of PHRASES) for (const [b, k] of ph.n) { const set = ph.tube ? 'tube' : ph.port ? 'port' : null, m = set ? LAMP_LINE[cnt[set]++ % LAMP_LINE.length] : NOTE[k];
+    light(ph.x + (ph.back ? -b : b) * (ph.bt || BEAT), m, !!ph.wait, !!ph.tube, !!ph.port); }      // 'back': a phrase met walking left
   for (const x of [2700, 9500]) LAMPS.push({ x, lit: 0 });                       // few and far apart: they count as special things too (none in the field)
   // Things, each on a depth level (LEVELS). Owner's rule (build 40): no more than one special thing in the picture at a
   // time, because their likeness distracts. So there are few of them, about one every 600 of road counting the lamps and his
@@ -1323,13 +1330,14 @@ const held = () => { if (autoHeld()) return true; for (const t of downs.values()
 // camera draws back at the gate, the far light rises to stand above the gateway, in the sky over the gatehouse
 // (Evangelist: "Keep that light in your eye, and go straight up to it. Then you will see the gate."). Since build 100
 // the gatehouse is tall, so the light stands high in the open sky beside it.
-const lightPos = () => { const t = smooth(0, 1, (1 - (G.zoom || 1)) / (1 - ZOOM_GATE)); return { x: lerp(880 - G.cam * .02, DOORM - G.cam + 600, t), y: lerp(96, -330, t) - 90 * smooth(0, 1, G.sunUp || 0) }; };      // sunUp: once the gate is open it climbs a little higher (build 102)      // build 100: in the open sky to the right of the tall gatehouse
+const lightPos = () => { const t = smooth(0, 1, (1 - (G.zoom || 1)) / (1 - ZOOM_GATE)), lc = Math.min(G.cam, OLD_W - VW); return { x: lerp(880 - lc * .02, DOORM - lc + 600, t),      // build 96: past the old end (the train ride) the far light stays put, ahead
+ y: lerp(96, -330, t) - 90 * smooth(0, 1, G.sunUp || 0) }; };      // sunUp: once the gate is open it climbs a little higher (build 102)      // build 100: in the open sky to the right of the tall gatehouse
 
 function reset() {
   seed = 99; buildLevel(); for (const it of ROW) if (it.who) { it.on = false; it.open = 0; }      // build 51: no door opens
   for (const Lr of SCN) for (const w of Lr.wins) w[5] = false;
   Object.assign(P, { x: START_X, y: GY, vx: 0, face: TEST_X ? 1 : -1, anim: 1, stand: { t: QUIET[0] }, turn: 0, run: false, ranim: 0, blend: null, weep: null, turnTo: 0, turnV: null, lookUp: 0, lookA: 0, wantBack: false, bk: 0 });
-  Object.assign(G, { cam: Math.max(0, Math.min(LEVEL_W - VW, TEST_X ? START_X - VW * .38 + 40 : START_X - VW * .62 - 40)), t: 0, got: 0, extra: 0, motes: [], flyers: [], ripples: [], glints: [], taps: [], litw: [], capQ: [], cap: 0, hint: null,
+  Object.assign(G, { cam: Math.max(0, Math.min(OLD_W - VW, TEST_X ? START_X - VW * .38 + 40 : START_X - VW * .62 - 40)), t: 0, got: 0, extra: 0, motes: [], flyers: [], ripples: [], glints: [], taps: [], litw: [], capQ: [], cap: 0, hint: null,
     pli: null, obst: null, flare: 0, gloom: 0, gloomTo: 0, gateOpen: 0, act: null, actT: 0, ring: null, auto: null, finale: null, guard: 0, idle: 0, wins: 0,
     evanDone: !!TEST_X, evanGone: TEST_X ? 1 : 0, neigh: TEST_X > NEIGH_X + 300, gateSeen: false, walked: false, touched: false, leaving: false, fam: TEST_X > HOME_X ? 2 : 0, door: 0,      // build 13 (owner: "as far as we know pilgrim has no family, for now"): his door stays shut
     doorShut: false, roll: TEST_X ? { t: 999, x: 0, y: 0 } : null, runZone: !!TEST_X && TEST_X < RUN_END, outSaid: false, watched: TEST_X > WATCH_X, ears: TEST_X > HOME_X });
@@ -1627,62 +1635,111 @@ function gateTick() {
   G.gateOpen = Math.min(1, G.gateOpen + .005);
   if (G.gateOpen >= 1) { G.gateOpening = null; gateOpened(); const go = () => { G.through = true; G.throughT = G.t; G.state = 'play'; G.idle = 0; caption(END); }; if (o.sneak) talk(TANK_NOW, go); else go(); }
 }
-// THE TRAIN (build 78). OTR: a freight train on a line between the tank and the fence (p .78), at real scale (88 px a metre at the road,
-// so 68.6 here): a shunting engine (10 m) and one flatcar (12 m) with a 20-foot container on its front half, the rear half of the deck
-// empty. It is not there before: a far horn is heard at the barricade; chosen, it comes rolling in from the town (from the left) at a
-// walking pace, he runs back to meet it, lets the engine go by and jumps onto the empty deck as it passes, the young man after him; it
-// passes in front of the tank and carries them out behind the barricade.
-const OTR = { p: .78, loco: 10, flat: 12, gap: 1 };
-const otrM = () => 88 * OTR.p, otrBase = () => HORIZON + 140 * OTR.p, otrX = cam => lineUp(G.train.a, OTR.p) - cam * OTR.p;      // its front on the screen
-const deckY = () => otrBase() - 1.25 * otrM();
-const otrLen = () => (OTR.loco + OTR.gap + OTR.flat) * otrM();
-// the empty rear deck of the flatcar, on the screen: [left, right]
-const deckSpan = cam => { const m = otrM(), x = otrX(cam) - otrLen(); return [x + .4 * m, x + 5.4 * m]; };
-function trainGo() { const cam = G.camDraw ?? G.cam; G.train = { a: 0, v: 1.4, t: 0 }; G.train.a = (-20 - 325 + cam * OTR.p) / OTR.p + 325; trainHorn(.09); }      // its front just off the left of the picture
+// THE TRAIN (build 88; owner: "Is there a tunnel gate for train a while back and put train in foreground ... they can walk back and then
+// hop", with a picture of a modern road diesel for its look; then "Train getting smaller looks bad": it never curves away). A track runs just
+// behind the road (p .9) straight into a rail tunnel at the barricade's near end (TR.UT, railPortal()). Chosen, a freight train comes out of
+// the town on it: an engine (20 m, after the owner's picture: our own plain silhouette, no markings) and a flatcar (13 m) with a 20-foot
+// container on its front half. The engine rumbles by behind them; they run back to meet the flatcar and hop up onto its empty rear deck; the
+// train carries them into the tunnel. Each car is painted on a small canvas and laid on the track in thin slices (trainCar). Places along
+// the track (u) are road places, as lineUp uses; a car is its length x 88 long in u. (The curve code, trP, is kept but unused.)
+const TR = { pN: .9, pF: .55, U0: 1e9, U1: 1e9, UT: 11400, v: 3 }, OTR = { loco: 20, gap: 1, flat: 13 };
+const trP = u => u <= TR.U0 ? TR.pN : u >= TR.U1 ? TR.pF : lerp(TR.pN, TR.pF, smooth(TR.U0, TR.U1, u));
+const trX = (u, cam) => { const p = trP(u); return lineUp(u, p) - cam * p; }, trY = u => HORIZON + 140 * trP(u);
+// the cars, front first: [rear u, front u, kind, length in m]
+const trCars = F => { const k = 88, lr = F - OTR.loco * k, fr = lr - OTR.gap * k; return [[lr, F, 'loco', OTR.loco], [fr - OTR.flat * k, fr, 'flat', OTR.flat]]; };
+// a point on a car (metres from its rear end, metres up) on the screen, with the depth there
+const carPt = (car, ox, oy, cam) => { const u = car[0] + ox * 88, p = trP(u); return { x: trX(u, cam), y: trY(u) - oy * 88 * p, p }; };
+function trainGo() { const cam = G.camDraw ?? G.cam; G.train = { F: (-60 - 325 + cam * TR.pN) / TR.pN + 325, t: 0 }; trainHorn(.1); }      // its front just off the left of the picture
 function toTrain() {
   G.train.ph = 'back'; G.state = 'auto'; G.auto = { dir: -1, to: -1e9 };      // he runs back toward it (a story move: the child need not hold)
   if (G.pli && G.pli.mode === 'follow') G.pli.mode = 'train';
 }
+const DECK = [.5, 5.6];      // the flatcar's empty rear deck, metres from its rear
 function trainTick() {
-  const T = G.train; if (!T) return; T.t++;
-  T.v = T.ph === 'ride' ? Math.min(2.6, T.v + .008) : 1.4; T.a += T.v; trainSound(T.v);
-  const cam = G.camDraw ?? G.cam, px = P.x - cam, [l, r] = deckSpan(cam), X = otrX(cam);
-  if (T.ph === 'back' && r - 25 >= px) {      // the empty deck has come up to him: he stops and jumps
-    G.auto = null; G.state = 'wait'; P.vx = 0; P.face = 1; T.ph = 'hop'; T.h = { t: 0, x0: px, off: clamp(px + 20, l + 18, r - 18) - X };
-  } else if (T.ph === 'hop') { T.h.t++; T.pOn = true; if (T.h.t >= 42) { T.ph = 'ride'; T.r = G.t; } }
-  if (T.ph === 'ride' && !T.done) { P.x = X + T.h.off + cam; if (P.x > GATE - 760 + 340 && G.t > T.r + 60) { T.done = true; finish(); } }      // carried out behind the barricade: the end
-  // the young man runs back with him and jumps a little after him
+  const T = G.train; if (!T) return; T.t++; T.F += TR.v; trainSound(TR.v);
+  const cam = G.camDraw ?? G.cam, px = P.x - cam, flat = trCars(T.F)[1], l = carPt(flat, DECK[0], 0, cam).x, r = carPt(flat, DECK[1], 0, cam).x;
+  if (T.ph === 'back' && r - 30 >= px && l < px) {      // the empty deck has come up to him: he stops and hops up
+    G.auto = null; G.state = 'wait'; P.vx = 0; P.face = 1; T.ph = 'hop';
+    T.h = { t: 0, x0: px, ox: clamp(DECK[0] + (px + 30 - l) / (r - l) * (DECK[1] - DECK[0]), DECK[0] + .6, DECK[1] - .4) };
+  } else if (T.ph === 'hop') { T.h.t++; T.pOn = true; if (T.h.t >= 40) { T.ph = 'ride'; T.r = G.t; } }
+  if (T.ph === 'ride' && !T.done) { const q = carPt(flat, T.h.ox, 1.25, cam); P.x = q.x + cam; if (q.x > portalArchL() + 50 - cam && G.t > T.r + 30) { T.done = true; finish(); } }      // into the tunnel: the end
+  // the young man runs back with him and hops up a little after him
   const p = G.pli;
-  if (p && p.mode === 'train') { p.face = -1; const tx = P.x + 55; if (p.x > tx) p.x = Math.max(tx, p.x - 3.2); if ((T.ph === 'hop' && T.h.t > 14) || T.ph === 'ride') { p.mode = 'trainhop'; p.face = 1; p.h = { t: 0, x0: p.x - cam, off: Math.max(l + 10 - X, T.h.off - 46) }; } }
-  if (p && p.mode === 'trainhop') p.h.t = Math.min(42, p.h.t + 1);
+  if (p && p.mode === 'train') { p.face = -1; const tx = P.x + 55; if (p.x > tx) p.x = Math.max(tx, p.x - 3.2); if ((T.ph === 'hop' && T.h.t > 14) || T.ph === 'ride') { p.mode = 'trainhop'; p.face = 1; p.h = { t: 0, x0: p.x - cam, ox: Math.max(DECK[0] + .3, T.h.ox - 1.1) }; } }
+  if (p && p.mode === 'trainhop') p.h.t = Math.min(40, p.h.t + 1);
 }
-// drawn in draw() right after the tank (it is nearer than the tank, so it passes in front of it): the engine, the flatcar, the two on it
-function drawOutTrain(cam) {
-  const T = G.train; G.camDraw = cam; if (!T) return;
-  const c = ctx, m = otrM(), base = otrBase(), X = otrX(cam), Lx = otrLen();
-  if (X < -60 || X - Lx > VW + 60) return;
-  const col = portCol(.72, X, .12), dk = portCol(.8, X, .08); c.globalAlpha = 1;      // one misty tone for its depth, a little darker than the tank behind it
-  const bogie = (x) => { c.fillStyle = css(dk); c.fillRect(x - 1.3 * m, base - .95 * m, 2.6 * m, .3 * m); for (const v of [-.8, 0, .8]) { c.beginPath(); c.arc(x + v * m, base - .45 * m, .45 * m, 0, 7); c.fill(); } };
-  // the engine: frame, a long hood, the cab toward its front (right), a short hood before it, dark windows, a handrail
-  { const x0 = X - OTR.loco * m; c.fillStyle = css(col);
-    c.fillRect(x0, base - 1.5 * m, OTR.loco * m, .55 * m);
-    c.fillRect(x0 + .5 * m, base - 3.5 * m, 5.6 * m, 2 * m); c.fillRect(x0 + 1.6 * m, base - 3.75 * m, 1 * m, .3 * m);      // the long hood, its exhaust
-    c.fillRect(x0 + 6.4 * m, base - 4.2 * m, 2.5 * m, 2.7 * m); c.fillRect(x0 + 6.25 * m, base - 4.3 * m, 2.8 * m, .16 * m);      // the cab, its roof
-    c.fillRect(x0 + 8.9 * m, base - 2.6 * m, .9 * m, 1.1 * m);      // the short hood
-    c.fillStyle = css(mix(dk, [0, 0, 0], .35)); c.fillRect(x0 + 6.8 * m, base - 3.8 * m, .8 * m, .75 * m); c.fillRect(x0 + 7.85 * m, base - 3.8 * m, .8 * m, .75 * m);      // its windows, dark
-    c.fillStyle = css(col); c.fillRect(x0 + .3 * m, base - 2.4 * m, OTR.loco * m - .6 * m, .07 * m);      // the handrail
-    bogie(x0 + 2.2 * m); bogie(x0 + OTR.loco * m - 2.2 * m); }
-  // the flatcar: a deep frame, a 20-foot container on its front half, the rear half empty
-  { const x0 = X - Lx, L = OTR.flat * m; c.fillStyle = css(col);
-    c.beginPath(); c.moveTo(x0, base - 1.25 * m); c.lineTo(x0 + L, base - 1.25 * m); c.lineTo(x0 + L, base - .95 * m); c.lineTo(x0 + L * .8, base - .7 * m); c.lineTo(x0 + L * .2, base - .7 * m); c.lineTo(x0, base - .95 * m); c.fill();
-    c.fillRect(x0 + L, base - 1.15 * m, OTR.gap * m, .15 * m);      // the coupling
-    cbox(c, x0 + 5.8 * m, base - 1.25 * m - 2.6 * m, 6.1 * m, 2.6 * m, boxCol(.72, x0, 37, .1), 1, 1);
-    bogie(x0 + 2 * m); bogie(x0 + L - 2 * m); }
-  // the pilgrim and the young man jumping up and riding (at this depth they are a little smaller)
-  const hop = (h, im, meta) => { const u = Math.min(1, h.t / 42), e = u * u * (3 - 2 * u), x = lerp(h.x0, X + h.off, e), y = lerp(GY, deckY(), e) - Math.sin(Math.PI * u) * 30, k = lerp(1, OTR.p, e);
-    drawFrame(im, meta, x, y + 1, 1, 1, CHR_K * k); };
-  if (T.h && T.pOn) hop(T.h, ...(T.ph === 'hop' && T.h.t < 34 && PW.ready ? [PW[10], PW_META] : PST.ready ? [PST[0], PST_META] : [PW[0], PW_META]));
-  const p = G.pli; if (p && p.mode === 'trainhop') { const [W, M, S, SM] = pliSet(); hop(p.h, p.h.t < 34 ? W[4] : S, p.h.t < 34 ? M : SM); }
+// the rails, all along: behind the road, then curving away to the tunnel (drawn in the far pass, under everything of the train)
+function trainRails(cam) {
+  const c = ctx, col = css(portCol(.6, VW / 2, .1)); c.fillStyle = col;
+  for (let u = PORT_A - 200; u < TR.UT + 200; u += 12) { const x = trX(u, cam), x2 = trX(u + 12, cam); if (x2 < -10 || x > VW + 10) continue; const y = trY(u), p = trP(u);
+    c.fillRect(x, y - 1.5 * p, x2 - x + .5, 2 * p); if ((u - PORT_A) % 48 === 0) c.fillRect(x, y - 1.5 * p, 2.6 * p, 6 * p); }      // the rail and its ties
+}
+// THE RAIL TUNNEL (build 88; owner: "far right end past the gate"; build 96, owner: "Shouldn't be part of barricade", then "Needs to be a lot
+// farther to right", with a photo of an old railway tunnel). Well past the gate (TR.UT 11400, in the 1200 the level gained) the barricade
+// ends against a grassy embankment, and the track goes into the embankment through an old tunnel after the photo: a tall flat stone
+// headwall, a big round-topped arch, a sloping wing wall on its right (no date, no words). Drawn BEFORE the train, which passes in front
+// of the barricade and is cut off at the arch's near side, so it goes into the dark. Only the train ride's camera goes past the old end.
+const camMax = () => (G.train && G.train.ph === 'ride' ? LEVEL_W : OLD_W) - VW;
+const HW = { x0: TR.UT - 120, w: 6.4 * 88, h: 7.4 * 88, aw: 4.4 * 88, ah: 5.9 * 88 }, WALL_END = HW.x0 + 30;
+const portalArchL = () => HW.x0 + (HW.w - HW.aw) / 2;      // the arch's near side (road place)
+function railPortal(cam) {
+  const c = ctx, m = 88, b = GY + 3, { x0, w, h, aw, ah } = HW, ax = portalArchL(), top = b - h;
+  const earth = hGrad(c, ...layerCol(.8), 1, 1, cam), stone = hGrad(c, ...layerCol(.55), 1, 1, cam);
+  // the embankment: from the barricade's top up to the headwall, then on behind it and off the picture, grass along its top
+  const ey = x => x < x0 ? b - lerp(4.2 * m, h + 10, smooth(x0 - 260, x0, x)) : b - h - 14 - 10 * smooth(x0 + w, x0 + w + 500, x) + 6 * Math.sin(x * .021) + 3 * Math.sin(x * .07);
+  c.globalAlpha = 1; c.fillStyle = earth; c.beginPath(); c.moveTo(x0 - 260, b);
+  for (let x = x0 - 260; x <= LEVEL_W + 200; x += 12) c.lineTo(x, ey(x)); c.lineTo(LEVEL_W + 200, b); c.closePath(); c.fill();
+  for (let x = x0 - 240; x < LEVEL_W + 200; x += 19) c.fillRect(x, ey(x) - 4 - (x % 6), 1.3, 5 + (x % 6));      // the grass
+  // the headwall: a tall flat face with a coping along its top; the wing wall sloping down on its right
+  c.fillStyle = stone; c.fillRect(x0, top, w, h + 3); c.fillRect(x0 - 6, top - 10, w + 12, 12);
+  c.beginPath(); c.moveTo(x0 + w, top + .2 * m); c.lineTo(x0 + w + 3.6 * m, b); c.lineTo(x0 + w, b); c.closePath(); c.fill();
+  c.fillStyle = HINT; c.fillRect(x0 + w, top + .2 * m, 3, h - .2 * m);      // the wing wall's edge catching a little light
+  // the arch, dark inside
+  c.fillStyle = DOORC; c.beginPath(); c.moveTo(ax, b); c.lineTo(ax, b - ah + aw / 2); c.arc(ax + aw / 2, b - ah + aw / 2, aw / 2, Math.PI, 0); c.lineTo(ax + aw, b); c.closePath(); c.fill();
+  c.fillStyle = 'rgba(6,7,10,.6)'; c.fill();
+}
+// one car: painted in metres on a small canvas, then laid on the track in narrow upright slices, each at its own place and depth,
+// so in the curve it bends away into the distance and foreshortens (one stretched shape looked broken)
+const CARC = mk(8, 8), CAR_S = 48, CAR_H = 5.2;      // 48 pixels a metre (sharp at the road's scale), 5.2 m tall
+function trainCar(car, cam, col, dk) {
+  const [ur, uf, kind, L] = car; if (trX(uf, cam) < -40 || trX(ur, cam) > VW + 40) return;
+  const W = Math.ceil(L * CAR_S), H = Math.ceil(CAR_H * CAR_S); if (CARC.width !== W || CARC.height !== H) { CARC.width = W; CARC.height = H; }
+  const c = CARC.getContext('2d'); c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, W, H); c.setTransform(CAR_S, 0, 0, CAR_S, 0, H);
+  const R = (x, y, w, h, k = col) => { c.fillStyle = css(k); c.fillRect(x, -y - h, w, h); };
+  const truck = (x, n) => { R(x - 1.2 * n, .65, 2.4 * n, .4, dk); c.fillStyle = css(dk); for (let i = 0; i < n; i++) { c.beginPath(); c.arc(x + (i - (n - 1) / 2) * 1.5, -.5, .5, 0, 7); c.fill(); } };
+  if (kind === 'loco') {      // after the owner's picture: a long hood, the rear radiators raised, the cab and its nose at the front, the walkway's handrail
+    truck(3.7, 3); truck(L - 3.7, 3); R(6.6, .7, 6.8, 1, dk);      // two three-axle trucks, the fuel tank between them
+    R(0, 1.15, L, .45); R(.15, .6, .5, .6, dk); R(L - .65, .6, .5, .6, dk);      // the frame and walkway, the steps at the ends
+    R(.8, 1.6, L - 6, 2.75); R(.8, 4.35, 5.4, .4); R(7.4, 4.35, .6, .3, dk);      // the long hood, the raised radiators at the rear, the exhaust stack
+    R(L - 5.2, 1.6, 3.6, 3.2); R(L - 5.3, 4.8, 3.8, .14, dk);      // the cab and its roof
+    c.fillStyle = css(col); c.beginPath(); c.moveTo(L - 1.6, -1.6); c.lineTo(L - 1.6, -3.5); c.lineTo(L - .6, -3.3); c.lineTo(L - .2, -2.6); c.lineTo(L - .2, -1.6); c.fill();      // the nose
+    const wn = mix(dk, [0, 0, 0], .3); R(L - 4.7, 3.6, 1.3, .8, wn); R(L - 3.1, 3.6, 1.1, .8, wn); R(L - 1.45, 3.05, .55, .35, wn);      // its windows, dark
+    R(.4, 2.7, L - .8, .07, dk); for (let x = 1.4; x < L - 1; x += 2.6) R(x, 1.6, .06, 1.1, dk);      // the handrail and its posts
+    R(1.2, 2.4, 4.2, .9, mix(col, dk, .35));      // the radiator grilles, a shade darker
+  } else {      // the flatcar: a deep frame, a 20-foot container on its front half, the rear half empty
+    truck(2, 2); truck(L - 2, 2);
+    c.fillStyle = css(col); c.beginPath(); c.moveTo(0, -1.25); c.lineTo(L, -1.25); c.lineTo(L, -.95); c.lineTo(L * .8, -.7); c.lineTo(L * .2, -.7); c.lineTo(0, -.95); c.fill();
+    const bc = boxCol(.66, trX(ur, cam), 41, .1); R(6.5, 1.25, 6.1, 2.6, bc); for (let x = 6.9; x < 12.4; x += .45) R(x, 1.4, .05, 2.3, mix(bc, dk, .3)); R(6.5, 3.7, 6.1, .15, mix(bc, dk, .45));      // the container, its ribs and top rail
+  }
+  const N = Math.ceil(L / .2);
+  for (let i = 0; i < N; i++) { const o0 = i * L / N, o1 = (i + 1) * L / N, u0 = ur + o0 * 88, u1 = ur + o1 * 88, x0 = trX(u0, cam), x1 = trX(u1, cam); if (x1 < -5 || x0 > VW + 5) continue;
+    const um = (u0 + u1) / 2, m = 88 * trP(um), y = trY(um);
+    ctx.drawImage(CARC, o0 * CAR_S, 0, (o1 - o0) * CAR_S, H, x0, y - CAR_H * m, Math.max(.5, x1 - x0) + .7, CAR_H * m); }
+}
+// the train in two passes: what is further than the tank (p < .7) before it, the rest after it, each with whoever rides it
+function drawOutTrain(cam, far) {
+  const T = G.train; if (far) { G.camDraw = cam; return; } trainRails(cam); if (!T) return;      // the rails are always there
+  ctx.save(); ctx.beginPath(); ctx.rect(-9999, -9999, portalArchL() - cam + 9999, 99999); ctx.clip();      // nothing of it shows past the arch's near side
+  const cars = trCars(T.F), flat = cars[1];
+  for (const car of cars) { const p = trP((car[0] + car[1]) / 2);
+    const col = portCol(lerp(.6, .8, (p - TR.pF) / (TR.pN - TR.pF)), trX(car[1], cam), .14), dk = mix(col, [0, 0, 0], .28); trainCar(car, cam, col, dk);
+    if (car === flat) {      // the two jumping up and riding (at the car's depth)
+      const hop = (h, im, meta) => { const q = carPt(flat, h.ox, 1.25, cam), u = Math.min(1, h.t / 40), e = u * u * (3 - 2 * u), x = lerp(h.x0, q.x, e), y = lerp(GY, q.y, e) - Math.sin(Math.PI * u) * 26, k = lerp(1, q.p, e);
+        drawFrame(im, meta, x, y + 1, 1, 1, CHR_K * k); };
+      if (T.h && T.pOn) hop(T.h, ...(T.ph === 'hop' && T.h.t < 32 && PW.ready ? [PW[10], PW_META] : PST.ready ? [PST[0], PST_META] : [PW[0], PW_META]));
+      const p2 = G.pli; if (p2 && p2.mode === 'trainhop') { const [W, M, S, SM] = pliSet(); hop(p2.h, p2.h.t < 32 ? W[4] : S, p2.h.t < 32 ? M : SM); }
+    } }
+  ctx.restore();
 }
 // the train's sounds, made in code: the horn (two low reed tones, long and short), and the wheels' clack over the rail joints with its speed
 let TRN_SND = null;
@@ -1724,7 +1781,7 @@ function pick(home) {
     try { localStorage.setItem('pp-gate', way); } catch (e) {}
     if (way === 'guard') talk(G.alone ? GUARD_ASK1 : GUARD_ASK, () => G.alone ? talk(GUARD_NO, () => { (G.gateTried = G.gateTried || {}).guard = 1; gateChoice(); }) : talk(GUARD_YES, () => openGate(false)));
     else if (way === 'tank') talk(TANK_WAIT, () => { G.state = 'wait'; if (G.tank) G.tank.leave = 1; later(330, () => { G.sentryAway = true; openGate(true); }); });
-    else talk(TRAIN_SEE, () => { trainGo(); talk(G.alone ? TRAIN_RUN1 : TRAIN_RUN, toTrain); });
+    else talk(TRAIN_SEE, () => { trainGo(); G.sentryAway = true; talk(G.alone ? TRAIN_RUN1 : TRAIN_RUN, toTrain); });
     return;
   }
   if (kind === 'young') {      // build 64: choice 5: only the light brings him
@@ -1967,7 +2024,7 @@ function walkTick(dir, max) {
   }
   if (!P.vx) return;
   // the way is shut until the gate opens; and wait for Evangelist's pictures if the phone is still fetching them
-  const lim = G.gateOpen >= 1 ? (G.through ? DOOR1 + 90 : LEVEL_W - 30) : DOOR0 - 44, lo = !EVA.ready && !G.evanDone ? EVAN_X + 205 : 30;
+  const lim = G.gateOpen >= 1 ? (G.through ? DOOR1 + 90 : OLD_W - 30) : DOOR0 - 44, lo = !EVA.ready && !G.evanDone ? EVAN_X + 205 : 30;
   const ns = narrStop(), lo2 = ns && ns.lo != null ? Math.max(lo, Math.min(P.x, ns.lo)) : lo, lim2 = ns && ns.hi != null ? Math.min(lim, Math.max(P.x, ns.hi)) : lim;
   const nx = clamp(P.x + P.vx, lo2, lim2), moved = Math.abs(nx - P.x), f0 = pwOn() ? pwFrame() : chrFrame();
   P.x = nx; let down = false;
@@ -2023,17 +2080,17 @@ function nearWindow(i, sx, sy, rad) {
   }
   return best;
 }
-function pulseLight() { if (G.flare < .35) { G.flare = Math.max(G.flare, .7); [62, 67, 71].forEach((m, i) => note(m, .04, 4, i * .08)); } touched(); }
+function pulseLight() { if (G.flare < .35) { G.flare = Math.max(G.flare, .7); lightSwell(); } touched(); }      // build 92: the same swell as when Phillip shows it (was a faint three-note harp chord)
 // what is under the finger? (sx, sy are in scene units, as seen on the screen)
 let TVR = null;      // where the shop window's TV was last drawn (screen units), for a touch
 function touchAt(sx, sy) {
   const cam = G.cam, wx = sx + cam, lp = lightPos();
   if (TVR && sx > TVR.x - 12 && sx < TVR.x + TVR.w + 12 && sy > TVR.y - 12 && sy < TVR.y + TVR.h + 12) { tvNews(); touched(); return true; }      // build 46: the news on the TV
-  if (Math.hypot(sx - lp.x, sy - lp.y) < 58) { pulseLight(); return true; }
+  if (Math.hypot(sx - lp.x, sy - lp.y) < 80) { pulseLight(); return true; }      // build 92: a wider target for a finger (was 58)
   for (const l of LAMPS) if (!l.lit && wx > l.x - 30 && wx < l.x + 100 && sy > GY - 400 && sy < GY + 14) { lightLamp(l); return true; }
   for (const fl of FLOCKS) if (!fl.away && Math.abs(sx - (fl.x - cam * fl.par)) < 52 && Math.abs(sy - fl.y + 6) < 46) { scatter(fl); touched(); return true; }
   if (touchExtra(sx, sy, wx)) return true;
-  if (sy > GY + 2 && warm(sx / VW) < .85) {                  // a finger on the wet road: rings, and now and then a light
+  if (sy > GY + 2 && warm(sx / VW) < .85 && !(sx > UP.sx0 && sx < UP.sx1)) {      // build 92: no rings on the dry road under the deck                  // a finger on the wet road: rings, and now and then a light
     G.ripples.push({ x: wx, y: sy, t: 0, a: 1, r: (sy - HORIZON) / 149 }); sfx.plink(); if (!(G.roadT > G.t - 600)) { G.roadT = G.t; free(wx, sy); } touched(); return true;
   }
   if (sy >= GY - 8) return false;
@@ -2095,16 +2152,21 @@ const turnedToLight = () => P.face > 0 && !P.turnV && !P.turnTo && !P.turn;
 // build 79 (owner: "The sound effect when I click the light is kinda corny"): no quick rising harp chord; one low, soft swell,
 // an open fifth (G and D, an octave apart) that breathes in over about a second and dies away slowly
 function lightSwell() {
+  // build 92 (owner: "Did not notice special sound when I click light"): build 79's swell sat at G2 to D4, too low and soft for a
+  // phone's speaker. Now one warm open chord in the middle (G3, D4, G4, B4, a faint D5), soft sines with a breath of shimmer,
+  // in over half a second and dying away over five, into the echo: heard on a phone, still never a jingle.
   if (!audio()) return; const t = AC.currentTime;
-  for (const [m, v, dt] of [[43, .05, 0], [50, .035, .05], [55, .022, .1], [62, .01, .18]]) {
-    const o = AC.createOscillator(), g = AC.createGain(), f = AC.createBiquadFilter(); o.type = 'sine'; o.frequency.value = hz(m); o.detune.value = (m % 3 - 1) * 4;
-    f.type = 'lowpass'; f.frequency.value = 900; g.gain.setValueAtTime(0, t + dt); g.gain.linearRampToValueAtTime(v, t + dt + 1.1); g.gain.exponentialRampToValueAtTime(.0003, t + dt + 6);
-    o.connect(f); f.connect(g); g.connect(CLEAR); g.connect(ECHO); o.start(t + dt); o.stop(t + dt + 6.1);
+  for (const [m, v, dt] of [[60, .07, 0], [67, .06, .04], [72, .05, .09], [77, .022, .16], [79, .016, .24]]) {      // build 94: in the music's key (C, G, C, F, G), was G major
+    for (const d of [-5, 5]) {
+      const o = AC.createOscillator(), g = AC.createGain(), f = AC.createBiquadFilter(); o.type = d < 0 ? 'sine' : 'triangle'; o.frequency.value = hz(m); o.detune.value = d;
+      f.type = 'lowpass'; f.frequency.value = 2400; g.gain.setValueAtTime(0, t + dt); g.gain.linearRampToValueAtTime(d < 0 ? v : v * .35, t + dt + .55); g.gain.exponentialRampToValueAtTime(.0003, t + dt + 5.2);
+      o.connect(f); f.connect(g); g.connect(CLEAR); g.connect(ECHO); o.start(t + dt); o.stop(t + dt + 5.3);
+    }
   }
 }
 function lightTouched() { if (!turnedToLight()) return; G.sawLight = true; G.flare = 1.2; lightSwell(); next(true); }
 function gateOpened() {
-  G.gateOpen = 1; G.flare = 1.3; sfx.open(); G.finale = { t: -50, i: 0, bar: 0 };
+  G.gateOpen = 1; G.flare = 1.3; sfx.open(); lightSwell();      // build 96: no hymn as the gate opens (was G.finale, the whole tune): one soft swell in the music's key
   next(true);       // the words are finished: on through the gate
 }
 
@@ -2164,7 +2226,7 @@ function update() {
   if (G.roll) G.roll.t++; if (G.hint === 'roll' && --G.rollT <= 0) clearHint('roll');
   people(); gather(); if (!SL.on && !HL.on && !CR.on) { droneTick(); tankTick(); gateTick(); trainTick(); } motes(); effects(); capTick(); acts(); ambience(); opening();
   if (G.state === 'play') story();
-  const target = Math.max(0, Math.min(LEVEL_W - VW, P.x - VW * (G.evanDone ? .38 : .62) + P.face * 40));      // room in front of him, whichever way he is going
+  const target = Math.max(0, Math.min(camMax(), P.x - VW * (G.evanDone ? .38 : .62) + P.face * 40));      // room in front of him, whichever way he is going
   G.cam += (target - G.cam) * .05;
   if (G.gateOpen >= 1) G.sunUp = Math.min(1, (G.sunUp || 0) + .0012);      // the light climbs as they go through the gate (about 14 s)
   G.zoom = (G.zoom || 1) + ((1 - (1 - ZOOM_GATE) * smooth(GATE - 1300, GATE - 380, P.x)) - (G.zoom || 1)) * .02;      // the camera draws back near the gate
@@ -2249,7 +2311,8 @@ function gather() {
     else { note(s.midi, .075, 2.8); G.motes.push({ x: s.x, y: s.y, tw: Math.random() * 6, life: 0 }); }
   }
   for (const fl of FLOCKS) if (!fl.away && Math.abs(fl.x - G.cam * fl.par - (P.x - G.cam)) < 64) scatter(fl);
-  for (const s of LIGHTS) if (s.tube && s.mote && G.t - s.gt > TUBE_ON) { s.mote = false; const q = s.port && s.lamp ? portLampAt(s.lamp) : null; G.motes.push(q ? { x: q[0] + G.cam, y: q[1], tw: Math.random() * 6, life: 0 } : { x: s.x, y: s.y + 10, tw: Math.random() * 6, life: 0 }); }      // the tube dies; a little warmth drifts up and away
+  if (0) for (const s of LIGHTS) if (s.tube && s.mote && G.t - s.gt > TUBE_ON) {      // build 94: no glow drifts up from either set of lamps (owner: "don't like that they move later")
+    s.mote = false; const q = s.port && s.lamp ? portLampAt(s.lamp) : null; G.motes.push(q ? { x: q[0] + G.cam, y: q[1], tw: Math.random() * 6, life: 0 } : { x: s.x, y: s.y + 10, tw: Math.random() * 6, life: 0 }); }      // the tube dies; a little warmth drifts up and away
 }
 // build 81: a dead tube light under the deck: how long it stays on (ticks), and how bright it is t ticks after it is reached
 // (a fluorescent start: two quick blinks, a stutter, then steady; dimming and a last flicker as the power fails again)
@@ -2295,13 +2358,8 @@ function tubeLevel(t) {
   if (t < TUBE_ON - 40) return 1; if (t < TUBE_ON) { const u = (t - (TUBE_ON - 40)) / 40; return (1 - u) * (Math.sin(t * 1.7) > -.6 ? 1 : .3); } return 0;
 }
 // its sound: the ballast's buzz at the note, warming over half a second into the note itself, soft (no chime, no echo of a harp)
-function tubeHum(midi) {
-  if (!audio()) return; const t = AC.currentTime, f = hz(midi);
-  const o = AC.createOscillator(), lp = AC.createBiquadFilter(), g = AC.createGain(); o.type = 'sawtooth'; o.frequency.value = f;
-  lp.type = 'lowpass'; lp.frequency.setValueAtTime(f * 6, t); lp.frequency.exponentialRampToValueAtTime(f * 1.4, t + .5);
-  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.022, t + .03); g.gain.exponentialRampToValueAtTime(.0004, t + 1.1);
-  o.connect(lp); lp.connect(g); g.connect(SFXG); o.start(t); o.stop(t + 1.15);
-  note(midi, .06, 2.6, .12);
+function tubeHum(midi) {      // build 94: one soft clear note in the music's key, no buzz (the saw buzz of builds 81 to 93 fought the soundtrack)
+  note(midi, .05, 2.8, 0);
 }
 // each light, once sung, drifts up and away toward the far light, slowly, and fades on the way; the far light answers a little
 function motes() {
@@ -2319,7 +2377,8 @@ function effects() {
   if (G.smoke) { for (const m of G.smoke) { m.t++; if (m.t > 0) { const u = m.t / 320; m.x += .12 + .55 * u + .1 * Math.sin(m.t * .04 + m.ph); m.y -= .62 * (1 - .55 * u); } } G.smoke = G.smoke.filter(m => m.t < 320); }
   for (const r of G.ripples) r.t++; G.ripples = G.ripples.filter(r => r.t < 70);
   // raindrops ring the wet road too: small rings anywhere on it where the rain is falling
-  for (let i = 0; i < 2; i++) { const sx = Math.random() * VW; if (Math.random() < (1 - warm(sx / VW)) * LOOK.rain * .55) { const y = GY + 4 + Math.random() * (VH - GY - 10); G.ripples.push({ x: sx + G.cam * (y - HORIZON) / 140, y, t: 44, a: .55, r: .35 * (y - HORIZON) / 149, par: (y - HORIZON) / 140 }); } }
+  for (let i = 0; i < 2; i++) { const sx = Math.random() * VW; if (sx > UP.sx0 - 20 && sx < UP.sx1 + 20) continue;      /* build 92 (owner: "no water drop circles should be under overpass") */
+    if (Math.random() < (1 - warm(sx / VW)) * LOOK.rain * .55) { const y = GY + 4 + Math.random() * (VH - GY - 10); G.ripples.push({ x: sx + G.cam * (y - HORIZON) / 140, y, t: 44, a: .55, r: .35 * (y - HORIZON) / 149, par: (y - HORIZON) / 140 }); } }
   for (const t of G.taps) t.t++; G.taps = G.taps.filter(t => t.t < 26);
   for (const g of G.glints) g.t++; G.glints = G.glints.filter(g => g.t < 56);
   // now and then something that can be touched gives a small glint
@@ -2809,7 +2868,7 @@ function drawDrone(cam) {
 // picture (sources/tank: gen-tank.py, cut-tank.py; assets/tank.webp), no markings, gun level, toned to its level like the port: on its own
 // level between the rails and the fence (p .7), well behind him, at real scale (2.6 m high against a man's 1.8 m; 61 px a metre at p .7).
 // It waits past the drone and, as he comes, rolls slowly toward the town (about 5 km/h) with a little shudder and a low rumble made in code.
-const TANK = { a: 9650, p: .7, k: .213, gnd: 904, go: 9400, run: 640 }; let TANK_IM = null, TANK_SND = null;
+const TANK = { a: 9650, p: .7, k: .213, gnd: 904, go: 9400, run: 380 }; let TANK_IM = null, TANK_SND = null;
 function bakeTank(im) { const out = {}; for (const [n, i] of [['cool', 0], ['warm', 1]]) { const c = mk(im.width, im.height), q = c.getContext('2d'); q.drawImage(im, 0, 0); q.globalCompositeOperation = 'source-atop'; q.fillStyle = css(layerCol(.7)[i], .8); q.fillRect(0, 0, im.width, im.height); out[n] = c; } return out; }
 function tankSound(v) {
   if (!AC || muted) { if (TANK_SND) TANK_SND.g.gain.value = 0; return; }
@@ -3176,7 +3235,9 @@ function gatePainted() {
   for (let x = f.x + 14 - ww; x + ww > W0; x -= ww - 1, n++) if (x < cam + VW + 40 && x + ww > cam - 40) both(WALL_P, x, GY + 2 - wh, ww, wh, n % 2);
   c.restore();
   n = 0;
+  c.save(); c.beginPath(); c.rect(-1e5, -5000, WALL_END + 1e5, 10000); c.clip();      // build 96: the barricade ends against the embankment (railPortal)
   for (let x = f.x + f.w - 14; x < LEVEL_W + 80; x += ww - 1, n++) if (x < cam + VW + 40 && x + ww > cam - 40) both(WALL_P, x, GY + 2 - wh, ww, wh, n % 2);
+  c.restore();
   both(GATE_P, f.x, f.y, f.w, f.h, false);
 }
 function gate() {                          // the city gate: two towers and an arch, a little paler than the road so Christian shows against it
@@ -3277,7 +3338,7 @@ function draw() {
   if (Z > .999) { OYD = 0; ZCAM = 0; drawWorld(); return; }
   const dpr = DPR, cam = G.cam;
   VW = VW0 / Z; DPR = dpr * Z; OYD = VH * (1 - Z) * dpr;
-  G.cam = Math.max(0, Math.min(LEVEL_W - VW, cam - (VW - VW0) * .3)); ZCAM = G.cam - cam;
+  G.cam = Math.max(0, Math.min(camMax(), cam - (VW - VW0) * .3)); ZCAM = G.cam - cam;
   try {
     drawWorld();
   } finally { VW = VW0; DPR = dpr; G.cam = cam; OYD = 0; }
@@ -3338,14 +3399,17 @@ function drawWorld() {
   const gcol = layerCol(1), wAt = x => warm((x - cam) / VW), on = (x, w = 0, m = 80) => x < cam + VW + m && x + w > cam - m;
   // the lane just behind the road: a low bank a little paler than the road, with his house and a few things on it
   ctx.fillStyle = hGrad(ctx, ...layerCol(.93)); ctx.fillRect(0, LEVELS.home.base, VW, GY - LEVELS.home.base + 2);
-  underpass(cam, 'back'); drawPort(cam); drawTank(cam); drawOutTrain(cam); drawRow(cam); home(cam); drawSmoke(cam); drawPoles(cam); drawLevel('mid', cam); drawWatchers(cam); busStop(cam); drawCrowd(cam); drawWheat(false); drawDrone(cam);          // the wheat behind him
+  underpass(cam, 'back'); drawPort(cam); drawOutTrain(cam, true); drawTank(cam); drawRow(cam); home(cam); drawSmoke(cam); drawPoles(cam); drawLevel('mid', cam); drawWatchers(cam); busStop(cam); drawCrowd(cam); drawWheat(false); drawDrone(cam);          // the wheat behind him
   ctx.setTransform(1, 0, 0, 1, 0, OYD); drawFog('lane'); ctx.setTransform(DPR, 0, 0, DPR, 0, OYD);
   lightThrough();      // build 79: the far light's glow, seen through the rain over the rooftops where the buildings hide it      // mist lying along the lane, round the houses' feet and in the wheat
   ctx.save(); ctx.translate(-cam, 0);
   const grad = hGrad(ctx, gcol[0], gcol[1], 1, 1, cam);
   INK = grad; SETC = hGrad(ctx, ...layerCol(.66), 1, 1, cam); DOORC = hGrad(ctx, ...layerCol(.86), 1, 1, cam);
   HINT = hGrad(ctx, PAL.hazeC, PAL.hazeW, .13, .17, cam);
-  if (on(GATE - 760, LEVEL_W - GATE + 760)) { doors(); gate(); }      // the whole wall, from its start (W0) to the end of the level
+  if (on(GATE - 760, LEVEL_W - GATE + 760)) { doors(); gate(); }
+  // build 88: the train runs just in front of the barricade (after it, before the people), into the rail tunnel at its far end
+  if (on(HW.x0 - 280, LEVEL_W)) railPortal(cam);      // the embankment and its tunnel, behind the track
+  ctx.save(); ctx.translate(cam, 0); drawOutTrain(cam, false); ctx.restore();
   for (const l of LAMPS) if (on(l.x - 20, 120)) streetLamp(l, cam);
   // birds sitting on things
   ctx.fillStyle = grad;
@@ -3745,14 +3809,14 @@ function drawDream(c, u, fire) {
 // traced one (no Space Needle; sources/dream/skyline.png), then a video from it: the flash behind the towers at about 2 s, the fireball and
 // the cloud rising, the camera tilting up after it (sources/dream/blast.mp4, 10 s). Silent. The code-drawn dream stays as the fallback.
 const DREAMVID = (() => { try { const v = document.createElement('video'); v.src = 'assets/dream.' + (v.canPlayType('video/mp4; codecs="avc1.640028"') ? 'mp4' : 'webm') + '?v=53'; v.muted = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('muted', ''); v.preload = 'auto'; v.load(); return v; } catch (e) { return null; } })();
-const EYEVID = (() => { try { const v = document.createElement('video'); v.src = 'assets/eyes-open.' + (v.canPlayType('video/mp4; codecs="avc1.640028"') ? 'mp4' : 'webm') + '?v=51';      /* H.264 where it plays, else VP9 */ v.muted = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('muted', ''); v.preload = 'auto'; v.load(); return v; } catch (e) { return null; } })();
+const EYEVID = (() => { try { const v = document.createElement('video'); v.src = 'assets/eyes-open.' + (v.canPlayType('video/mp4; codecs="avc1.640028"') ? 'mp4' : 'webm') + '?v=98';      /* H.264 where it plays, else VP9 */ v.muted = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('muted', ''); v.preload = 'auto'; v.load(); return v; } catch (e) { return null; } })();
 // Build 37 (owner: "animation of eyes opening didn't work", on the iPhone): Safari may not load or play a video that is not in the
 // page, and plays one only after a touch. So both videos are put in the page (hidden, 1 px), and started and stopped once from the
 // touch that begins Level 1 (primeVids, called by start()); if the eyes still do not play, two stills cross-fade instead (EYESTILL:
 // the first and last frames of the clip, eyes shut and open).
 (() => { const box = document.createElement('div'); box.style.cssText = 'position:fixed;left:0;top:0;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none;z-index:-1'; for (const v of [DREAMVID, EYEVID]) if (v) { v.style.width = v.style.height = '1px'; box.appendChild(v); } (document.body || document.documentElement).appendChild(box); })();
 function primeVids() { for (const v of [DREAMVID, EYEVID]) if (v) { try { const pr = v.play(); if (pr && pr.then) pr.then(() => { if (!v.dataset.live) { v.pause(); v.currentTime = 0; } }).catch(() => {}); } catch (e) {} } }
-const EYESTILL = ['shut', 'open'].map(n => { const im = new Image(); im.src = 'assets/eyes-still-' + n + '.webp?v=51'; return im; });
+const EYESTILL = ['shut', 'open'].map(n => { const im = new Image(); im.src = 'assets/eyes-still-' + n + '.webp?v=98'; return im; });
 function wakeEyes(then) {
   const ec = document.getElementById('eyes'); if (!ec) { setTimeout(then, 1700); return; }
   if (!DREAM) bakeDream();
@@ -3773,7 +3837,8 @@ function wakeEyes(then) {
   const D = { black: 400, inn: 1200, shut: 800, open: 1000, hold: 5000, out: 1500 };      // build 61: the push into the window (build 57) is gone: out 1500 again
   // build 57: where the window's reflection sits in each iris (the existing catchlight, up and left of the pupil; in the 960 x 540 clip the
   // pupils hold at (247, 383) and (675, 383) once open), its size, and how far the push goes in (the window then fills the picture)
-  const REFL = [[229, 368], [661, 368]], REFL_S = 17;
+  // build 98 (the night look, sources/eyes/look-night.py): the pupils hold at (265, 358) and (688, 357); the painted catchlights just up and left
+  const REFL = [[245, 347], [672, 344]], REFL_S = 17;
   const WIN = document.createElement('canvas'), WM = document.createElement('canvas'); WIN.width = WIN.height = 96; WM.width = WM.height = 12;
   { const m = WM.getContext('2d'); m.fillStyle = '#fff'; m.fillRect(3, 3, 6, 6); }      // a soft square: drawn small, stretched up, so its edge is soft at any size
   const DROPS = Array.from({ length: 11 }, (_, i) => ({ x: 8 + ((i * 37) % 80), v: .03 + ((i * 13) % 7) / 220, o: (i * .37) % 1, l: 10 + (i * 7) % 18 }));

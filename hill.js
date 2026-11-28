@@ -901,8 +901,9 @@ const HL = (() => {
         if (k2 >= 1) { const t = l.slice(0, k2 + 1); t.w = l.w; bolt.push(t); } });
       boltT = 0; boltTwice = Math.random() < .6; } if (audio()) { sweep(64, 30, 1.8, .09 * k); hiss(190, .7, .11 * k, 1.6, 'lowpass'); hiss(900, 1, .03 * k, .5, 'bandpass', .05); } }
   // the tune on the wrong path: Amazing Grace's first phrase with its bright notes bent flat, low and slow
-  const WRONG = [62, 67, 70, 67, 70, 68, 67, 63, 62].map(m => m - 12);
-  const RIGHT = [62, 67, 71, 67, 71, 69, 67];
+  // build 96 (owner: "No amazing grace in this game please"): plain lines, not the hymn: low and bent on the wrong path, open at the gate
+  const WRONG = [48, 55, 51, 49, 48, 51, 55, 54, 48];
+  const RIGHT = [60, 67, 72, 67, 65, 67, 60];
   function knock() {
     if (G.act !== 'knock' || knocks >= 3) return;
     knocks++; knockT = 0; G.ring = null; G.actT = 20;

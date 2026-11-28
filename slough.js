@@ -525,7 +525,8 @@ const SL = (() => {
   // Amazing Grace, the first three phrases, a step for each note: in G minor (B -> B flat, E -> E flat), an octave down.
   // It breaks off one phrase short at the far bank; the last phrase comes in the major as the steps light up.
   const m = { D: 50, E: 51, G: 55, A: 57, B: 58, d: 62 };
-  const WADE_TUNE = 'D G B G B A G E D D G B G B A d B d B d B G D E G G E D'.split(' ').map(k => m[k]);
+  // build 96 (owner: "No amazing grace in this game please"): a plain low line in C minor (the key of Level 1's music, darkened) in place of the hymn
+  const WADE_TUNE = [48, 55, 53, 51, 48, 51, 53, 55, 58, 55, 53, 51, 48, 43, 48, 55, 53, 51, 53, 55, 51, 48, 46, 48, 51, 50, 48, 48];
   // build 55 (owner: "work on second level now - putting on pilgrim sprite"): on dry ground he is the 2100 pilgrim of Level 1
   // (index.html: PW the walk, PST the start, whose frame 0 is his standing picture); in the mire the wading, stuck, reach and
   // lift videos are still the old figure until new ones are made. Until the new packs load, the old walk and stand stand in.
