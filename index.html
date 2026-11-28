@@ -262,7 +262,7 @@ every year.</div>
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 115 · Nov 28 2026</div>
+  <div id="build">build 116 · Nov 28 2026</div>
   <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
@@ -3949,14 +3949,15 @@ function drawDream(c, u, fire) {
 // traced one (no Space Needle; sources/dream/skyline.png), then a video from it: the flash behind the towers at about 2 s, the fireball and
 // the cloud rising, the camera tilting up after it (sources/dream/blast.mp4, 10 s). Silent. The code-drawn dream stays as the fallback.
 const DREAMVID = (() => { try { const v = document.createElement('video'); v.src = 'assets/dream.' + (v.canPlayType('video/mp4; codecs="avc1.640028"') ? 'mp4' : 'webm') + '?v=53'; v.muted = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('muted', ''); v.preload = 'auto'; v.load(); return v; } catch (e) { return null; } })();
-const EYEVID = (() => { try { const v = document.createElement('video'); v.src = 'assets/eyes-open.' + (v.canPlayType('video/mp4; codecs="avc1.640028"') ? 'mp4' : 'webm') + '?v=98';      /* H.264 where it plays, else VP9 */ v.muted = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('muted', ''); v.preload = 'auto'; v.load(); return v; } catch (e) { return null; } })();
+const EYEVID = (() => { try { const v = document.createElement('video'); v.src = 'assets/eyes-open.' + (v.canPlayType('video/mp4; codecs="avc1.640028"') ? 'mp4' : 'webm') + '?v=116';      /* H.264 where it plays, else VP9 */ v.muted = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('muted', ''); v.preload = 'auto'; v.load(); return v; } catch (e) { return null; } })();
 // Build 37 (owner: "animation of eyes opening didn't work", on the iPhone): Safari may not load or play a video that is not in the
 // page, and plays one only after a touch. So both videos are put in the page (hidden, 1 px), and started and stopped once from the
 // touch that begins Level 1 (primeVids, called by start()); if the eyes still do not play, two stills cross-fade instead (EYESTILL:
 // the first and last frames of the clip, eyes shut and open).
 (() => { const box = document.createElement('div'); box.style.cssText = 'position:fixed;left:0;top:0;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none;z-index:-1'; for (const v of [DREAMVID, EYEVID]) if (v) { v.style.width = v.style.height = '1px'; box.appendChild(v); } (document.body || document.documentElement).appendChild(box); })();
 function primeVids() { for (const v of [DREAMVID, EYEVID]) if (v) { try { const pr = v.play(); if (pr && pr.then) pr.then(() => { if (!v.dataset.live) { v.pause(); v.currentTime = 0; } }).catch(() => {}); } catch (e) {} } }
-const EYESTILL = ['shut', 'open'].map(n => { const im = new Image(); im.src = 'assets/eyes-still-' + n + '.webp?v=98'; return im; });
+const EYESTILL = ['shut', 'open'].map(n => { const im = new Image(); im.src = 'assets/eyes-still-' + n + '.webp?v=116'; return im; });
+const WARMDARK_RGB = [24, 13, 10], WARMDARK = 'rgb(24,13,10)';      // build 116: the warm dark between the dream and his face
 function wakeEyes(then) {
   const ec = document.getElementById('eyes'); if (!ec) { setTimeout(then, 1700); return; }
   if (!DREAM) bakeDream();
@@ -3974,7 +3975,7 @@ function wakeEyes(then) {
   // build 21: his eyes are a real video (assets/eyes-open.mp4, 7.5 s: asleep in bed to 2 s, waking 2.5 to 4.5 s, a blink near 6 s, awake); D.inn..D.hold span it
   // build 51 (owner: "open eyes a little quicker but then stare a little longer"): the clip (sources/eyes/eyes-cut-b51.txt) is 2 s asleep, the eyes
   // opening in 1 s (that part 1.5 times its own speed), then the stare, its last 2.4 s played back and forth; the stare now holds about 5 s
-  const D = { black: 400, inn: 1200, shut: 800, open: 1000, hold: 5000, out: 1500 };      // build 61: the push into the window (build 57) is gone: out 1500 again
+  const D = { black: 400, inn: 1200, shut: 800, open: 1000, hold: 5000, out: 2000 };      // build 116: out 2000, a dissolve into the street      // build 61: the push into the window (build 57) is gone: out 1500 again
   // build 57: where the window's reflection sits in each iris (the existing catchlight, up and left of the pupil; in the 960 x 540 clip the
   // pupils hold at (247, 383) and (675, 383) once open), its size, and how far the push goes in (the window then fills the picture)
   // build 98 (the night look, sources/eyes/look-night.py): the pupils hold at (265, 358) and (688, 357); the painted catchlights just up and left
@@ -3992,9 +3993,9 @@ function wakeEyes(then) {
   const mkT = () => [D.black, D.inn, D.shut, D.open, D.hold, D.out].reduce((a, v) => (a.push(a[a.length - 1] + v), a), [0]).map(v => v + DR);
   let T = mkT();
   const ease = u => u * u * (3 - 2 * u), cl = v => Math.max(0, Math.min(1, v));
-  ec.style.display = 'block'; ec.style.opacity = 1; let told = false, woke = false;
+  ec.style.display = 'block'; ec.style.opacity = 1; ec.dataset.run = run; let told = false, woke = false;
   const frame = now => {
-    if (run !== runN) { ec.style.display = 'none'; return; }
+    if (run !== runN) { if (+ec.dataset.run === run) ec.style.display = 'none'; return; }      // build 116: a stale run never hides a newer run's picture (a link naming a level started it twice: the dream and the face were drawn hidden)
     const t = now - t0, d = Math.min(2, window.devicePixelRatio || 1), W = Math.round(innerWidth * d), H = Math.round(innerHeight * d);
     if (!decided && (t > 1000 || (DREAMVID && DREAMVID.readyState >= 2))) { decided = true; if (DREAMVID && DREAMVID.readyState >= 2) { dv = DREAMVID; try { dv.pause(); dv.currentTime = 0; } catch (e) {} DR = VH + VW1 * 1000 / RATE + 1300; T = mkT(); } }
     if (ec.width !== W || ec.height !== H) { ec.width = W; ec.height = H; }
@@ -4002,7 +4003,7 @@ function wakeEyes(then) {
     // game's own picture (the box of #cv), on the page's own dark round it, so the street later comes up in the very same place
     c.setTransform(1, 0, 0, 1, 0, 0); c.fillStyle = '#1b1c22'; c.fillRect(0, 0, W, H);
     const cb = (document.getElementById('cv') || ec).getBoundingClientRect(), X0 = cb.left * d, Y0 = cb.top * d, BW = cb.width * d, BH = cb.height * d;
-    c.save(); c.beginPath(); if (c.roundRect) c.roundRect(X0, Y0, BW, BH, 6 * d); else c.rect(X0, Y0, BW, BH); c.clip(); c.fillStyle = '#000'; c.fillRect(X0, Y0, BW, BH);
+    c.save(); c.beginPath(); if (c.roundRect) c.roundRect(X0, Y0, BW, BH, 6 * d); else c.rect(X0, Y0, BW, BH); c.clip(); c.fillStyle = WARMDARK; c.fillRect(X0, Y0, BW, BH);
     const cover = (src, w, h) => { const sc = Math.max(BW / w, BH / h); c.drawImage(src, X0 + (BW - w * sc) / 2, Y0 + (BH - h * sc) / 2, w * sc, h * sc); };
     if (t < DR && dv) {      // the video: in from black, its own flash and cloud, out to black
       if (t > VH && !dvOn) { dvOn = true; dv.dataset.live = 1; try { dv.playbackRate = RATE; const pr = dv.play(); if (pr && pr.catch) pr.catch(() => {}); } catch (e) {} }
@@ -4011,8 +4012,13 @@ function wakeEyes(then) {
       { const g = c.createLinearGradient(0, Y0, 0, Y0 + BH * .36); g.addColorStop(0, 'rgba(0,0,0,.62)'); g.addColorStop(.45, 'rgba(0,0,0,.24)'); g.addColorStop(1, 'rgba(0,0,0,0)'); c.fillStyle = g; c.fillRect(X0, Y0, BW, BH * .36); }
       const vt = (t - VH) / 1000 * RATE, white = vt < VW0 ? 0 : vt < VW1 ? ease((vt - VW0) / (VW1 - VW0)) : 1;
       if (white > 0) { c.fillStyle = `rgba(255,250,240,${white})`; c.fillRect(X0, Y0, BW, BH); }
-      const black = t < 1200 ? 1 - t / 1200 : t > DR - 900 ? cl((t - (DR - 900)) / 700) : 0;
+      const black = t < 1200 ? 1 - t / 1200 : 0;
       if (black > 0) { c.fillStyle = `rgba(0,0,0,${black})`; c.fillRect(X0, Y0, BW, BH); }
+      // build 116 (owner: "The waking face doesn't transition very well"): the white no longer sags to grey and black; it turns to a warm
+      // glow, like light through shut eyelids, and dims to a warm dark, out of which his sleeping face comes up
+      const lid = cl((t - (DR - 1250)) / 1250);
+      if (lid > 0) { const e2 = ease(lid), mix3 = (a, b, u) => a.map((v, i) => Math.round(v + (b[i] - v) * u)), col = e2 < .45 ? mix3([255, 250, 240], [150, 92, 66], e2 / .45) : mix3([150, 92, 66], WARMDARK_RGB, (e2 - .45) / .55);
+        c.fillStyle = `rgba(${col[0]},${col[1]},${col[2]},${cl(lid * 3)})`; c.fillRect(X0, Y0, BW, BH); }
     } else if (t < DR) {
       const k = t - FL, u = k > 300 ? cl((k - 300) / 5200) : 0, fire = k > 0 ? 1 : 0, dc = DREAM.can.getContext('2d');
       drawDream(dc, u, fire);
@@ -4036,21 +4042,21 @@ function wakeEyes(then) {
       if (src) {
         const sw = src === 'vid' ? vid.videoWidth : EYESTILL[0].naturalWidth, sh = src === 'vid' ? vid.videoHeight : EYESTILL[0].naturalHeight, sc = Math.max(BW / sw, BH / sh);
         const ox = X0 + (BW - sw * sc) / 2, oy = Y0 + (BH - sh * sc) / 2, k = sw / 960;
-        c.save(); c.globalAlpha = fadeIn * (1 - ease(cl(pu / .45)));      // build 61: the eyes go to black first (fixes build 57, where a comment had swallowed this line)
+        c.save(); c.globalAlpha = fadeIn;      // build 116: no black between: the whole picture of his face dissolves into the street (ec's opacity, below)
         if (src === 'vid') cover(vid, sw, sh);      // build 31: the whole picture, no band, no vignette
         else { cover(EYESTILL[0], sw, sh); if (op > 0 && EYESTILL[1].naturalWidth) { c.globalAlpha = fadeIn * op; cover(EYESTILL[1], sw, sh); } }
         // the window in each iris: fading in as the eyes open (video 2.6 to 3.4 s), gone with the eyes
         const ra = ease(cl((vtm - 2.6) / .8)), win = winTex(t);
         for (const [ex, ey] of REFL) {
           const cx = ox + ex * k * sc, cy = oy + ey * k * sc, z = REFL_S * k * sc;
-          c.globalAlpha = ra * .6 * (1 - ease(cl(pu / .45))); c.globalCompositeOperation = 'screen';
+          c.globalAlpha = ra * .6; c.globalCompositeOperation = 'screen';
           c.drawImage(win, cx - z / 2, cy - z / 2, z, z);
         }
         c.restore(); c.globalAlpha = 1; c.globalCompositeOperation = 'source-over';
       }
     }
     c.restore();
-    if (t > T[5]) ec.style.opacity = 1 - cl((t - T[5] - D.out * .45) / (D.out * .55));
+    if (t > T[5]) ec.style.opacity = 1 - ease(cl((t - T[5]) / D.out));
     if (!told && t > T[5] + D.out * .5) { told = true; then(); }
     if (t < T[6]) requestAnimationFrame(frame); else { ec.style.display = 'none'; if (vid) try { vid.pause(); } catch (e) {} }
   };
@@ -4345,7 +4351,7 @@ document.getElementById('on2').onclick = () => SL.on ? go3() : HL.on ? go5() : g
   // a touch): the book opens and the level begins at once. Not for the automated tests (they open the book themselves).
   if (/[?&](level|at|room)=/.test(location.search) && !navigator.webdriver) {
     document.getElementById('sub').textContent = 'Touch to begin';
-    window.addEventListener('pointerup', function jump(e) { window.removeEventListener('pointerup', jump, true); e.stopPropagation();
+    window.addEventListener('pointerup', function jump(e) { window.removeEventListener('pointerup', jump, true); if (e.target.closest && e.target.closest('.tcover')) return; e.stopPropagation();      // build 116: a touch on the cover starts it itself (it started twice)
       const room = new URLSearchParams(location.search).has('room'); openBook(); tpShow(false);
       if (!room) { const n = +new URLSearchParams(location.search).get('level') || LV, b = document.querySelector('.lv[data-lv="' + n + '"]'); if (b) b.onclick(); } }, true);
   }
