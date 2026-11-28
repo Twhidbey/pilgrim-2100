@@ -249,7 +249,7 @@ every year.</div>
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 76 · Nov 28 2026</div>
+  <div id="build">build 78 · Nov 28 2026</div>
   <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
@@ -270,6 +270,7 @@ const OBS_META={"ax": 95, "ground": 307, "frames": 32, "vpx": 6.0, "rest": [23]}
 const BMW = [], BMW_META = {"ax": 132, "ground": 307, "frames": 36, "vpx": 5.4, "rest": [22]}, YMW = [], YMW_META = {"ax": 132, "ground": 299, "frames": 33, "vpx": 5.0, "rest": [0]};
 // build 71 (owner: "they stand there half walking half standing awkwardly - can we make them just stand"): their standing
 // pictures are their videos' first frames (a real stand, video frame 0), not a walk frame
+const CRW = [], CRW_META = {"ax": 134, "ground": 307, "frames": 86}, CRAWL_LOOP = 47, SNT = [], SNT_META = {"ax": 132, "ground": 303, "frames": 80};      // build 74: the crawl (47 kneeling pictures, then a 39-picture loop) and the sentry
 const BMS = [], BMS_META = {"ax": 130, "ground": 303}, YMS = [], YMS_META = {"ax": 134, "ground": 304};
 const obsSet = () => BMW.ready ? [BMW, BMW_META, BMS[0] || BMW[22], BMS[0] ? BMS_META : BMW_META] : [OBS, OBS_META, OBS_ST, OBS_ST_META];
 const pliSet = () => YMW.ready && !SL.on ? [YMW, YMW_META, YMS[0] || YMW[0], YMS[0] ? YMS_META : YMW_META] : [PLI, PLI_META, PLI_ST, PLI_ST_META];
@@ -1329,7 +1330,7 @@ function reset() {
     pli: null, obst: null, flare: 0, gloom: 0, gloomTo: 0, gateOpen: 0, act: null, actT: 0, ring: null, auto: null, finale: null, guard: 0, idle: 0, wins: 0,
     evanDone: !!TEST_X, evanGone: TEST_X ? 1 : 0, neigh: TEST_X > NEIGH_X + 300, gateSeen: false, walked: false, touched: false, leaving: false, fam: TEST_X > HOME_X ? 2 : 0, door: 0,      // build 13 (owner: "as far as we know pilgrim has no family, for now"): his door stays shut
     doorShut: false, roll: TEST_X ? { t: 999, x: 0, y: 0 } : null, runZone: !!TEST_X && TEST_X < RUN_END, outSaid: false, watched: TEST_X > WATCH_X, ears: TEST_X > HOME_X });
-  G.sunUp = 0; G.waitFn = null; G.drone = null; G.tank = null; G.tvRun = !!TEST_X && TEST_X > TV_RUN_A; G.phGo = !!TEST_X && TEST_X > EVAN_X; G.phFade = G.phGo ? 1 : 0; if (ROW[0] && !ROW[0].who) ROW[0].open = 1;      // build 16: the party: the door of the building beside his (to the left), lit from the start
+  G.sunUp = 0; G.waitFn = null; G.drone = null; G.tank = null; G.drain = null; G.gateTried = null; G.gateOpening = null; G.gateOpts = null; G.sentryAway = false; G.sentryTw = 0; P.crawl = null; G.tvRun = !!TEST_X && TEST_X > TV_RUN_A; G.phGo = !!TEST_X && TEST_X > EVAN_X; G.phFade = G.phGo ? 1 : 0; if (ROW[0] && !ROW[0].who) ROW[0].open = 1;      // build 16: the party: the door of the building beside his (to the left), lit from the start
   G.through = false; G.homeTo = null; G.autoRun = 0; G.calm = 0; G.doorSaid = false; G.choiceKind = null; G.sawLight = !!TEST_X && TEST_X > EVAN_X; G.nchose = false; G.alone = false;
   G.zoom = 1 - (1 - ZOOM_GATE) * smooth(GATE - 1300, GATE - 380, START_X);      // starting near the gate (?at=gate): already drawn back
   G.evan.pt = TEST_X ? 239 : 0; G.evan.go = false; G.evan.st = EVS_META.frames * 100; downs.clear(); pushing = false; keys.r = keys.push = false;
@@ -1466,7 +1467,7 @@ async function say(who, txt) {
 }
 // fetch every line's recording quietly, in story order, while the child is already playing
 async function fetchVoices() {
-  const all = [...INTRO, ...TV_NEWS, ...PARTY_NO, ...FIELDS, ...EVAN, ...ASK_GO, ...ASK_NO, ...EVAN2, ...NAME_ASK, ...NAME_THANKS, ...GONE, ...NEIGH_BURN, ...NEIGH_HOME, ...NEIGH_GO, ...YOUNG_ASK, ...YOUNG_LIGHT, ...YOUNG_AWAY, ...RUNS, ...DOOR_WORDS, ...FAMILY, ...LIFE, ...WATCH, ...FETCH, ...NEIGH_CALL]; for (const c of CAPS) all.push(...c.lines); all.push(...NEIGH, ...HOME, ...ONWARD, ...PART, ...GATEWORDS, ...END);
+  const all = [...INTRO, ...TV_NEWS, ...PARTY_NO, ...FIELDS, ...EVAN, ...ASK_GO, ...ASK_NO, ...EVAN2, ...NAME_ASK, ...NAME_THANKS, ...GONE, ...NEIGH_BURN, ...NEIGH_HOME, ...NEIGH_GO, ...YOUNG_ASK, ...YOUNG_LIGHT, ...YOUNG_AWAY, ...RUNS, ...DOOR_WORDS, ...FAMILY, ...LIFE, ...WATCH, ...FETCH, ...NEIGH_CALL]; for (const c of CAPS) all.push(...c.lines); all.push(...NEIGH, ...HOME, ...ONWARD, ...PART, ...GATEWORDS, ...GATE_ALL, ...END);
   for (const [who, txt] of all) { if (who === TIP) continue; const v = vox(who, txt); await v.raw; await voxBuf(v); }
 }
 function caption(arr) { for (const l of arr) G.capQ.push(l); }
@@ -1592,9 +1593,57 @@ const GATE_TIP = [TIP, isTouch ? 'Hold the gate to push it open.' : 'Hold the ga
 const GATEWORDS = [
   [YM, 'They\'ve walled the city in.'],
   [PG, 'Then we go through.'],
-  GATE_TIP,
 ];
-const GATE_ALONE = [GATE_TIP];      // build 64: the young man stayed behind: the pilgrim comes to the barricade alone, in silence
+const GATE_ALONE = [];      // build 64: the young man stayed behind: the pilgrim comes to the barricade alone, in silence
+// BUILD 74: THREE WAYS THROUGH THE BARRICADE (owner: "how do they get thru gate by just pushing- think how to make this realistic...maybe
+// give player some options"; "Do all three please"). A sentry stands beyond the gate (SENTRY_X); low in the barricade's face a few steps
+// back is a drain mouth (DRAIN_X). Choice 6 (gateChoice, pick 'gate'): ask the guard (only works if the young man came: he knows him;
+// alone, the sentry turns him away and the choice comes again without it), wait for the tank (it turns and rolls out behind the barricade,
+// the sentry hauls the gate open for it and watches it go; they slip through), or the drain (he walks back to it, takes off his pack and
+// crawls in pushing it ahead: assets/pilgrim-crawl.pack; the young man ducks in after him). The way taken is kept (pp-gate) for later levels.
+// Words drafted in the script app (scene 6), not yet approved: shown, not yet recorded.
+const SN = 'Sentry', DRAIN_X = 9690, SENTRY_X = DOOR1 + 45;
+const SENTRY_STOP = [[SN, 'That\'s far enough. The gate\'s shut.']];
+const GUARD_ASK = [[PG, 'Let us through. Please.']], GUARD_ASK1 = [[PG, 'Let me through. Please.']];
+const GUARD_YES = [[YM, 'It\'s me. Open up.'], [SN, '...You? Out here?'], [YM, 'We\'re leaving.'], [SN, 'Go on, then. I never saw you.']];
+const GUARD_NO = [[SN, 'Orders. Nobody goes out. Go home, friend.']];
+const TANK_WAIT = [[PG, 'Wait.']], TANK_NOW = [[PG, 'Now.']];
+const DRAIN_SEE = [[PG, 'There. Under the wall.']], DRAIN_PACK = [[YM, 'You won\'t fit. Not with that pack.'], [PG, 'Then it goes first.']];
+const GATE_ALL = [...SENTRY_STOP, ...GUARD_ASK, ...GUARD_ASK1, ...GUARD_YES, ...GUARD_NO, ...TANK_WAIT, ...TANK_NOW, ...DRAIN_SEE, ...DRAIN_PACK];
+function gateChoice() {
+  const L = { guard: 'Ask the guard', tank: 'Wait for the tank', drain: 'Try the drain' }, tried = G.gateTried || {};
+  G.gateOpts = ['guard', 'tank', 'drain'].filter(k => !tried[k]);
+  offer('gate', ...G.gateOpts.map(k => L[k]));
+}
+// the gate opens by itself (the sentry hauls it from beyond): the light, the tune, then on through it (as when it was pushed)
+function openGate(sneak) { G.state = 'wait'; G.gateOpening = { sneak }; }
+function gateTick() {
+  const o = G.gateOpening; if (!o) return;
+  G.gateOpen = Math.min(1, G.gateOpen + .005);
+  if (G.gateOpen >= 1) { G.gateOpening = null; gateOpened(); const go = () => { G.through = true; G.throughT = G.t; G.state = 'play'; G.idle = 0; caption(END); }; if (o.sneak) talk(TANK_NOW, go); else go(); }
+}
+// the drain: he walks back to it, then kneels (the crawl video's first part, 8 pictures a second) and crawls in (its loop, 24 a second)
+function toDrain() {
+  G.drain = { ph: 'back', a: 0 };
+  if (G.pli && G.pli.mode === 'follow') { G.pli.mode = 'drainwait'; G.pli.face = -1; }
+  G.state = 'auto'; G.auto = { dir: -1, to: DRAIN_X - 85, then: () => { G.state = 'wait'; poseChange(16); P.face = 1; P.crawl = { f: 0 }; G.drain.ph = 'kneel'; } };
+}
+function drainTick() {
+  const D = G.drain; if (!D) return;
+  if (D.ph === 'kneel') { P.crawl.f += .133; if (P.crawl.f >= CRAWL_LOOP) D.ph = 'crawl'; }
+  else if (D.ph === 'crawl') { P.crawl.f += .4; if (P.crawl.f >= CRW_META.frames) P.crawl.f -= CRW_META.frames - CRAWL_LOOP; P.x += .3; D.a = smooth(DRAIN_X - 55, DRAIN_X + 25, P.x); if (D.a >= 1 && !D.in) D.in = G.t; }
+  const p = G.pli;
+  if (p && p.mode === 'drainwait' && D.in) p.mode = 'drainin';
+  if (p && p.mode === 'drainin') { p.face = -1; p.x -= .9; p.al = 1 - smooth(DRAIN_X + 45, DRAIN_X + 5, p.x); if (p.al <= 0) p.mode = 'gone'; }
+  if (D.in && !D.done && (!p || p.mode === 'gone' || p.mode === 'home') && G.t > D.in + 50) { D.done = true; G.sunUp = 0; finish(); }
+}
+// the drain's mouth: a concrete pipe end low in the barricade's face, dark inside, mud at its lip
+function drainMouth() {
+  const c = ctx, x = DRAIN_X, b = GY + 4, arch = r => { c.beginPath(); c.moveTo(x - r, b); c.lineTo(x - r, b - r * .5); c.arc(x, b - r * .5, r, Math.PI, 0); c.lineTo(x + r, b); c.closePath(); };
+  c.globalAlpha = 1; c.fillStyle = SETC; arch(74); c.fill();
+  c.fillStyle = 'rgba(10,11,15,.94)'; arch(63); c.fill();
+  c.fillStyle = INK; c.beginPath(); c.ellipse(x, b - 2, 92, 9, 0, 0, 7); c.fill();      // the mud at its lip
+}
 const END = [];      // build 27: no narrator
 
 // ---------- the choice: go home, or go on ----------
@@ -1612,6 +1661,15 @@ function pick(home) {
   if (kind === 'neigh') {      // build 64: choice 4; a long look, the big man waves him on and walks back to town, then the young man asks
     choiceEl.className = ''; document.body.classList.remove('talking'); G.choiceKind = null;
     talk(home === true ? NEIGH_BURN : NEIGH_HOME, () => { G.state = 'wait'; later(home === true ? 110 : 170, () => talk(NEIGH_GO, () => { G.obst.mode = 'home'; G.state = 'wait'; later(70, () => talk(YOUNG_ASK, () => offer('young', 'Do you see that light?', 'Away from here.', '(say nothing)'))); })); });
+    return;
+  }
+  if (kind === 'gate') {      // build 74: choice 6, the way through the barricade
+    choiceEl.className = ''; document.body.classList.remove('talking'); document.getElementById('chThird').style.display = 'none'; G.choiceKind = null;
+    const way = G.gateOpts[home === true ? 0 : home === false ? 1 : 2];
+    try { localStorage.setItem('pp-gate', way); } catch (e) {}
+    if (way === 'guard') talk(G.alone ? GUARD_ASK1 : GUARD_ASK, () => G.alone ? talk(GUARD_NO, () => { (G.gateTried = G.gateTried || {}).guard = 1; gateChoice(); }) : talk(GUARD_YES, () => openGate(false)));
+    else if (way === 'tank') talk(TANK_WAIT, () => { G.state = 'wait'; if (G.tank) G.tank.leave = 1; later(330, () => { G.sentryAway = true; openGate(true); }); });
+    else talk(DRAIN_SEE, () => G.alone ? toDrain() : talk(DRAIN_PACK, toDrain));
     return;
   }
   if (kind === 'young') {      // build 64: choice 5: only the light brings him
@@ -1680,7 +1738,7 @@ const runNow = () => PR.ready && pwOn() ? [PR, PR_META] : G.ears || !RUNP.ready 
 function coverEars() { if (G.ears) return; if (P.run) poseChange(8, true); G.ears = true; }
 const CHR = [], PLI = [], OBS = [], EVA = [], STD = [], RUN = [], CHR_K = .52, RUN_STEP = RUN_META.vpx * CHR_K, RUNV = RUN_STEP * .4,   // the run at its video's own speed (24 frames a second)
    CHR_STEP = CHR_META.vpx * CHR_K, PLI_STEP = PLI_META.vpx * CHR_K, OBS_STEP = OBS_META.vpx * CHR_K;
-const PACK_V = 49;                          // bump when the .pack files change, so phones fetch the new ones
+const PACK_V = 51;                          // bump when the .pack files change, so phones fetch the new ones
 // SOLID FIGURES (build 202; owner: "in both level 2 and 3, pilgrims sprite is clear in spots. we need to fix this"). The
 // figures were cut from their white paper by how white each pixel is, so the white paper showing inside the watercolour
 // (highlights on the cloak, the pack, the hood) was cut away too and the scene showed through those spots (2 to 7 per cent
@@ -1757,7 +1815,7 @@ const pwFrame = () => ((Math.floor(P.anim) % PW.length) + PW.length) % PW.length
 // Stopping, he walks on to loop frame 31 and plays the start backwards to stand (P.stand.st 13 -> 0); setting off, it plays forwards (P.sp 0 -> 13) and joins the loop at 31.
 const PST = [], PST_META = {"ax": 132, "ground": 300, "frames": 14}, PST_JOIN = 31, PST_END = 13;
 const pstOn = () => pwOn() && PST.ready;
-const chrPose = () => pwOn() && !P.turnV && !P.weep && !P.run ? (P.stand ? (PST.ready && P.stand.pf == null ? [PST[Math.round(P.stand.st || 0)], PST_META] : [PW[P.stand.pf ?? PW_STAND], PW_META]) : P.sp != null && PST.ready ? [PST[Math.min(PST_END, Math.floor(P.sp))], PST_META] : [PW[pwFrame()], PW_META]) : P.turnV && TURN.ready ? [TURN[Math.min(TURN.length - 1, Math.floor(P.turnV.t))], TURN_META] : P.weep && WEEP.ready ? [WEEP[Math.min(WEEP.length - 1, Math.floor(P.weep.t))], WEEP_META] : P.run ? (([set, meta]) => [set[((Math.floor(P.ranim) % set.length) + set.length) % set.length], meta])(runNow()) : P.stand ? [STD[stdFrame()], STD_META] : [CHR[chrFrame()], CHR_META];
+const chrPose = () => P.crawl && CRW.ready ? [CRW[Math.min(CRW.length - 1, Math.floor(P.crawl.f))], CRW_META] : pwOn() && !P.turnV && !P.weep && !P.run ? (P.stand ? (PST.ready && P.stand.pf == null ? [PST[Math.round(P.stand.st || 0)], PST_META] : [PW[P.stand.pf ?? PW_STAND], PW_META]) : P.sp != null && PST.ready ? [PST[Math.min(PST_END, Math.floor(P.sp))], PST_META] : [PW[pwFrame()], PW_META]) : P.turnV && TURN.ready ? [TURN[Math.min(TURN.length - 1, Math.floor(P.turnV.t))], TURN_META] : P.weep && WEEP.ready ? [WEEP[Math.min(WEEP.length - 1, Math.floor(P.weep.t))], WEEP_META] : P.run ? (([set, meta]) => [set[((Math.floor(P.ranim) % set.length) + set.length) % set.length], meta])(runNow()) : P.stand ? [STD[stdFrame()], STD_META] : [CHR[chrFrame()], CHR_META];
 // Walking and standing join frame to frame. Running does not, so going into or out of the run the old picture dissolves
 // into the new one over a fifth of a second (the new one comes in on top, then the old one goes: nothing shows through).
 // n = ticks; quick = the new picture is there at once and the old one fades off it (used into and out of the run:
@@ -2039,7 +2097,7 @@ function update() {
   // build 51 (owner: "when [he] runs can we not have doors fly open"): the neighbours' doors stay shut (a little crowd of onlookers is to come)
   if (!G.tvRun && P.x > TV_RUN_A - 240 && P.x < TV_RUN_A + 400 && !SPK) { G.tvRun = true; tvNews(); }      // build 51: the news from the window as he runs by
   if (G.roll) G.roll.t++; if (G.hint === 'roll' && --G.rollT <= 0) clearHint('roll');
-  people(); gather(); if (!SL.on && !HL.on && !CR.on) { droneTick(); tankTick(); } motes(); effects(); capTick(); acts(); ambience(); opening();
+  people(); gather(); if (!SL.on && !HL.on && !CR.on) { droneTick(); tankTick(); gateTick(); drainTick(); } motes(); effects(); capTick(); acts(); ambience(); opening();
   if (G.state === 'play') story();
   const target = Math.max(0, Math.min(LEVEL_W - VW, P.x - VW * (G.evanDone ? .38 : .62) + P.face * 40));      // room in front of him, whichever way he is going
   G.cam += (target - G.cam) * .05;
@@ -2074,7 +2132,7 @@ function story() {
   // build 64: the two strangers are already standing in his way when he comes; they fade in out of the dark between the containers
   if (!G.obst && !G.neigh && P.x > NEIGH_X - 700 && OBS.ready && PLI.ready) { G.obst = { x: NEIGH_X + 190, mode: 'block', st: 1, al: 0, face: -1 }; G.pli = { x: NEIGH_X + 275, mode: 'block', st: 1, al: 0, face: -1 }; }
   if (!G.neigh && G.obst && P.x > NEIGH_X && G.state === 'play' && !saying()) { G.neigh = true; G.obst.mode = G.pli.mode = 'talk'; talk(NEIGH_CALL, () => offer('neigh', 'Nothing you\'d want. It\'s all going to burn.', 'Let me pass.')); }
-  if (!G.gateSeen && P.x > GATE_STOP) { G.gateSeen = true; talk(G.alone ? GATE_ALONE : GATEWORDS, () => { G.through = true; G.throughT = G.t; G.idle = 0; caption(END); }); }
+  if (!G.gateSeen && P.x > GATE_STOP) { G.gateSeen = true; const w = G.alone ? GATE_ALONE : GATEWORDS; const ask = () => talk(SENTRY_STOP, gateChoice); if (w.length) talk(w, ask); else ask(); }      // build 74: the sentry, then choice 6
   if (G.through && !G.leaving && P.x >= DOOR1 + 89) { G.state = 'auto'; G.leaving = true; clearHint('walk'); }      // through the gate (the child walked him there): Pliable follows, then the end
   if (G.homeTo && P.x <= G.homeTo.to + 1) { const h = G.homeTo; G.homeTo = null; clearHint('walk'); h.then(); return; }
   if (G.homeTo && P.stand && G.idle === 150) hint('walk', 'Hold to walk back toward home.');
@@ -2105,7 +2163,7 @@ function people() {
     if (gap > 14) p.go = true; if (gap < 1) p.go = false;
   }
   if (p) {
-    const still = p.mode === 'talk' || p.mode === 'block' || (p.mode === 'follow' && !p.go);
+    const still = p.mode === 'talk' || p.mode === 'block' || p.mode === 'drainwait' || (p.mode === 'follow' && !p.go);
     p.st = clamp((p.st || 0) + (still && rest(p, pliSet()[1]) && pliSet()[2] ? .035 : -.06));
     if (p.mode === 'follow' && p.go && p.st <= 0) { const gap = (G.leaving ? DOOR1 + 90 : P.x - 70) - p.x; p.x += Math.max(0, Math.min(gap, gap > 46 ? 2 : MAXV)); }
   }
@@ -2662,8 +2720,9 @@ function tankTick() {      // build 71: its movement in the update, not the draw
   // build 72 (owner: "Tank should still be pretty close to barrier just precedes it by a few secs"): it comes out from behind the
   // barricade's slope only a few seconds before he reaches the barricade, rolls a short way (TANK.run) and stops there, its engine idling
   if (P.x > TANK.go) T.go = true;
-  if (T.go) { const left = T.a - (TANK.a - TANK.run); T.v = left > 0 ? 1.7 * smooth(0, 110, left) : 0; T.a -= T.v; }
-  tankSound(T.go ? (T.v > .05 ? .16 : .09) * (1 - smooth(250, 1300, Math.abs(T.a - P.x))) : 0);
+  if (T.leave) { T.leave++; T.v = 1; if (T.leave > 170) T.a += Math.min(2.2, (T.leave - 170) * .035); }      // build 74 (the tank way): it pivots round, then rolls out behind the barricade
+  else if (T.go) { const left = T.a - (TANK.a - TANK.run); T.v = left > 0 ? 1.7 * smooth(0, 110, left) : 0; T.a -= T.v; }
+  tankSound(T.go ? (T.leave ? .24 : T.v > .05 ? .16 : .09) * (1 - smooth(250, 1300, Math.abs(T.a - P.x))) : 0);
   farGunfire();
 }
 function drawTank(cam) {
@@ -2671,7 +2730,8 @@ function drawTank(cam) {
   const x = lineUp(T.a, TANK.p) - cam * TANK.p, base = HORIZON + 140 * TANK.p, w = TANK_IM.cool.width * TANK.k, h = TANK_IM.cool.height * TANK.k;
   if (x + w < -40 || x - w > VW + 40) return;
   const jit = T.v > .05 ? Math.sin(G.t * 1.9) * .35 + Math.sin(G.t * .7) * .25 : 0, y = base + 2 - TANK.gnd * TANK.k + jit, wm = warm(x / VW), c = ctx;
-  c.save(); c.translate(x, 0); c.scale(-1, 1);      // the picture faces right; it rolls left, toward the town
+  const tu = T.leave ? smooth(20, 170, T.leave) : 0, sx = -Math.cos(Math.PI * tu);      // build 74: pivoting, it shows end on for a moment
+  c.save(); c.translate(x, 0); c.scale(Math.sign(sx || 1) * Math.max(.22, Math.abs(sx)), 1);      // the picture faces right; it rolls left, toward the town
   c.drawImage(TANK_IM.cool, -w / 2, y, w, h); if (wm > .01) { c.globalAlpha = wm; c.drawImage(TANK_IM.warm, -w / 2, y, w, h); c.globalAlpha = 1; }
   c.restore();
 }
@@ -3124,7 +3184,7 @@ function drawWorld() {
   const grad = hGrad(ctx, gcol[0], gcol[1], 1, 1, cam);
   INK = grad; SETC = hGrad(ctx, ...layerCol(.66), 1, 1, cam); DOORC = hGrad(ctx, ...layerCol(.86), 1, 1, cam);
   HINT = hGrad(ctx, PAL.hazeC, PAL.hazeW, .13, .17, cam);
-  if (on(GATE - 760, LEVEL_W - GATE + 760)) { doors(); gate(); }      // the whole wall, from its start (W0) to the end of the level
+  if (on(GATE - 760, LEVEL_W - GATE + 760)) { doors(); gate(); drainMouth(); }      // the whole wall, from its start (W0) to the end of the level
   for (const l of LAMPS) if (on(l.x - 20, 120)) streetLamp(l, cam);
   // birds sitting on things
   ctx.fillStyle = grad;
@@ -3225,7 +3285,11 @@ function drawWorld() {
   if (G.pli && G.pli.mode !== 'gone') { const [W, M, S, SM] = pliSet(); figure(G.pli.x, a => walker(G.pli, W[Math.floor(G.pli.anim ?? 0) % W.length], M, S, SM, G.pli.face || 1, a * (G.pli.al ?? 1))); }
   { const dxs = P.x - cam - doorX(cam), a = G.door * smooth(300, 60, Math.abs(dxs)); RIM = a > .02 ? { dir: dxs > 0 ? -1 : 1, a } : null; }      // the door's light on him
   TALKM = talkMove(C);
-  figure(P.x, a => drawChristian(P.x - cam, P.y + 1, P.face, a)); RIM = null; TALKM = null;
+  // build 74: the sentry beyond the gate, facing the town; for the tank he turns to watch it go out (a short dissolve to his mirror)
+  if (SNT.ready && SENTRY_X - cam < VW + 120) { TALKM = talkMove(SN); const L = SNT.length, t = G.t * .133 % (2 * L - 2), f = SNT[Math.floor(t < L ? t : 2 * L - 2 - t)]; G.sentryTw = Math.min(1, (G.sentryTw || 0) + (G.sentryAway ? .04 : 0)); const k = G.sentryTw;
+    if (k < 1) drawFrame(f, SNT_META, SENTRY_X - cam, GY, -1, k < .5 ? 1 : 2 * (1 - k)); if (k > 0) drawFrame(f, SNT_META, SENTRY_X - cam, GY, 1, k < .5 ? 2 * k : 1); }
+  TALKM = talkMove(C);
+  figure(P.x, a => drawChristian(P.x - cam, P.y + 1, P.face, a * (1 - (G.drain ? G.drain.a : 0)))); RIM = null; TALKM = null;
   // birds in the air
   ctx.lineCap = 'round'; ctx.strokeStyle = css(mix(gcol[0], gcol[1], warm(.5)), .9);
   for (const f of G.flyers) {
@@ -3876,11 +3940,11 @@ document.getElementById('on2').onclick = () => SL.on ? go3() : HL.on ? go5() : g
   // If it is not ready by its line he simply stands (WEEP.ready is checked there).
   loadPack('christian-weep', WEEP).catch(() => {}).then(() => loadPack('christian-turn', TURN)).then(() => bookLoaded('TURN')).catch(() => {}).then(nbLoad);
   Promise.all([loadPack('evangelist', EVA), loadPack('evangelist-stand', EVS), loadPack('phillip-stand', PHS).catch(() => {}), loadPack('phillip-point', PHP).catch(() => {})]).then(() => Promise.all([loadImg('family.webp').then(im => { FAM = im; if (im) FAM_SH = mkShadow(im); }), Promise.resolve().then(() => { const B = barricade(); GATE_P = bakeTint(B.gate, .42, .4); WALL_P = bakeTint(B.wall, .42, .4); }), ...['a', 'b', 'c'].map(key => loadImg('neighbor-' + key + '.webp').then(im => { WATCH_IM[key] = im; })), ...['a', 'b', 'c'].map(key => loadPack('neighbor-' + key, WATCH_PACK[key]).catch(() => {})), loadImg('christian-back.webp').then(im => { BACK = im; }), loadPack('christian-run', RUN), loadPack('christian-run-plain', RUNP)]))
-    .then(() => Promise.all([loadPack('obstinate', OBS), loadPack('pliable', PLI), loadPack('bigman-walk', BMW).catch(() => {}), ...CROWD.map((w, i) => loadPack('crowd-' + (i + 1), w.pk).catch(() => {})), loadImg('tank.webp').then(im => { if (im) TANK_IM = bakeTank(im); }), loadPack('youngman-walk', YMW).catch(() => {}), loadPack('bigman-stand', BMS).catch(() => {}), loadPack('youngman-stand', YMS).catch(() => {}), loadImg('obstinate-stand.webp').then(im => { OBS_ST = im; }), loadImg('pliable-stand.webp').then(im => { PLI_ST = im; })]));
+    .then(() => Promise.all([loadPack('obstinate', OBS), loadPack('pliable', PLI), loadPack('bigman-walk', BMW).catch(() => {}), ...CROWD.map((w, i) => loadPack('crowd-' + (i + 1), w.pk).catch(() => {})), loadImg('tank.webp').then(im => { if (im) TANK_IM = bakeTank(im); }), loadPack('youngman-walk', YMW).catch(() => {}), loadPack('bigman-stand', BMS).catch(() => {}), loadPack('pilgrim-crawl', CRW).catch(() => {}), loadPack('sentry-stand', SNT).catch(() => {}), loadPack('youngman-stand', YMS).catch(() => {}), loadImg('obstinate-stand.webp').then(im => { OBS_ST = im; }), loadImg('pliable-stand.webp').then(im => { PLI_ST = im; })]));
   for (const [who, txt] of INTRO) vox(who, txt);          // the first words, ready before Begin is pressed
 })();
 </script>
-<script src="slough.js?v=76"></script>
+<script src="slough.js?v=78"></script>
 <script src="hill.js?v=662"></script>
 <script src="rooms.js?v=2"></script>
 <script src="heaven.js?v=547"></script>

@@ -158,20 +158,26 @@ const SL = (() => {
     const now = AC.currentTime; motor.g.gain.setTargetAtTime(.05 * v, now, .5); motor.o.frequency.setTargetAtTime(44 + 14 * v, now, .4); motor.o2.frequency.setTargetAtTime(89 + 28 * v, now, .4);
   }
   function boatShape(n, x, a, col) {
-    // build 67 (owner, with a photo of a flat-bottomed aluminium work boat: "Boat idea"): a jon boat: long and low, the sheer
-    // nearly straight with a rub rail standing a hair proud, the bottom flat until a quarter from the bow and then raked
-    // straight up to a square bow, a small console a little forward of amidships, a big outboard on the square stern
+    // build 78 (owner, of the boat beside their photo: "make changes please and yes Dark silhouette"): closer to the photo's jon boat: the
+    // hull long and LOW (about ten times as long as it stands out of the water), the sheer nearly straight, rising a little to the bow;
+    // the flat bottom raked straight up a sixth of the way from the bow; a seat with a low back just behind the console; a big rounded
+    // outboard sitting right on the stern on its bracket, its leg short into the water. One dark tone, with only the rub rail along the
+    // sheer a breath lighter, as light catches a rail.
     if (a <= .01) return;
     n.save(); n.globalAlpha = a; n.fillStyle = css(col); n.translate(x, 0); n.beginPath();
-    n.moveTo(BOW - 4, -36); n.lineTo(STERN, -34); n.lineTo(STERN, -31.5); n.lineTo(STERN - 1, 7); n.lineTo(BOW + 74, 7);      // the sheer (with its rail) and the transom, the flat bottom
-    n.quadraticCurveTo(BOW + 64, 7, BOW + 58, 1); n.lineTo(BOW + 2, -30); n.quadraticCurveTo(BOW - 3, -32.5, BOW - 4, -36); n.closePath();      // the rake up to the square bow
-    n.moveTo(84, -33); n.lineTo(84, -52); n.lineTo(96, -54); n.lineTo(104, -48); n.lineTo(104, -33); n.closePath();      // the console (just behind where Help stands)
-    // the outboard: a tall boxy cowling sitting on the stern, leaning back, its leg slanting down into the water
-    n.moveTo(STERN - 1, -36); n.lineTo(STERN - 3, -60); n.quadraticCurveTo(STERN - 2, -69, STERN + 8, -70); n.lineTo(STERN + 22, -68); n.quadraticCurveTo(STERN + 31, -66, STERN + 30, -56);
-    n.lineTo(STERN + 27, -42); n.lineTo(STERN + 19, -38); n.lineTo(STERN + 22, 2); n.lineTo(STERN + 27, 4); n.lineTo(STERN + 26, 11); n.lineTo(STERN + 12, 12); n.lineTo(STERN + 11, 3); n.lineTo(STERN + 8, -2); n.lineTo(STERN + 6, -36); n.closePath();
-    n.moveTo(STERN - 1, -37); n.lineTo(STERN + 10, -37); n.lineTo(STERN + 10, -21); n.lineTo(STERN - 1, -21); n.closePath();      // the clamp bracket on the stern
-    n.fill(); n.restore();
+    n.moveTo(BOW - 3, -33); n.quadraticCurveTo(BOW + 60, -29, STERN, -27); n.lineTo(STERN, 6); n.lineTo(BOW + 52, 6);      // the sheer and the transom, the flat bottom
+    n.quadraticCurveTo(BOW + 44, 6, BOW + 40, 2); n.lineTo(BOW + 1, -29); n.quadraticCurveTo(BOW - 3, -31, BOW - 3, -33); n.closePath();      // the rake up to the square bow
+    n.moveTo(84, -28); n.lineTo(84, -45); n.lineTo(95, -47); n.lineTo(103, -42); n.lineTo(103, -28); n.closePath();      // the console
+    n.moveTo(110, -28); n.lineTo(110, -35); n.lineTo(124, -35); n.lineTo(125, -45); n.lineTo(128, -45); n.lineTo(128, -28); n.closePath();      // the seat and its low back
+    // the outboard as in the photo: a big boxy cowling sitting right on the stern, its top rounded, a little lean back; the leg beneath it short
+    n.moveTo(STERN - 3, -27); n.lineTo(STERN - 5, -55); n.quadraticCurveTo(STERN - 4, -66, STERN + 8, -67); n.lineTo(STERN + 27, -65);
+    n.quadraticCurveTo(STERN + 38, -62, STERN + 38, -50); n.lineTo(STERN + 35, -35); n.quadraticCurveTo(STERN + 32, -30, STERN + 24, -29);
+    n.lineTo(STERN + 21, 5); n.lineTo(STERN + 8, 5); n.lineTo(STERN + 9, -27); n.closePath();
+    n.fill();
+    n.strokeStyle = css(mix(col, LIGHT, .14)); n.lineWidth = 1.6; n.beginPath(); n.moveTo(BOW - 2, -31.6); n.quadraticCurveTo(BOW + 60, -27.6, STERN - 1, -25.6); n.stroke();      // the rub rail
+    n.restore();
   }
+
 
 
   // ---------- the oak (the same seed, 18, as the approved still) ----------
@@ -1484,7 +1490,7 @@ const SL = (() => {
     if (FP > .01) { ctx.save(); ctx.setTransform(S, 0, 0, S, 0, 0); const B = darkMist().band, bw = 1300 * z, bh = 120 * z, off = (((-cx * z * .9 - G.t * .25) % bw) + bw) % bw;      // build 381: a low band of dark mist lying flat across the mire behind him (drawn before the figures, so never over him)
       ctx.globalAlpha = Math.min(1, .85 * FP); for (let x = off - bw; x < VW; x += bw) ctx.drawImage(B, x, wl - 190 * z, bw, bh); ctx.restore(); }
     if (pliIn) { TALKM = talkMove(PL); pliMire(ctx); TALKM = null; }
-    if (haulLate >= 0) { const f = haulLate, top = lerp(0, -35, smooth(36, 58, f)); RCLIP = { x1: HX + HAUL_SPLIT, y1: top }; figure(ctx, 'haulP', HAUL[f], META.res, HX, 0, 1, fig, false, clamp(lift ? lift.t / 3.2 : 1)); RCLIP = null; }      // build 76: up over the side
+    if (haulLate >= 0) { const f = haulLate, top = lerp(0, -30, smooth(36, 58, f)); RCLIP = { x1: HX + HAUL_SPLIT, y1: top }; figure(ctx, 'haulP', HAUL[f], META.res, HX, 0, 1, fig, false, clamp(lift ? lift.t / 3.2 : 1)); RCLIP = null; }      // build 76: up over the side
     if (chrLate > 0) { MREC = 'C'; FIG_WET = NEWR() ? null : { D: C2.D || 0, a: .8 }; TALKM = C2.reach > 0 ? null : talkMove(C); drawChr(ctx, fig, chrLate); TALKM = null; MREC = null; FIG_WET = null; }
     sense();
     { // (1), (2): the surface line, lifted by the field and by a collar hugging every crossing; seen near the bodies and
