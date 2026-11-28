@@ -249,7 +249,7 @@ every year.</div>
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 49 · Nov 28 2026</div>
+  <div id="build">build 50 · Nov 28 2026</div>
   <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
@@ -1638,7 +1638,7 @@ const runNow = () => PR.ready && pwOn() ? [PR, PR_META] : G.ears || !RUNP.ready 
 function coverEars() { if (G.ears) return; if (P.run) poseChange(8, true); G.ears = true; }
 const CHR = [], PLI = [], OBS = [], EVA = [], STD = [], RUN = [], CHR_K = .52, RUN_STEP = RUN_META.vpx * CHR_K, RUNV = RUN_STEP * .4,   // the run at its video's own speed (24 frames a second)
    CHR_STEP = CHR_META.vpx * CHR_K, PLI_STEP = PLI_META.vpx * CHR_K, OBS_STEP = OBS_META.vpx * CHR_K;
-const PACK_V = 45;                          // bump when the .pack files change, so phones fetch the new ones
+const PACK_V = 46;                          // bump when the .pack files change, so phones fetch the new ones
 // SOLID FIGURES (build 202; owner: "in both level 2 and 3, pilgrims sprite is clear in spots. we need to fix this"). The
 // figures were cut from their white paper by how white each pixel is, so the white paper showing inside the watercolour
 // (highlights on the cloak, the pack, the hood) was cut away too and the scene showed through those spots (2 to 7 per cent
@@ -1710,7 +1710,12 @@ const figC = mk(8, 8), shC = mk(8, 8), FEET_SINK = 9;
 const PW = [], PW_META = {"ax": 132, "ground": 299, "frames": 37, "vpx": 5.1, "rest": [10, 28]}, PW_STAND = 6, PW_STEP = PW_META.vpx * CHR_K;
 const pwOn = () => PW.ready && !SL.on && !HL.on && !CR.on;
 const pwFrame = () => ((Math.floor(P.anim) % PW.length) + PW.length) % PW.length;
-const chrPose = () => pwOn() && !P.turnV && !P.weep && !P.run ? (P.stand ? [PW[P.stand.pf ?? PW_STAND], PW_META] : [PW[pwFrame()], PW_META]) : P.turnV && TURN.ready ? [TURN[Math.min(TURN.length - 1, Math.floor(P.turnV.t))], TURN_META] : P.weep && WEEP.ready ? [WEEP[Math.min(WEEP.length - 1, Math.floor(P.weep.t))], WEEP_META] : P.run ? (([set, meta]) => [set[((Math.floor(P.ranim) % set.length) + set.length) % set.length], meta])(runNow()) : P.stand ? [STD[stdFrame()], STD_META] : [CHR[chrFrame()], CHR_META];
+// build 50 (owner: "When pilgrim stops can we make it go to a natural standing pose, if it take one more step to transition allow it"): the walk video's
+// first frames are a real stand-to-walk start (assets/pilgrim-start.pack, video 0..13; 0 is his standing picture) and video 13 meets the loop's frame 31.
+// Stopping, he walks on to loop frame 31 and plays the start backwards to stand (P.stand.st 13 -> 0); setting off, it plays forwards (P.sp 0 -> 13) and joins the loop at 31.
+const PST = [], PST_META = {"ax": 132, "ground": 300, "frames": 14}, PST_JOIN = 31, PST_END = 13;
+const pstOn = () => pwOn() && PST.ready;
+const chrPose = () => pwOn() && !P.turnV && !P.weep && !P.run ? (P.stand ? (PST.ready && P.stand.pf == null ? [PST[Math.round(P.stand.st || 0)], PST_META] : [PW[P.stand.pf ?? PW_STAND], PW_META]) : P.sp != null && PST.ready ? [PST[Math.min(PST_END, Math.floor(P.sp))], PST_META] : [PW[pwFrame()], PW_META]) : P.turnV && TURN.ready ? [TURN[Math.min(TURN.length - 1, Math.floor(P.turnV.t))], TURN_META] : P.weep && WEEP.ready ? [WEEP[Math.min(WEEP.length - 1, Math.floor(P.weep.t))], WEEP_META] : P.run ? (([set, meta]) => [set[((Math.floor(P.ranim) % set.length) + set.length) % set.length], meta])(runNow()) : P.stand ? [STD[stdFrame()], STD_META] : [CHR[chrFrame()], CHR_META];
 // Walking and standing join frame to frame. Running does not, so going into or out of the run the old picture dissolves
 // into the new one over a fifth of a second (the new one comes in on top, then the old one goes: nothing shows through).
 // n = ticks; quick = the new picture is there at once and the old one fades off it (used into and out of the run:
@@ -1788,19 +1793,21 @@ function walkTick(dir, max) {
   if (run !== P.run) {
     poseChange(6, true); P.run = run;
     if (run) P.ranim = runNow()[1].start || 0;      // he sets off from the run's narrowest stride, the frame nearest a standing figure
-    if (!run) { if (dir) { P.stand = null; P.anim = 1; } else P.stand = { t: QUIET[0] }; }      // out of the run: into a walk, or standing quietly
+    if (!run) { P.sp = null; if (dir) { P.stand = null; P.anim = pstOn() ? PST_JOIN : 1; } else P.stand = { t: QUIET[0] }; }      // out of the run: into a walk, or standing quietly
   }
   if (P.run) { P.stand = null; P.face = 1; P.vx = runNow()[1].vpx * CHR_K * .4; }      // each run at its own video's speed
   else if (dir) {
-    if (P.stand) { P.anim = P.stand.pf != null ? P.stand.pf + .5 : 1; P.stand = null; }
+    if (P.stand) { if (pstOn() && P.stand.pf == null) P.sp = P.stand.st || 0; else P.anim = P.stand.pf != null ? P.stand.pf + .5 : 1; P.stand = null; }
     P.face = dir; P.vx = dir * max;
   } else if (!P.stand) {
-    if (pwOn()) { const f = pwFrame(); if (f === 6 || f === 24) { P.stand = { t: 0, pf: f }; P.vx = 0; if (P.turn) { P.face = P.turn; P.turn = 0; } } else P.vx = P.face * max; }
+    if (pstOn()) { const f = pwFrame(); if (P.sp != null || f === PST_JOIN) { P.stand = { t: 0, st: P.sp != null ? P.sp : PST_END }; P.sp = null; P.vx = 0; if (P.turn) { P.face = P.turn; P.turn = 0; } } else P.vx = P.face * max; }
+    else if (pwOn()) { const f = pwFrame(); if (f === 6 || f === 24) { P.stand = { t: 0, pf: f }; P.vx = 0; if (P.turn) { P.face = P.turn; P.turn = 0; } } else P.vx = P.face * max; }
     else { const f = chrFrame();
     if (f === 28 || f === 1) { P.stand = { t: f === 28 ? 0 : STAND_FROM_1 }; P.vx = 0; if (P.turn) { P.face = P.turn; P.turn = 0; } }
     else P.vx = P.face * max; }
   } else {
     P.vx = 0; if (P.turn) { P.face = P.turn; P.turn = 0; }
+    if (P.stand.st > 0) P.stand.st = Math.max(0, P.stand.st - .4);      // build 50: the start played backwards, at the video's own speed, into his standing pose
     if (!still || P.stand.t < 16 || P.stand.t >= QUIET[0]) P.stand.t += .4;      // while someone talks he finishes stopping, then holds still (no lifting of the book); build 118: once in his quiet breathing he goes on breathing through the talk
   }
   if (!P.vx) return;
@@ -1810,6 +1817,7 @@ function walkTick(dir, max) {
   const nx = clamp(P.x + P.vx, lo2, lim2), moved = Math.abs(nx - P.x), f0 = pwOn() ? pwFrame() : chrFrame();
   P.x = nx; let down = false;
   if (P.run) { const m = runNow()[1], r0 = Math.floor(P.ranim) % m.frames; P.ranim += moved / (m.vpx * CHR_K); const r1 = Math.floor(P.ranim) % m.frames; down = r1 !== r0 && m.steps.includes(r1); }
+  else if (P.sp != null && pstOn()) { P.sp += Math.max(moved, .25) / PW_STEP; if (P.sp >= PST_END) { P.anim = PST_JOIN + (P.sp - PST_END); P.sp = null; } }      // build 50: setting off from standing
   else if (pwOn()) { P.anim += Math.max(moved, .25) / PW_STEP; const f1 = pwFrame(); down = f1 !== f0 && PW_META.rest.includes(f1); }
   else { P.anim += Math.max(moved, .25) / CHR_STEP; const f1 = chrFrame(); down = f1 !== f0 && CHR_META.rest.includes(f1); }
   if (down) {                                                  // a foot comes down
@@ -3500,7 +3508,7 @@ document.getElementById('on2').onclick = () => SL.on ? go3() : HL.on ? go5() : g
 (async function boot() {
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.fillStyle = '#5d6b80'; ctx.fillRect(0, 0, VW, VH);
   await new Promise(r => setTimeout(r, 30));
-  const chr = Promise.all([loadPack('christian-walk', CHR), loadPack('pilgrim-walk', PW).catch(() => {}), loadPack('pilgrim-run', PR).catch(() => {}), loadPack('christian-stand', STD), 
+  const chr = Promise.all([loadPack('christian-walk', CHR), loadPack('pilgrim-walk', PW).catch(() => {}), loadPack('pilgrim-run', PR).catch(() => {}), loadPack('pilgrim-start', PST).catch(() => {}), loadPack('christian-stand', STD), 
     // build 89 (owner: "when I first open link house isn't there then flickers there"): what the first picture shows (his
     // house and its row, the trees, his wife in the door) now loads before "Open the book" appears, not after
     Promise.resolve().then(() => { HOUSE = bakeTint(streetFront('h'), HOUSE_DEPTH, HOUSE_DETAIL); for (const key of ['b', 'c']) NB[key] = bakeTint(streetFront(key), HOUSE_DEPTH, HOUSE_DETAIL); buildRow(); }),      // build 13: city buildings drawn in code, not the cottage paintings
