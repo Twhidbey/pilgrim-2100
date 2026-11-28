@@ -507,7 +507,7 @@ function buildWheat() {
       const x = x0 + i * WHEAT_GAP; ph[i] = Rw();
       hs[i] = (h * (.94 + .04 * Math.sin(x * .017 + o) + .02 * Math.sin(x * .049 + o * 2)) + ph[i] * 2.5) * lerp(.72, 1, smooth(x1, x1 - 330 * p, x) * smooth(xs, xs + 330 * p, x));
     }
-    if (false) WHEAT.push({ p, d, front: 0, wind, n, x1, x0, xs, h0: h, base: HORIZON + 140 * p + 3, h: hs, ph, two: true });      // build 51: the port, not fields (the numbers are still drawn, so nothing else moves)
+    WHEAT.push({ p, d, front: 0, wind, n, x1, x0, xs, h0: h, base: HORIZON + 140 * p + 3, h: hs, ph, two: true });
   }
 }
 // the wind in the middle layer: long slow waves running with the rain (a lean, 0 = upright)
@@ -577,7 +577,6 @@ function fadeGrad(c, a, b, xe, len, alpha = 1, xs = -1e9) {      // xs (build 49
   return g;
 }
 function wheatPlane(cam) {
-  return;      // build 51: no field plane at the town's edge (the port)
   const N2 = SCN[2], off = cam * N2.par;
   // build 494: the fields at the town's edge, running back to the near layer's hedges and trees
   const lx = X => 420 + (X - 420) * N2.par; wheatPlane1(cam, lx(FIELD2[0]) - off, lx(FIELD2[1]) - off);
@@ -708,8 +707,6 @@ function buildScenery() {
     // STORY LAB (build 48): the level opens in a field, as the book does. The nearest row of houses only begins where the
     // field ends; the far row stays, so the city is seen across the field. The field rises to a hedgerow with a few trees.
     const field = near ? 420 + (FIELD_END - 420) * par : -1e9;
-    // build 51 (owner: "Port and rail yard sounds great"): from the town's edge to the barricade the land is the port: flat, no woods, no trees
-    const gateL = 420 + (GATE - 420) * par, portK = x => first ? 0 : smooth(edge - 120, edge + 260, x) * (1 - smooth(gateL - 150, gateL + 250, x));
     const amp = lerp(105, 24, Math.pow(d, .55)) * LOOK.hills * (first ? 1.25 : 1);
     const nz = mkNoise(), cl = mkNoise(), wd = mkNoise(), fine = mkNoise(), wl = lerp(380, 640, d);
     // a mountain range: long ridgelines that rise to rounded peaks, with shoulders and small crags
@@ -724,9 +721,9 @@ function buildScenery() {
       let v = clamp(nz(x + 90 * wd(x, 500, 2), wl, 5, .46) * 1.9 * .5 + .5);
       v = Math.pow(v, 1.25);
       const woods = smooth(.05, .4, wd(x + 300, 260 * s + 90, 2)) * (fine(x, 15 * s + 3, 2, .6) * .5 + .5) * 5.5 * s;
-      const cityFlat = lerp(.5, 1, Math.max(smooth(edge - 120, edge + 260, x), 1 - smooth(field - 300, field + 40, x))) * (1 - .7 * portK(x));      // build 51: the port is flat land
+      const cityFlat = lerp(.5, 1, Math.max(smooth(edge - 120, edge + 260, x), 1 - smooth(field - 300, field + 40, x)));
       const lift = near ? 1 - smooth(field - 420, field - 40, x) : 0;      // the field rises gently behind the wheat
-      return base - amp * v * cityFlat - woods * cityFlat * (1 - portK(x)) - lift * (62 + 26 * v);
+      return base - amp * v * cityFlat - woods * cityFlat - lift * (62 + 26 * v);
     };
     L = { d, par, W, base, s, gy, field, shapes: [], wins: [], steeples: [], trees: [] };
     if (first) { const rx = 300, rw = 420, rh = 158; poly([[rx - rw, VH + 20], [rx - rw, base - 10], ...Array.from({ length: 81 }, (_, k) => { k /= 2; const u = k / 20 - 1, a = Math.min(1, Math.sqrt(u * u + .006) - .077); return [rx + u * rw, base - 10 - rh * Math.pow(1 - a, 1.9) / Math.pow(1 - (Math.sqrt(.006) - .077), 1.9)]; }), [rx + rw, base - 10], [rx + rw, VH + 20]]); }      // build 13: a great lone volcano far off, in the manner of Mount Rainier (the burning mountain to come)
@@ -764,7 +761,7 @@ function buildScenery() {
       // groves (a slow wave along the land, two or three trees close together), with long open fields between. The random
       // numbers are drawn as before, so nothing else in the layer moves.
       const grove = x => { const u = x / s; return Math.sin(u * .0029 + d * 11) + .55 * Math.sin(u * .0071 + d * 5 + 1.3) > .5; };
-      let lastT = -1e9; const plant = x => { if (!grove(x) || x - lastT < 95 * s) return; lastT = x; const t = { x, h: s * rr(82, 122), face: R() < .5 ? 1 : -1 }; if (x > gateL) L.trees.push(t); };      // build 51: none in the port
+      let lastT = -1e9; const plant = x => { if (!grove(x) || x - lastT < 95 * s) return; lastT = x; L.trees.push({ x, h: s * rr(82, 122), face: R() < .5 ? 1 : -1 }); };
       for (let x = Math.max(edge + 20 * s, -30); x < W + 30; x += rr(16, 46) * s / (.25 + LOOK.trees)) {
         if (cl(x, 420 * s + 120) * .5 + .5 > LOOK.trees * 1.15 - .08) continue;
         R(); plant(x);
@@ -773,7 +770,7 @@ function buildScenery() {
       L.trees.sort((a, b) => a.x - b.x);
       if (near) L.trees.unshift(...FIELD_TREES.map(([k, x, h, face]) => ({ k, x, h, face })));      // the six on the field's rise, each a different tree
       // (the trees on the field's rise are painted pictures since build 67: FIELD_TREES, drawFieldTrees)
-      if (i === 2) for (let x = Math.max(edge + 150, gateL); x < W - 200; x += rr(380, 560)) fence(x, gy, 8 + (R() * 8 | 0));      // build 51: field fences only beyond the barricade
+      if (i === 2) for (let x = edge + 150; x < W - 200; x += rr(380, 560)) fence(x, gy, 8 + (R() * 8 | 0));
     }
     // soft stencil (farther = softer), lit windows, and the mist that settles in front of this layer
     // (the nearest layer is baked sharp since build 65: the owner found its trees "a little blurry")
@@ -1314,14 +1311,14 @@ const held = () => { if (autoHeld()) return true; for (const t of downs.values()
 const lightPos = () => { const t = smooth(0, 1, (1 - (G.zoom || 1)) / (1 - ZOOM_GATE)); return { x: lerp(880 - G.cam * .02, DOORM - G.cam + 600, t), y: lerp(146, -330, t) - 90 * smooth(0, 1, G.sunUp || 0) }; };      // sunUp: once the gate is open it climbs a little higher (build 102)      // build 100: in the open sky to the right of the tall gatehouse
 
 function reset() {
-  seed = 99; buildLevel(); for (const it of ROW) if (it.who) { it.on = false; it.open = 0; }      // build 51: no door opens
+  seed = 99; buildLevel(); for (const it of ROW) if (it.who) { it.on = TEST_X > it.a; it.open = it.on ? 1 : 0; }
   for (const Lr of SCN) for (const w of Lr.wins) w[5] = false;
   Object.assign(P, { x: START_X, y: GY, vx: 0, face: TEST_X ? 1 : -1, anim: 1, stand: { t: QUIET[0] }, turn: 0, run: false, ranim: 0, blend: null, weep: null, turnTo: 0, turnV: null, lookUp: 0, lookA: 0, wantBack: false, bk: 0 });
   Object.assign(G, { cam: Math.max(0, Math.min(LEVEL_W - VW, TEST_X ? START_X - VW * .38 + 40 : START_X - VW * .62 - 40)), t: 0, got: 0, extra: 0, motes: [], flyers: [], ripples: [], glints: [], taps: [], litw: [], capQ: [], cap: 0, hint: null,
     pli: null, obst: null, flare: 0, gloom: 0, gloomTo: 0, gateOpen: 0, act: null, actT: 0, ring: null, auto: null, finale: null, guard: 0, idle: 0, wins: 0,
     evanDone: !!TEST_X, evanGone: TEST_X ? 1 : 0, neigh: TEST_X > NEIGH_X + 300, gateSeen: false, walked: false, touched: false, leaving: false, fam: TEST_X > HOME_X ? 2 : 0, door: 0,      // build 13 (owner: "as far as we know pilgrim has no family, for now"): his door stays shut
     doorShut: false, roll: TEST_X ? { t: 999, x: 0, y: 0 } : null, runZone: !!TEST_X && TEST_X < RUN_END, outSaid: false, watched: TEST_X > WATCH_X, ears: TEST_X > HOME_X });
-  G.sunUp = 0; G.waitFn = null; G.drone = null; G.tvRun = !!TEST_X && TEST_X > TV_RUN_A; G.phGo = !!TEST_X && TEST_X > EVAN_X; G.phFade = G.phGo ? 1 : 0; if (ROW[0] && !ROW[0].who) ROW[0].open = 1;      // build 16: the party: the door of the building beside his (to the left), lit from the start
+  G.sunUp = 0; G.waitFn = null; G.phGo = !!TEST_X && TEST_X > EVAN_X; G.phFade = G.phGo ? 1 : 0; if (ROW[0] && !ROW[0].who) ROW[0].open = 1;      // build 16: the party: the door of the building beside his (to the left), lit from the start
   G.through = false; G.homeTo = null; G.autoRun = 0; G.calm = 0; G.doorSaid = false; G.choiceKind = null; G.sawLight = !!TEST_X && TEST_X > EVAN_X; G.nchose = false;
   G.zoom = 1 - (1 - ZOOM_GATE) * smooth(GATE - 1300, GATE - 380, START_X);      // starting near the gate (?at=gate): already drawn back
   G.evan.pt = TEST_X ? 239 : 0; G.evan.go = false; G.evan.st = EVS_META.frames * 100; downs.clear(); pushing = false; keys.r = keys.push = false;
@@ -1493,9 +1490,7 @@ const INTRO_SAVED = [
 // build 46 (owner: "The newscaster can just be a screen in storefront in background, not [a] script item ... could it be a touchable item?"):
 // the news is a TV in the shop window of his building (room() style 10); a touch on it plays the report (TV_NEWS). The opening is his line only.
 const TV_NEWS = [INTRO_SAVED[1]];
-// build 51 (owner chose the words): he whispers as he wakes. Not recorded yet (the voice account has no credit): shown as words until it is.
-const WAKE = [PG, '...Again. The same dream.'];
-const INTRO = [WAKE, INTRO_SAVED[7]];
+const INTRO = [INTRO_SAVED[7]];
 const PARTY_NO = [[PG, 'No. I can\'t.']];
 // {11}, {12}: "he would also walk solitarily in the fields, sometimes reading, and sometimes praying"
 const FIELDS = [];      // build 16: no narrator
@@ -1503,7 +1498,7 @@ const FIELDS = [];      // build 16: no narrator
 // cylinder; choice 2 (ask: "Where do I go?" / "Leave me alone.", after which Phillip only waits); the gate and the
 // light; choice 3 (name: "And who are you?" / "Thank you." / say nothing); Phillip fades away (G.phFade).
 const EVAN = [
-  [PH, 'Son, you look like a man who\'s woken up.'],      // build 51 (owner chose it; was "Why are you crying?"); to be recorded when the voice account has credit
+  [PH, 'Why are you crying?'],
   [PG, 'This book says I must die, and then be judged. I\'m not ready for either.'],
   [PG, '"Flee from the wrath to come."', 0, () => { G.roll = { t: 0, x: G.evan.x - G.cam + 30, y: GY - 92 }; note(79, .035, 2.4); }],
 ];
@@ -1776,7 +1771,7 @@ function drawFrame(im, meta, x, y, face, alpha, K = CHR_K, sy = 1) {      // sy:
 // the next place where new words begin, while words are still being said (see "STOP POINTS FOR THE WORDS" in update())
 // words are still being SAID (queued, or a recording still playing), not just lingering on the screen (both levels use this)
 const saying = () => !!(G.capQ.length || (G.cap > 0 && G.t <= (G.capEnd || 0) + 6));
-const TV_RUN_A = 5250, WATCH_X = 4000, DOOR_OPEN = 640, DOOR_STOP = 170, DOOR_SAY = 1320;      // DOOR_STOP: where he stops before his door; DOOR_SAY: where the storyteller begins to tell of it (build 110)      // DOOR_OPEN: how far before his house the door flies open (was 330; earlier, so its words are done by the house)      // where the first neighbour's door opens
+const WATCH_X = 4000, DOOR_OPEN = 640, DOOR_STOP = 170, DOOR_SAY = 1320;      // DOOR_STOP: where he stops before his door; DOOR_SAY: where the storyteller begins to tell of it (build 110)      // DOOR_OPEN: how far before his house the door flies open (was 330; earlier, so its words are done by the house)      // where the first neighbour's door opens
 function narrStop() {
   if (SL.on || HL.on || G.state !== 'play' || !saying()) return null;
   if (!G.evanDone) return { lo: EVAN_X + 202 };      // walking out: Evangelist waits until the words in the field are done
@@ -1998,8 +1993,7 @@ function update() {
   if (P.turnTo && (P.bk || 0) >= .99) { P.face = P.turnTo; P.turnTo = 0; P.wantBack = false; }      // half way through his turn: now he faces the light
   if (P.wantBack && !P.turnTo && (dir > 0 || G.state === 'play')) P.wantBack = false;      // the child holds to run on: he turns away
   P.bk = Math.max(0, Math.min(1, (P.bk || 0) + (P.wantBack && P.stand ? .022 : -.07)));
-  // build 51 (owner: "when [he] runs can we not have doors fly open"): the neighbours' doors stay shut (a little crowd of onlookers is to come)
-  if (!G.tvRun && P.x > TV_RUN_A - 240 && P.x < TV_RUN_A + 400 && !SPK) { G.tvRun = true; say(...TV_NEWS[0]); }      // build 51: the news from the window as he runs by
+  for (const it of ROW) if (it.who) { if (!it.on && G.fam === 2 && P.x > it.a - 400) { it.on = true; sweep(170, 120, .4, .02); } if (it.on) it.open = Math.min(1, it.open + .05); }      // the neighbours' doors open as he comes
   if (G.roll) G.roll.t++; if (G.hint === 'roll' && --G.rollT <= 0) clearHint('roll');
   people(); gather(); motes(); effects(); capTick(); acts(); ambience(); opening();
   if (G.state === 'play') story();
@@ -2359,9 +2353,6 @@ function buildRow() {
     ROW.push({ key, flip, who, a, x: lineUp(a, p) - (flip ? M.w * k - dc : dc), lit: [who === 'b' || who === 'obs' ? 1 : 0, who === 'a' || who === 'pli' ? 1 : 0], on: false, open: 0, f: -1 });
   }
   ROW.forEach((it, i) => { it.st = 1 + i % (WIN_STYLES - 1); });      // each house its own window style (his own is 0), no two alike (build 97)
-  // build 51 (owner: "he'll pass an open window with TV lights flickering with news reporters"): the house at road 5250 has a TV left on in its
-  // first shop window (room() style 10); the news plays as he runs past it (TV_RUN_A)
-  const tvh = ROW.find(it => it.a === TV_RUN_A); if (tvh) { const M = rowMeta(tvh.key); tvh.tv = M.wins.findIndex(v => v[1] > M.h - 200); if (tvh.tv >= 0) tvh.lit[tvh.tv] = 1; }
 }
 // chimney smoke (a touch on a roof): soft pale puffs that swell, drift with the wind and fade
 function drawSmoke(cam) {
@@ -2393,112 +2384,6 @@ function drawPoles(cam) {
     for (const yy of [y - top - 2 * k, y - top + 18 * k]) c.fillRect(x + 14 * k, yy, 4 * k, 5 * k);      // insulators
     if (i % 3 === 1) { c.fillRect(x - 15 * k, y - top + 50 * k, 11 * k, 24 * k); c.fillRect(x - 6 * k, y - top + 58 * k, 4 * k, 2 * k); }      // a transformer on every third
   }
-}
-// THE PORT AND RAIL YARD (build 51; owner, of the fields between the street and the barricade: "field is too rural"; chose "Port and rail
-// yard"). Seattle's industrial edge by the bay, from the town's edge (road 6600) to the barricade, in the layered look and by the one
-// perspective rule (a thing at depth p stands on HORIZON + 140 p, is p as big and slides p as fast): far off, three container cranes
-// standing still in the mist, two with their booms raised (a level boom across the legs could read as a cross: kept to one, and
-// asymmetric, with its stays); nearer, stacked containers and a long warehouse; a string of freight wagons on the rails; a chain-link
-// fence along the lane. Nothing lit, nothing moving: the power is spotty, the yard is stopped (the machines to come will stop too).
-const PORT_A = 6700, PORT_B = 9800;
-const portIn = a => smooth(PORT_A - 300, PORT_A + 200, a);
-function portCol(d, x, haze = 0) { const c = layerCol(d), m = mix(c[0], c[1], warm(x / VW)); return haze ? mix(m, mix(PAL.hazeC, PAL.hazeW, warm(x / VW)), haze) : m; }
-const PORT = {
-  cranes: [[7150, 1, .9], [8250, 0, 1], [9250, 1, .82]],      // [road place, boom raised?, size]
-  boxes: [[7700, [2, 3, 1, 2, 2]], [8000, [3, 2, 2, 1]], [8750, [1, 2, 3, 3, 2, 1]], [9450, [2, 1, 2]]],      // stacks of containers, each a column's height
-  shed: [8350, 640],      // a long low warehouse: [road place, length in its own units]
-  wagons: [6950, 4],      // freight wagons: [road place of the first, how many]
-};
-function drawPort(cam) {
-  if (cam + VW < PORT_A - 900 || cam > PORT_B + 200) return;
-  const c = ctx;
-  // far: the cranes (p .12), pale in the mist, a soft bank of mist over their feet
-  { const p = .12, base = HORIZON + 140 * p, k = p * 2.6;
-    for (const [a, up, sz] of PORT.cranes) {
-      const x = lineUp(a, p) - cam * p, al = portIn(a); if (x < -260 || x > VW + 260 || al < .01) continue;
-      const h = 240 * sz * k / (.12 * 2.6), lw = h * .34, cy = base - h * .62;      // the portal: two legs, a girder at two thirds
-      c.fillStyle = css(portCol(.2, x, .45), al);
-      c.fillRect(x - lw / 2 - 3, base - h * .62, 5, h * .62); c.fillRect(x + lw / 2 - 2, base - h * .62, 5, h * .62);      // the legs
-      c.beginPath(); c.moveTo(x - lw / 2 - 3, base); c.lineTo(x - lw / 2 + 2, base - h * .62); c.lineTo(x - lw / 2 + 8, base); c.fill();
-      c.beginPath(); c.moveTo(x + lw / 2 + 3, base); c.lineTo(x + lw / 2 - 2, base - h * .62); c.lineTo(x + lw / 2 - 8, base); c.fill();
-      c.fillRect(x - lw / 2 - 3, cy, lw + 6, 6);      // the girder the trolley runs on
-      c.fillRect(x - lw * .2, cy - h * .3, 4, h * .3); c.fillRect(x + lw * .2 - 4, cy - h * .3, 4, h * .3);      // the A-frame above
-      c.fillRect(x - lw * .32, cy - 14, lw * .3, 13);      // the machinery house
-      c.strokeStyle = css(portCol(.2, x, .45), al); c.lineWidth = 1.2; c.beginPath();
-      if (up) {      // the boom raised: it rises steeply from the girder's front end, held by stays from the top of the A-frame
-        const bx = x - lw / 2, by = cy, tx = bx - h * .12, ty = cy - h * .62;
-        c.moveTo(bx, by); c.lineTo(tx, ty); c.lineTo(bx + 3, by); c.closePath(); c.fill();
-        c.moveTo(x - lw * .2, cy - h * .3); c.lineTo(tx + 2, ty + h * .08); c.stroke();
-      } else {       // the boom lowered, out over the water to one side only, a short back-reach the other way, two stays
-        c.fillRect(x - lw / 2 - h * .95, cy - 4, h * .95 + lw * .5 + h * .28, 5);
-        c.moveTo(x - lw * .18, cy - h * .3); c.lineTo(x - lw / 2 - h * .9, cy - 2); c.moveTo(x + lw * .18, cy - h * .3); c.lineTo(x + lw / 2 + h * .26, cy - 2); c.stroke();
-      }
-      const g = c.createLinearGradient(0, base - h * .3, 0, base + 4); const mc = mix(PAL.hazeC, PAL.hazeW, warm(x / VW));      // mist over the feet
-      g.addColorStop(0, css(mc, 0)); g.addColorStop(1, css(mc, .7 * al)); c.fillStyle = g; c.fillRect(x - lw - 60, base - h * .3, lw * 2 + 120, h * .3 + 4);
-    } }
-  // middle: containers and the warehouse (p .3)
-  { const p = .3, base = HORIZON + 140 * p, k = p, cw = 120 * k * 3.2, chh = 26 * k * 3.2;      // one container: about 2.6 m high, 12 m long
-    for (const [a, cols] of PORT.boxes) { const x0 = lineUp(a, p) - cam * p, al = portIn(a); if (x0 > VW + 40 || x0 + cols.length * cw < -40 || al < .01) continue;
-      cols.forEach((n, i) => { const x = x0 + i * cw * (i % 2 ? .98 : 1.02); for (let j = 0; j < n; j++) {
-        c.fillStyle = css(portCol(.38 + .04 * ((i + j) % 2), x, .22), al); c.fillRect(x, base - (j + 1) * chh, cw - 2, chh - 1.5);
-        c.fillStyle = css(portCol(.5, x, .2), al * .35); for (let r = 1; r < 10; r++) c.fillRect(x + r * cw / 10, base - (j + 1) * chh + 2, 1, chh - 5); } });      // the ribs
-    }
-    const [a, len] = PORT.shed, x = lineUp(a, p) - cam * p, w = len * k * 3.2, h = 60 * k * 3.2, al = portIn(a);
-    if (x < VW + 40 && x + w > -40) { c.fillStyle = css(portCol(.42, x, .18), al); c.beginPath(); c.moveTo(x, base); c.lineTo(x, base - h); c.lineTo(x + w * .5, base - h - h * .12); c.lineTo(x + w, base - h); c.lineTo(x + w, base); c.fill();
-      c.fillStyle = css(portCol(.55, x, .1), al * .5); for (let r = 0; r < 7; r++) c.fillRect(x + w * (.08 + r * .13), base - h * .55, w * .07, h * .45); }      // its loading doors
-  }
-  // the rail line (p .55): two rails and their ties, a string of freight wagons standing on it
-  { const p = .55, base = HORIZON + 140 * p, k = p, x0 = lineUp(PORT_A - 300, p) - cam * p, x1 = lineUp(PORT_B, p) - cam * p;
-    if (x1 > 0 && x0 < VW) { const col = portCol(.6, VW / 2, .05), g = c.createLinearGradient(x0, 0, x0 + 500, 0); g.addColorStop(0, css(col, 0)); g.addColorStop(1, css(col, .9));
-      c.fillStyle = g; c.fillRect(Math.max(0, x0), base - 1, Math.min(VW, x1) - Math.max(0, x0), 2); c.fillRect(Math.max(0, x0), base + 3, Math.min(VW, x1) - Math.max(0, x0), 1.5);
-      for (let t = Math.ceil(Math.max(x0, 0) / 9) * 9; t < Math.min(x1, VW); t += 9) c.fillRect(t, base - 1, 2.4, 6); }      // the ties
-    const [a0, n] = PORT.wagons, L = 300 * k, H = 70 * k, gap = 6 * k;      // a boxcar: about 15 m long, 4.3 m high
-    for (let i = 0; i < n; i++) { const a = a0 + i * (L + gap) / p, x = lineUp(a0, p) - cam * p + i * (L + gap), al = portIn(a0); if (x > VW + 20 || x + L < -20) continue;
-      c.fillStyle = css(portCol(.62, x, .05), al); c.fillRect(x, base - H - 10 * k, L, H); c.fillRect(x - gap / 2, base - 18 * k, L + gap, 5 * k);      // the box, the coupler line
-      c.fillStyle = css(portCol(.72, x, 0), al); for (const u of [.12, .22, .78, .88]) { c.beginPath(); c.arc(x + L * u, base - 5 * k, 6 * k, 0, 7); c.fill(); }      // the wheels
-      c.fillStyle = css(portCol(.5, x, .1), al * .55); c.fillRect(x + L * .4, base - H - 6 * k, L * .2, H - 8 * k); c.fillRect(x + L * .4, base - H - 7 * k, L * .2, 1.5); }      // the sliding door and its rail
-  }
-  // the fence along the lane (p .88): posts, a top rail, the mesh as a faint veil
-  { const p = .88, base = HORIZON + 140 * p, k = p, h = 120 * k, a0 = PORT_A, a1 = PORT_B - 260;
-    const x0 = lineUp(a0, p) - cam * p, x1 = lineUp(a1, p) - cam * p; if (x1 > -10 && x0 < VW + 10) {
-      const col = portCol(.82, VW / 2, 0), xs = Math.max(-10, x0), xe = Math.min(VW + 10, x1);
-      const g = c.createLinearGradient(x0, 0, x0 + 260, 0); g.addColorStop(0, css(col, 0)); g.addColorStop(1, css(col, .16)); c.fillStyle = g; c.fillRect(xs, base - h, xe - xs, h);      // the mesh
-      c.fillStyle = css(col, .9); c.fillRect(xs, base - h, xe - xs, 2);      // the top rail
-      for (let x = x0; x < x1; x += 150 * k) if (x > -10 && x < VW + 10) c.fillRect(x, base - h - 3, 3, h + 3);
-    } }
-}
-// THE DRONE (build 51; owner: "they pass a quadcopter scout drone humming"): a small quadcopter hanging in the air over the road past the
-// big man's place (road 8950), drawn in code: a dark body, two rotors seen side on (soft blurred discs), a camera under it. It turns
-// to watch him, drifts along to keep him in view, and lifts away as he nears the barricade. Its hum is made in code (two detuned saw
-// tones through a low-pass, wobbling a little), through the effects' own loudness (SFXG), stronger as he comes near.
-const DRONE_A = 8950; let DRONE_SND = null;
-function droneSound(v) {
-  if (!AC || muted) { if (DRONE_SND) DRONE_SND.g.gain.value = 0; return; }
-  if (!DRONE_SND) { try {
-    const g = AC.createGain(), lp = AC.createBiquadFilter(), o1 = AC.createOscillator(), o2 = AC.createOscillator(), lfo = AC.createOscillator(), lg = AC.createGain();
-    g.gain.value = 0; lp.type = 'lowpass'; lp.frequency.value = 760; o1.type = o2.type = 'sawtooth'; o1.frequency.value = 168; o2.frequency.value = 175.5;
-    lfo.frequency.value = 6.3; lg.gain.value = 3.5; lfo.connect(lg); lg.connect(o1.frequency); lg.connect(o2.frequency);
-    o1.connect(lp); o2.connect(lp); lp.connect(g); g.connect(SFXG); o1.start(); o2.start(); lfo.start(); DRONE_SND = { g };
-  } catch (e) { return; } }
-  const g = DRONE_SND.g.gain, t = AC.currentTime; g.cancelScheduledValues(t); g.setTargetAtTime(v, t, .25); g.setTargetAtTime(0, t + .5, .3);      // falls silent by itself if the level stops drawing it
-}
-function drawDrone(cam) {
-  const D = G.drone || (G.drone = { x: DRONE_A, y: GY - 250, f: -1, up: 0 });
-  if (P.x > DRONE_A - 650) { const tx = clamp(P.x + 260, DRONE_A, DRONE_A + 420); D.x += (tx - D.x) * .012; }      // it keeps a little ahead of him
-  if (P.x > DRONE_A + 380) D.up = Math.min(1, D.up + .004);      // and lifts away
-  D.f += ((P.x < D.x ? -1 : 1) - D.f) * .05;      // it turns to watch him
-  const bob = Math.sin(G.t / 37) * 4 + Math.sin(G.t / 13) * 1.2, x = D.x - cam, y = D.y + bob - D.up * D.up * 330;
-  const near = 1 - smooth(300, 1100, Math.abs(D.x - P.x)); droneSound(D.up < 1 ? .05 * near * (1 - D.up) : 0);
-  if (x < -60 || x > VW + 60 || y < -40) return;
-  const c = ctx, col = css(mix(layerCol(.92)[0], layerCol(.92)[1], warm(x / VW))), s = 1, f = D.f;
-  c.save(); c.translate(x, y); c.rotate(-.06 * f + Math.sin(G.t / 29) * .02);
-  c.fillStyle = col; c.beginPath(); if (c.roundRect) c.roundRect(-13 * s, -4 * s, 26 * s, 8 * s, 3 * s); else c.rect(-13 * s, -4 * s, 26 * s, 8 * s); c.fill();      // the body
-  c.fillRect(-25 * s, -2 * s, 50 * s, 2.4 * s);      // the arms, side on
-  for (const ax of [-25, 25]) { c.fillRect(ax * s - 1.2, -6 * s, 2.4, 5 * s);      // the motor posts and the spinning rotors, a soft blur
-    c.globalAlpha = .35 + .15 * Math.sin(G.t * 1.7 + ax); c.beginPath(); c.ellipse(ax * s, -6.5 * s, 13 * s, 1.6 * s, 0, 0, 7); c.fill(); c.globalAlpha = 1; }
-  c.beginPath(); c.arc(7 * f * s, 6 * s, 3.4 * s, 0, 7); c.fill();      // the camera under it, toward him
-  c.fillRect(-9 * s, 4 * s, 2 * s, 4 * s); c.fillRect(7 * s, 4 * s, 2 * s, 4 * s);      // its legs
-  c.restore();
 }
 // THE UNDERPASS (build 37; owner: "The field doesn't work for a meeting place - there no field in Queen Anne Seattle - what about an
 // under pass"). Where he wanders and Phillip meets him, a highway crosses over the street, as the interstate crosses below Queen Anne:
@@ -2541,7 +2426,6 @@ function underpass(cam, part) {
   }
 }
 function drawRow(cam) {
-  const keepTV = TVR;      // build 51: only his own building's set is touched; the one on the run keeps TVR as it was
   const L = LEVELS.home, p = L.par, k = p * HOUSE_K, c = ctx;
   // Between two houses the pale far mist showed as a hard bright slot (owner, build 62: "too high contrast here"): a soft
   // shade now stands in each space, the houses' own tone, strongest at the ground and gone by the eaves.
@@ -2554,7 +2438,7 @@ function drawRow(cam) {
     const B = rowPic(it.key), M = rowMeta(it.key), x = it.x - cam * p, w = M.w * k, h = M.h * k, y = L.base + 3 - h; if (!B || x > VW + 20 || x + w < -20) continue;
     const wm = warm((x + w / 2) / VW), dark = css(mix(layerCol(.9)[0], layerCol(.9)[1], wm));
     c.save(); if (it.flip) { c.translate(x + w, 0); c.scale(-1, 1); } else c.translate(x, 0);
-    M.wins.forEach((v, i) => { const wx = v[0] * k - 2, wy = y + v[1] * k - 2, ww = v[2] * k + 4, wh = v[3] * k + 4; if (it.lit[i]) room(c, wx, wy, ww, wh, lerp(.8, .45, wm), dark, it.x * .37 + i * 5, it.tv === i ? 10 : v[1] > M.h - 200 ? 7 + (it.st + i) % 3 : it.st, i && M.wins[i][1] === M.wins[0][1] ? 1 : 0);      /* build 31: a window on the shop floor shows a shop */ else { c.fillStyle = dark; c.fillRect(wx, wy, ww, wh); } });
+    M.wins.forEach((v, i) => { const wx = v[0] * k - 2, wy = y + v[1] * k - 2, ww = v[2] * k + 4, wh = v[3] * k + 4; if (it.lit[i]) room(c, wx, wy, ww, wh, lerp(.8, .45, wm), dark, it.x * .37 + i * 5, v[1] > M.h - 200 ? 7 + (it.st + i) % 3 : it.st, i && M.wins[i][1] === M.wins[0][1] ? 1 : 0);      /* build 31: a window on the shop floor shows a shop */ else { c.fillStyle = dark; c.fillRect(wx, wy, ww, wh); } });
     c.drawImage(B.cool, 0, y, w, h); if (wm > .01) { c.globalAlpha = wm; c.drawImage(B.warm, 0, y, w, h); c.globalAlpha = 1; }
     sills(c, M.wins, k, y, dark);
     const o = it.open || 0, e = o * o * (3 - 2 * o);
@@ -2571,7 +2455,6 @@ function drawRow(cam) {
       if (im && meta) { if (u < .99) drawFrame(im, meta, sx, fy, -1, al * (u < .5 ? 1 : 2 * (1 - u)), K, sy); if (u > .01) drawFrame(im, meta, sx, fy, 1, al * (u < .5 ? 2 * u : 1), K, sy); }
     }
   }
-  TVR = keepTV;
 }
 // The neighbours who come out to see him run ({19}: "some mocked, others threatened, and some cried after him to
 // return"; owner, build 58: "i need neighbors teasing him"). They stand in the lane (the 'mid' level) beyond his row,
@@ -2920,7 +2803,7 @@ function drawWorld() {
   const gcol = layerCol(1), wAt = x => warm((x - cam) / VW), on = (x, w = 0, m = 80) => x < cam + VW + m && x + w > cam - m;
   // the lane just behind the road: a low bank a little paler than the road, with his house and a few things on it
   ctx.fillStyle = hGrad(ctx, ...layerCol(.93)); ctx.fillRect(0, LEVELS.home.base, VW, GY - LEVELS.home.base + 2);
-  underpass(cam, 'back'); drawPort(cam); drawRow(cam); home(cam); drawSmoke(cam); drawPoles(cam); drawLevel('mid', cam); drawWatchers(cam); drawWheat(false); drawDrone(cam);          // the wheat behind him
+  underpass(cam, 'back'); drawRow(cam); home(cam); drawSmoke(cam); drawPoles(cam); drawLevel('mid', cam); drawWatchers(cam); drawWheat(false);          // the wheat behind him
   ctx.setTransform(1, 0, 0, 1, 0, OYD); drawFog('lane'); ctx.setTransform(DPR, 0, 0, DPR, 0, OYD);      // mist lying along the lane, round the houses' feet and in the wheat
   ctx.save(); ctx.translate(-cam, 0);
   const grad = hGrad(ctx, gcol[0], gcol[1], 1, 1, cam);
@@ -3318,14 +3201,14 @@ function drawDream(c, u, fire) {
 // traced one (no Space Needle; sources/dream/skyline.png), then a video from it: the flash behind the towers at about 2 s, the fireball and
 // the cloud rising, the camera tilting up after it (sources/dream/blast.mp4, 10 s). Silent. The code-drawn dream stays as the fallback.
 const DREAMVID = (() => { try { const v = document.createElement('video'); v.src = 'assets/dream.' + (v.canPlayType('video/mp4; codecs="avc1.640028"') ? 'mp4' : 'webm') + '?v=43'; v.muted = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('muted', ''); v.preload = 'auto'; v.load(); return v; } catch (e) { return null; } })();
-const EYEVID = (() => { try { const v = document.createElement('video'); v.src = 'assets/eyes-open.' + (v.canPlayType('video/mp4; codecs="avc1.640028"') ? 'mp4' : 'webm') + '?v=51';      /* H.264 where it plays, else VP9 */ v.muted = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('muted', ''); v.preload = 'auto'; v.load(); return v; } catch (e) { return null; } })();
+const EYEVID = (() => { try { const v = document.createElement('video'); v.src = 'assets/eyes-open.' + (v.canPlayType('video/mp4; codecs="avc1.640028"') ? 'mp4' : 'webm') + '?v=49';      /* H.264 where it plays, else VP9 */ v.muted = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('muted', ''); v.preload = 'auto'; v.load(); return v; } catch (e) { return null; } })();
 // Build 37 (owner: "animation of eyes opening didn't work", on the iPhone): Safari may not load or play a video that is not in the
 // page, and plays one only after a touch. So both videos are put in the page (hidden, 1 px), and started and stopped once from the
 // touch that begins Level 1 (primeVids, called by start()); if the eyes still do not play, two stills cross-fade instead (EYESTILL:
 // the first and last frames of the clip, eyes shut and open).
 (() => { const box = document.createElement('div'); box.style.cssText = 'position:fixed;left:0;top:0;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none;z-index:-1'; for (const v of [DREAMVID, EYEVID]) if (v) { v.style.width = v.style.height = '1px'; box.appendChild(v); } (document.body || document.documentElement).appendChild(box); })();
 function primeVids() { for (const v of [DREAMVID, EYEVID]) if (v) { try { const pr = v.play(); if (pr && pr.then) pr.then(() => { if (!v.dataset.live) { v.pause(); v.currentTime = 0; } }).catch(() => {}); } catch (e) {} } }
-const EYESTILL = ['shut', 'open'].map(n => { const im = new Image(); im.src = 'assets/eyes-still-' + n + '.webp?v=51'; return im; });
+const EYESTILL = ['shut', 'open'].map(n => { const im = new Image(); im.src = 'assets/eyes-still-' + n + '.webp?v=49'; return im; });
 function wakeEyes(then) {
   const ec = document.getElementById('eyes'); if (!ec) { setTimeout(then, 1700); return; }
   if (!DREAM) bakeDream();
@@ -3335,13 +3218,11 @@ function wakeEyes(then) {
   // build 21: the dream is a real video when it has loaded (else the code-drawn one); build 37: the choice waits up to a second (in the black)
   let dv = DREAMVID && DREAMVID.readyState >= 2 ? DREAMVID : null, decided = !!dv;
   // build 26: the video's first frame is HELD (the calm city, VH ms) before it plays, and it goes to white just after the city is gone
-  // (video s VW0..VW1), so the darkest part of the blast is not shown; then white, then black
-  const VH = 3000, VW0 = 5.0, VW1 = 6.3, FL = 3600; let DR = dv ? VH + VW1 * 1000 + 1300 : FL + 6700;
+  // (video s VW0..VW1), so the darkest part of the blast is not shown; then white, then black  build 51 (owner: "Fade to white before secondary rings show"): white from 4.1 s, whole by 4.8, so the later ring over the cap (about 4.8 s) is never seen
+  const VH = 3000, VW0 = 4.1, VW1 = 4.8, FL = 3600; let DR = dv ? VH + VW1 * 1000 + 1300 : FL + 6700;
   if (dv) { try { dv.pause(); dv.currentTime = 0; } catch (e) {} } let dvOn = false;
   // build 21: his eyes are a real video (assets/eyes-open.mp4, 7.5 s: asleep in bed to 2 s, waking 2.5 to 4.5 s, a blink near 6 s, awake); D.inn..D.hold span it
-  // build 51 (owner: "open eyes a little quicker but then stare a little longer"): the clip (sources/eyes/eyes-cut-b51.txt) is 2 s asleep, the eyes
-  // opening in 1 s (that part 1.5 times its own speed), then the stare, its last 2.4 s played back and forth; the stare now holds about 5 s
-  const D = { black: 400, inn: 1200, shut: 800, open: 1000, hold: 5000, out: 1500 };
+  const D = { black: 400, inn: 1200, shut: 1000, open: 2500, hold: 2300, out: 1500 };
   const vid = EYEVID; if (vid) { try { vid.pause(); vid.currentTime = 0; } catch (e) {} } let vidOn = false, still = false;
   const mkT = () => [D.black, D.inn, D.shut, D.open, D.hold, D.out].reduce((a, v) => (a.push(a[a.length - 1] + v), a), [0]).map(v => v + DR);
   let T = mkT();
@@ -3379,7 +3260,7 @@ function wakeEyes(then) {
       if (!still && t > T[1] + 900 && (vid.readyState < 2 || vid.currentTime < .05)) still = true;      // build 37: it will not play here: the stills instead
       const fadeA = Math.min(1, (t - T[1]) / D.inn) * (t > T[5] ? 1 - ease(cl((t - T[5]) / (D.out * .45))) : 1);
       if (still && EYESTILL[0].complete && EYESTILL[0].naturalWidth) {
-        const op = ease(cl((t - T[1] - 2000) / 1000));      // the eyes open where the clip opens them (build 51: 2 to 3 s)
+        const op = ease(cl((t - T[1] - 2500) / 2000));      // the eyes open where the clip opens them
         c.globalAlpha = fadeA; cover(EYESTILL[0], EYESTILL[0].naturalWidth, EYESTILL[0].naturalHeight);
         if (op > 0 && EYESTILL[1].naturalWidth) { c.globalAlpha = fadeA * op; cover(EYESTILL[1], EYESTILL[1].naturalWidth, EYESTILL[1].naturalHeight); }
         c.globalAlpha = 1;
