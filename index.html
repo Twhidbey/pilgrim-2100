@@ -249,7 +249,7 @@ every year.</div>
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 82 · Nov 28 2026</div>
+  <div id="build">build 83 · Nov 28 2026</div>
   <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
@@ -447,7 +447,7 @@ function tower(x, gy, w, h, s, kind) {
     pts.push([x + w, b]); poly(pts);
   }
   const lit = .012;                        // windows: rows of floors, few lit (the power is spotty)
-  for (let y = top + 8 * s; y < gy - 6 * s; y += 7.5 * s) for (let xx = x + 3 * s; xx < x + w - 5 * s; xx += 6 * s) if (R() < lit) L.wins.push([xx, y, 2.6 * s, 3.6 * s, 0]);
+  for (let y = top + 8 * s; y < gy - 6 * s; y += 7.5 * s) for (let xx = x + 3 * s; xx < x + w - 5 * s; xx += 6 * s) if (R() < lit) L.wins.push([xx, y, 2.6 * s, 3.6 * s, 0]); else if (L.dwins && (Math.sin(xx * 12.9898 + y * 78.233) * 43758.5) % 1 > .93) L.dwins.push([xx, y, 2.6 * s, 3.6 * s]);      // build 83: a few dark windows kept, for the hymn's far lights (no R(): the random order stays as it was)
 }
 function tree(x, gy, s, kind) {
   const p = new Path2D(), ln = rr(-5, 5) * s;
@@ -733,7 +733,7 @@ function buildScenery() {
       const lift = near ? 1 - smooth(field - 420, field - 40, x) : 0;      // the field rises gently behind the wheat
       return base - amp * v * cityFlat - woods * cityFlat * (1 - portK(x)) - lift * (62 + 26 * v);
     };
-    L = { d, par, W, base, s, gy, field, shapes: [], wins: [], steeples: [], trees: [] };
+    L = { d, par, W, base, s, gy, field, shapes: [], wins: [], dwins: [], steeples: [], trees: [] };
     if (first) { const rx = 300, rw = 420, rh = 158; poly([[rx - rw, VH + 20], [rx - rw, base - 10], ...Array.from({ length: 81 }, (_, k) => { k /= 2; const u = k / 20 - 1, a = Math.min(1, Math.sqrt(u * u + .006) - .077); return [rx + u * rw, base - 10 - rh * Math.pow(1 - a, 1.9) / Math.pow(1 - (Math.sqrt(.006) - .077), 1.9)]; }), [rx + rw, base - 10], [rx + rw, VH + 20]]); }      // build 13: a great lone volcano far off, in the manner of Mount Rainier (the burning mountain to come)
     if (first) { const bp = [[-30, VH + 20]]; for (let x = -30; x <= W + 6; x += 2.5) bp.push([x, base - 34 - amp * 1.25 * range(x * .8 + 4321, 1000, 1.5)]); bp.push([W + 6, VH + 20]); poly(bp); L.back = L.shapes.pop(); }
     const hp = [[-30, VH + 20]]; for (let x = -30; x <= W + 6; x += 2.5) hp.push([x, gy(x)]); hp.push([W + 6, VH + 20]);
@@ -2249,7 +2249,7 @@ function gather() {
   for (const s of LIGHTS) if (s.wait) s.a = way ? Math.min(1, s.a + .008) : 0;
   for (const s of LIGHTS) if (!s.got && s.a > .5 && s.x - P.x < 22 && s.x - P.x > -60) {
     s.got = true; s.gt = G.t; G.got++;
-    if (s.tube) { tubeHum(s.midi); s.mote = true; }      // build 81: the tube flickers on and hums its note; its mote leaves when it dies (TUBE_ON)
+    if (s.tube) { tubeHum(s.midi); s.mote = true; s.win = farWindow(s); }      // build 83: a window far off in the city comes on (was: the tube overhead); build 81: the tube flickers on and hums its note; its mote leaves when it dies (TUBE_ON)
     else { note(s.midi, .075, 2.8); G.motes.push({ x: s.x, y: s.y, tw: Math.random() * 6, life: 0 }); }
   }
   for (const fl of FLOCKS) if (!fl.away && Math.abs(fl.x - G.cam * fl.par - (P.x - G.cam)) < 64) scatter(fl);
@@ -2258,6 +2258,18 @@ function gather() {
 // build 81: a dead tube light under the deck: how long it stays on (ticks), and how bright it is t ticks after it is reached
 // (a fluorescent start: two quick blinks, a stutter, then steady; dimming and a last flicker as the power fails again)
 const TUBE_ON = 190;
+// build 83 (owner: "not sure about lights immediately above him ... what about in distance"): each note lights ONE dark window
+// far off in the city across the water, seen between the piers, ahead of him (to his left as he walks to Phillip), below the deck
+const FARLIT = new Set();
+function farWindow(sL) {
+  const px = P.x - G.cam; let best = null, bd = 1e9;
+  for (const i of [1, 0]) { const Lr = SCN[i]; if (!Lr || !Lr.dwins) continue; const off = G.cam * Lr.par;
+    for (const w of Lr.dwins) { if (FARLIT.has(w)) continue; const x = w[0] - off, y = w[1];
+      if (x < 40 || x > px - 30 || y < UP.dy + 40 || y > GY - 60) continue;
+      const want = px - 150 - ((sL.midi - 62) * 9), d = Math.abs(x - want) + Math.abs(y - (GY - 110 - (sL.midi - 62) * 9)) * .6 + (i ? 0 : 40);
+      if (d < bd) { bd = d; best = [i, w]; } } }
+  if (best) FARLIT.add(best[1]); return best;
+}
 function tubeLevel(t) {
   if (t < 0) return 0; if (t < 22) return [1, 0, 0, 1, 1, 0, 0, 0, .6, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1][t | 0] * (.55 + .45 * t / 22);
   if (t < TUBE_ON - 40) return 1; if (t < TUBE_ON) { const u = (t - (TUBE_ON - 40)) / 40; return (1 - u) * (Math.sin(t * 1.7) > -.6 ? 1 : .3); } return 0;
@@ -2868,9 +2880,6 @@ function underpass(cam, part) {
   const dk = col(1.05); c.fillStyle = dk; c.fillRect(x0, TOPY - 2, x1 - x0, DY - TOPY + 2);
   c.fillStyle = col(.92); c.fillRect(x0, DY - 9, x1 - x0, 3); for (let x = x0 + 18; x < x1 - 10; x += 46) c.fillRect(x, DY - 6, 9, 6);
   c.fillStyle = col(.8); c.fillRect(x0, TOPY - 2, 5, DY - TOPY + 2); c.fillRect(x1 - 5, TOPY - 2, 5, DY - TOPY + 2);
-  // build 81: the row of dead tube fixtures along the deck's underside (the hymn's lights on his way to Phillip)
-  c.fillStyle = col(1.12);
-  for (const sL of LIGHTS) if (sL.tube) { const x = sL.x - cam; if (x < -40 || x > VW + 40) continue; c.fillRect(x - 14, DY, 3, 4); c.fillRect(x + 11, DY, 3, 4); c.fillRect(x - 16, DY + 4, 32, 4); }
   // the one lamp still working, and its light on the wet road
   const lx = UP.lamp - cam, fl = .9 + .1 * Math.sin(G.t * .07) * Math.sin(G.t * .013), on = Math.sin(G.t * .21) > -.985 ? 1 : .35;      // it hums and, now and then, blinks
   if (lx > -200 && lx < VW + 200) {
@@ -3424,10 +3433,10 @@ function drawWorld() {
   for (const it of ROW) if (it.who && it.open > .02) { const sx = lineUp(it.a, LEVELS.home.par) - cam * LEVELS.home.par; if (sx > -200 && sx < VW + 200) glow(sx, LEVELS.home.base - 55, 170, .22 * it.open); }      // the glow of the neighbours' doors
   if (G.door > .02) glow(doorX(cam) + 3, LEVELS.home.base - 62, 260, .32 * G.door * lerp(1, .5, warm(doorX(cam) / VW)));   // the glow of home
   for (const s of LIGHTS) {
-    if (s.tube) { const x = s.x - cam, lv = s.got ? tubeLevel(G.t - s.gt) : 0; if (lv < .01 || x < -300 || x > VW + 300) continue;
-      ctx.fillStyle = `rgba(232,242,236,${.95 * lv})`; ctx.fillRect(x - 13, UP.dy + 8, 26, 2.2);      // the tube itself, cool white
-      glow(x, UP.dy + 12, 70, .42 * lv); glow(x, UP.dy + 10, 18, .7 * lv);
-      ctx.save(); ctx.translate(x, GY + 6); ctx.scale(150, 13); const pl = ctx.createRadialGradient(0, 0, 0, 0, 0, 1); pl.addColorStop(0, `rgba(214,232,226,${.26 * lv})`); pl.addColorStop(1, 'rgba(214,232,226,0)'); ctx.fillStyle = pl; ctx.beginPath(); ctx.arc(0, 0, 1, 0, 7); ctx.fill(); ctx.restore();      // a flat pool on the wet road
+    if (s.tube) { const lv = s.got && s.win ? tubeLevel(G.t - s.gt) : 0; if (lv < .01) continue;      // build 83: a far window coming on in the city
+      const [li, w] = s.win, x = w[0] - cam * SCN[li].par + w[2] / 2, y = w[1] + w[3] / 2, k = li ? 1 : .8;
+      ctx.fillStyle = css(PAL.win, .95 * lv); ctx.fillRect(x - w[2] / 2, y - w[3] / 2, w[2], w[3]);
+      glow(x, y, 26 * k, .5 * lv); glow(x, y, 8 * k, .8 * lv);
       continue; }
     const x = s.x - cam; if (s.got || x < -40 || x > VW + 40) continue;
     const y = s.y + Math.sin(G.t / 26 + s.ph) * 4, tw = .82 + .18 * Math.sin(G.t / 11 + s.ph * 3);
