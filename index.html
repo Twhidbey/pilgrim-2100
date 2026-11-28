@@ -249,7 +249,7 @@ every year.</div>
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 52 · Nov 28 2026</div>
+  <div id="build">build 53 · Nov 28 2026</div>
   <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
@@ -3317,7 +3317,7 @@ function drawDream(c, u, fire) {
 // THE DREAM IS A VIDEO TOO (build 21; owner: "The nuclear bomb needs an animation to make it realistic"): a photo-real dusk skyline after the
 // traced one (no Space Needle; sources/dream/skyline.png), then a video from it: the flash behind the towers at about 2 s, the fireball and
 // the cloud rising, the camera tilting up after it (sources/dream/blast.mp4, 10 s). Silent. The code-drawn dream stays as the fallback.
-const DREAMVID = (() => { try { const v = document.createElement('video'); v.src = 'assets/dream.' + (v.canPlayType('video/mp4; codecs="avc1.640028"') ? 'mp4' : 'webm') + '?v=43'; v.muted = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('muted', ''); v.preload = 'auto'; v.load(); return v; } catch (e) { return null; } })();
+const DREAMVID = (() => { try { const v = document.createElement('video'); v.src = 'assets/dream.' + (v.canPlayType('video/mp4; codecs="avc1.640028"') ? 'mp4' : 'webm') + '?v=53'; v.muted = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('muted', ''); v.preload = 'auto'; v.load(); return v; } catch (e) { return null; } })();
 const EYEVID = (() => { try { const v = document.createElement('video'); v.src = 'assets/eyes-open.' + (v.canPlayType('video/mp4; codecs="avc1.640028"') ? 'mp4' : 'webm') + '?v=51';      /* H.264 where it plays, else VP9 */ v.muted = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('muted', ''); v.preload = 'auto'; v.load(); return v; } catch (e) { return null; } })();
 // Build 37 (owner: "animation of eyes opening didn't work", on the iPhone): Safari may not load or play a video that is not in the
 // page, and plays one only after a touch. So both videos are put in the page (hidden, 1 px), and started and stopped once from the
@@ -3336,7 +3336,9 @@ function wakeEyes(then) {
   let dv = DREAMVID && DREAMVID.readyState >= 2 ? DREAMVID : null, decided = !!dv;
   // build 26: the video's first frame is HELD (the calm city, VH ms) before it plays, and it goes to white just after the city is gone
   // (video s VW0..VW1), so the darkest part of the blast is not shown; then white, then black  build 52 (owner: "Fade to white before secondary rings show"): white from 4.1 s, whole by 4.8, so the later ring over the cap (about 4.8 s) is never seen
-  const VH = 3000, VW0 = 4.1, VW1 = 4.8, FL = 3600; let DR = dv ? VH + VW1 * 1000 + 1300 : FL + 6700;
+  // build 53 (owner: "slow down video just a bit and don't fade quite so much ... keep as much as you can while clipping out secondary rings"):
+  // the second ring is painted out of the video itself (sources/dream/no-ring.py), so it plays nearly to its end, at RATE of its speed
+  const VH = 3000, VW0 = 6.4, VW1 = 7.6, RATE = .85, FL = 3600; let DR = dv ? VH + VW1 * 1000 / RATE + 1300 : FL + 6700;
   if (dv) { try { dv.pause(); dv.currentTime = 0; } catch (e) {} } let dvOn = false;
   // build 21: his eyes are a real video (assets/eyes-open.mp4, 7.5 s: asleep in bed to 2 s, waking 2.5 to 4.5 s, a blink near 6 s, awake); D.inn..D.hold span it
   // build 51 (owner: "open eyes a little quicker but then stare a little longer"): the clip (sources/eyes/eyes-cut-b51.txt) is 2 s asleep, the eyes
@@ -3350,7 +3352,7 @@ function wakeEyes(then) {
   const frame = now => {
     if (run !== runN) { ec.style.display = 'none'; return; }
     const t = now - t0, d = Math.min(2, window.devicePixelRatio || 1), W = Math.round(innerWidth * d), H = Math.round(innerHeight * d);
-    if (!decided && (t > 1000 || (DREAMVID && DREAMVID.readyState >= 2))) { decided = true; if (DREAMVID && DREAMVID.readyState >= 2) { dv = DREAMVID; try { dv.pause(); dv.currentTime = 0; } catch (e) {} DR = VH + VW1 * 1000 + 1300; T = mkT(); } }
+    if (!decided && (t > 1000 || (DREAMVID && DREAMVID.readyState >= 2))) { decided = true; if (DREAMVID && DREAMVID.readyState >= 2) { dv = DREAMVID; try { dv.pause(); dv.currentTime = 0; } catch (e) {} DR = VH + VW1 * 1000 / RATE + 1300; T = mkT(); } }
     if (ec.width !== W || ec.height !== H) { ec.width = W; ec.height = H; }
     // build 31 (owner: "black frame on eyes make look like movie and not cohesive with rest"): the dream and the eyes are shown in the
     // game's own picture (the box of #cv), on the page's own dark round it, so the street later comes up in the very same place
@@ -3359,9 +3361,9 @@ function wakeEyes(then) {
     c.save(); c.beginPath(); if (c.roundRect) c.roundRect(X0, Y0, BW, BH, 6 * d); else c.rect(X0, Y0, BW, BH); c.clip(); c.fillStyle = '#000'; c.fillRect(X0, Y0, BW, BH);
     const cover = (src, w, h) => { const sc = Math.max(BW / w, BH / h); c.drawImage(src, X0 + (BW - w * sc) / 2, Y0 + (BH - h * sc) / 2, w * sc, h * sc); };
     if (t < DR && dv) {      // the video: in from black, its own flash and cloud, out to black
-      if (t > VH && !dvOn) { dvOn = true; dv.dataset.live = 1; try { const pr = dv.play(); if (pr && pr.catch) pr.catch(() => {}); } catch (e) {} }
+      if (t > VH && !dvOn) { dvOn = true; dv.dataset.live = 1; try { dv.playbackRate = RATE; const pr = dv.play(); if (pr && pr.catch) pr.catch(() => {}); } catch (e) {} }
       cover(dv, dv.videoWidth, dv.videoHeight);
-      const vt = (t - VH) / 1000, white = vt < VW0 ? 0 : vt < VW1 ? ease((vt - VW0) / (VW1 - VW0)) : 1;
+      const vt = (t - VH) / 1000 * RATE, white = vt < VW0 ? 0 : vt < VW1 ? ease((vt - VW0) / (VW1 - VW0)) : 1;
       if (white > 0) { c.fillStyle = `rgba(255,250,240,${white})`; c.fillRect(X0, Y0, BW, BH); }
       const black = t < 1200 ? 1 - t / 1200 : t > DR - 900 ? cl((t - (DR - 900)) / 700) : 0;
       if (black > 0) { c.fillStyle = `rgba(0,0,0,${black})`; c.fillRect(X0, Y0, BW, BH); }
