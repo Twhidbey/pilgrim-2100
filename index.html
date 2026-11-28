@@ -256,7 +256,7 @@ every year.</div>
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 108 · Nov 28 2026</div>
+  <div id="build">build 109 · Nov 28 2026</div>
   <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
@@ -1635,7 +1635,8 @@ const GATE_ALL = [...SENTRY_STOP, ...GUARD_ASK, ...GUARD_ASK1, ...GUARD_YES, ...
 function gateChoice() {
   if (!G.hornFar) { G.hornFar = true; trainHorn(.025); }      // build 78: a train's horn, far off: the third way
   const L = { guard: 'Ask the guard', tank: 'Wait for the tank', train: 'Jump the train' }, tried = G.gateTried || {};
-  G.gateOpts = ['guard', 'tank', 'train'].filter(k => !tried[k]);
+  G.gateOpts = ['guard', 'train'].filter(k => !tried[k]);      // build 109 (owner: "Remove it from list of options"): the tank way is gone (its code is kept, unused)
+  if (G.gateOpts.length === 1) { G.choiceKind = 'gate'; G.state = 'choice'; pick(true); return; }      // build 109: alone, once the guard has said no, the train is the only way left: he takes it
   offer('gate', ...G.gateOpts.map(k => L[k]));
 }
 // the gate opens by itself (the sentry hauls it from beyond): the light, the tune, then on through it (as when it was pushed)
@@ -2926,12 +2927,14 @@ function tankTick() {      // build 71: its movement in the update, not the draw
   // barricade's slope only a few seconds before he reaches the barricade, rolls a short way (TANK.run) and stops there, its engine idling
   if (P.x > TANK.go) T.go = true;
   if (T.leave) { T.leave++; T.v = 1; if (T.leave > 170) T.a += Math.min(2.2, (T.leave - 170) * .035); }      // build 74 (the tank way): it pivots round, then rolls out behind the barricade
-  else if (T.go) { const left = T.a - (TANK.a - TANK.run); T.v = left > 0 ? 1.7 * smooth(0, 110, left) : 0; T.a -= T.v; }
-  tankSound(T.go ? (T.leave ? .24 : T.v > .05 ? .16 : .09) * (1 - smooth(250, 1300, Math.abs(T.a - P.x))) : 0);
+  // build 109 (owner: "The tank - how can you make it continue on and not come back"): it no longer stops by the barricade; it rolls
+  // out, eases up to speed and keeps on toward the town, past him, and is gone for good once it is far behind
+  else if (T.go && !T.gone) { T.ru = (T.ru || 0) + 1; T.v = 1.7 * smooth(0, 110, T.ru); T.a -= T.v; if (T.a < P.x - 2600) { T.gone = true; T.v = 0; } }
+  tankSound(T.go && !T.gone ? (T.leave ? .24 : T.v > .05 ? .16 : .09) * (1 - smooth(250, 1300, Math.abs(T.a - P.x))) : 0);
   farGunfire();
 }
 function drawTank(cam) {
-  const T = G.tank; if (!TANK_IM || !T) return;
+  const T = G.tank; if (!TANK_IM || !T || T.gone) return;
   const x = lineUp(T.a, TANK.p) - cam * TANK.p, base = HORIZON + 140 * TANK.p, w = TANK_IM.cool.width * TANK.k, h = TANK_IM.cool.height * TANK.k;
   if (x + w < -40 || x - w > VW + 40) return;
   const jit = T.v > .05 ? Math.sin(G.t * 1.9) * .35 + Math.sin(G.t * .7) * .25 : 0, y = base + 2 - TANK.gnd * TANK.k + jit, wm = warm(x / VW), c = ctx;
