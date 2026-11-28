@@ -144,7 +144,7 @@ const SL = (() => {
   // In its own units from where Help kneels (HX): the bow at -62 (he reaches over it), the stern and motor at STERN.
   // It comes in from the right out of the mist (BOAT_IN), the motor cut part way so it glides to a stop beside him; after the
   // lift it backs slowly (FERRY) until its stern lies against the far bank; when he goes on his way it leaves, bow first.
-  const BOAT_IN = 680, BOAT_T = 460, BOW = -132, STERN = 160,      // build 76: the bow left of where he climbs aboard
+  const BOAT_IN = 680, BOAT_T = 460, BOW = -132, STERN = 418,      // build 76: the bow left of where he climbs aboard
     FERRY = BANK0 + 12 - (HX + STERN), FERRY_T = 640;
   let boatOff = 0, boatV = 0, ferryT = 0, leaveT = 0, motor = null;
   const inBoat = x => help && x > HX + boatOff + BOW + 10 && x < HX + boatOff + STERN - 2;
@@ -165,16 +165,19 @@ const SL = (() => {
     // sheer a breath lighter, as light catches a rail.
     if (a <= .01) return;
     n.save(); n.globalAlpha = a; n.fillStyle = css(col); n.translate(x, 0); n.beginPath();
-    n.moveTo(BOW - 3, -33); n.quadraticCurveTo(BOW + 60, -29, STERN, -27); n.lineTo(STERN, 6); n.lineTo(BOW + 52, 6);      // the sheer and the transom, the flat bottom
-    n.quadraticCurveTo(BOW + 44, 6, BOW + 40, 2); n.lineTo(BOW + 1, -29); n.quadraticCurveTo(BOW - 3, -31, BOW - 3, -33); n.closePath();      // the rake up to the square bow
-    n.moveTo(84, -28); n.lineTo(84, -45); n.lineTo(95, -47); n.lineTo(103, -42); n.lineTo(103, -28); n.closePath();      // the console
-    n.moveTo(110, -28); n.lineTo(110, -35); n.lineTo(124, -35); n.lineTo(125, -45); n.lineTo(128, -45); n.lineTo(128, -28); n.closePath();      // the seat and its low back
-    // the outboard as in the photo: a big boxy cowling sitting right on the stern, its top rounded, a little lean back; the leg beneath it short
-    n.moveTo(STERN - 3, -27); n.lineTo(STERN - 5, -55); n.quadraticCurveTo(STERN - 4, -66, STERN + 8, -67); n.lineTo(STERN + 27, -65);
-    n.quadraticCurveTo(STERN + 38, -62, STERN + 38, -50); n.lineTo(STERN + 35, -35); n.quadraticCurveTo(STERN + 32, -30, STERN + 24, -29);
-    n.lineTo(STERN + 16, 5); n.lineTo(STERN + 1, 5); n.lineTo(STERN + 1, -27); n.closePath();      // the leg right against the stern (a gap showed open water between them)
+    // build 82 (owner: "Should be longer - look at guy in picture!"): the photo's boat is nearly four times as long as a man is tall, its side about a
+    // third of his height out of the water: so STERN 418 (550 long against his 150), the sheer -46 at the bow to -40 at the stern
+    const L = STERN - BOW, RK = BOW + L * .16;
+    n.moveTo(BOW - 3, -46); n.quadraticCurveTo(BOW + L * .25, -41, STERN, -40); n.lineTo(STERN, 6); n.lineTo(RK + 10, 6);      // the sheer and the transom, the flat bottom
+    n.quadraticCurveTo(RK, 6, RK - 5, 1); n.lineTo(BOW + 1, -42); n.quadraticCurveTo(BOW - 3, -44, BOW - 3, -46); n.closePath();      // the rake up to the square bow
+    n.moveTo(84, -40); n.lineTo(84, -58); n.lineTo(96, -61); n.lineTo(105, -55); n.lineTo(105, -40); n.closePath();      // the console
+    n.moveTo(116, -40); n.lineTo(116, -48); n.lineTo(132, -48); n.lineTo(133, -59); n.lineTo(137, -59); n.lineTo(137, -40); n.closePath();      // the seat and its low back
+    // the outboard: a big boxy cowling right on the stern, its top rounded, leaning back a little; its leg against the stern, short into the water
+    n.moveTo(STERN - 3, -40); n.lineTo(STERN - 5, -70); n.quadraticCurveTo(STERN - 4, -83, STERN + 10, -84); n.lineTo(STERN + 32, -82);
+    n.quadraticCurveTo(STERN + 45, -78, STERN + 45, -64); n.lineTo(STERN + 41, -47); n.quadraticCurveTo(STERN + 38, -41, STERN + 28, -40);
+    n.lineTo(STERN + 19, 6); n.lineTo(STERN + 1, 6); n.lineTo(STERN + 1, -40); n.closePath();
     n.fill();
-    n.strokeStyle = css(mix(col, LIGHT, .14)); n.lineWidth = 1.6; n.beginPath(); n.moveTo(BOW - 2, -31.6); n.quadraticCurveTo(BOW + 60, -27.6, STERN - 1, -25.6); n.stroke();      // the rub rail
+    n.strokeStyle = css(mix(col, LIGHT, .14)); n.lineWidth = 1.6; n.beginPath(); n.moveTo(BOW - 2, -44.4); n.quadraticCurveTo(BOW + (STERN - BOW) * .25, -39.4, STERN - 1, -38.4); n.stroke();      // the rub rail
     n.restore();
   }
 
@@ -983,7 +986,7 @@ const SL = (() => {
         else { lv.w += .2; lv.d += 13.1 * .2 * CHR_K; }      // 13.1 pack px of ground to each frame of his walk (HW_OFF)
       }
       // build 65: he does not walk away: he goes as he came, by boat, bow first back out over the water into the mist
-      if (lv && help.boatGo == null) help.boatGo = 0;
+      if (lv && help.boatGo == null && C2.x > HX + boatOff + STERN + 12) help.boatGo = 0;      // build 82: only once he has stepped off onto the bank
       if (help.boatGo != null && !help.gone) { help.boatGo++; const u = help.boatGo; boatOff = FERRY - 900 * Math.pow(smooth(40, 900, u), 1.6); motorSet(smooth(20, 90, u) * (1 - smooth(600, 900, u)));
         if (u % 8 === 0 && u > 60) rings.push({ x: HX + boatOff + BOW + 6, y: 0, t: 0, k: 1.2 });
         if (u > 900) { help.gone = true; motorSet(0); }
@@ -1490,7 +1493,7 @@ const SL = (() => {
     if (FP > .01) { ctx.save(); ctx.setTransform(S, 0, 0, S, 0, 0); const B = darkMist().band, bw = 1300 * z, bh = 120 * z, off = (((-cx * z * .9 - G.t * .25) % bw) + bw) % bw;      // build 381: a low band of dark mist lying flat across the mire behind him (drawn before the figures, so never over him)
       ctx.globalAlpha = Math.min(1, .85 * FP); for (let x = off - bw; x < VW; x += bw) ctx.drawImage(B, x, wl - 190 * z, bw, bh); ctx.restore(); }
     if (pliIn) { TALKM = talkMove(PL); pliMire(ctx); TALKM = null; }
-    if (haulLate >= 0) { const f = haulLate, top = lerp(0, -30, smooth(36, 58, f)); RCLIP = { x1: HX + HAUL_SPLIT, y1: top }; figure(ctx, 'haulP', HAUL[f], META.res, HX, 0, 1, fig, false, clamp(lift ? lift.t / 3.2 : 1)); RCLIP = null; }      // build 76: up over the side
+    if (haulLate >= 0) { const f = haulLate, top = lerp(0, -43, smooth(36, 58, f)); RCLIP = { x1: HX + HAUL_SPLIT, y1: top }; figure(ctx, 'haulP', HAUL[f], META.res, HX, 0, 1, fig, false, clamp(lift ? lift.t / 3.2 : 1)); RCLIP = null; }      // build 76: up over the side
     if (chrLate > 0) { MREC = 'C'; FIG_WET = NEWR() ? null : { D: C2.D || 0, a: .8 }; TALKM = C2.reach > 0 ? null : talkMove(C); drawChr(ctx, fig, chrLate); TALKM = null; MREC = null; FIG_WET = null; }
     sense();
     { // (1), (2): the surface line, lifted by the field and by a collar hugging every crossing; seen near the bodies and

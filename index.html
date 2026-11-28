@@ -249,7 +249,7 @@ every year.</div>
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 81 · Nov 28 2026</div>
+  <div id="build">build 82 · Nov 28 2026</div>
   <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
@@ -270,7 +270,7 @@ const OBS_META={"ax": 95, "ground": 307, "frames": 32, "vpx": 6.0, "rest": [23]}
 const BMW = [], BMW_META = {"ax": 132, "ground": 307, "frames": 36, "vpx": 5.4, "rest": [22]}, YMW = [], YMW_META = {"ax": 132, "ground": 299, "frames": 33, "vpx": 5.0, "rest": [0]};
 // build 71 (owner: "they stand there half walking half standing awkwardly - can we make them just stand"): their standing
 // pictures are their videos' first frames (a real stand, video frame 0), not a walk frame
-const CRW = [], CRW_META = {"ax": 134, "ground": 307, "frames": 86}, CRAWL_LOOP = 47, SNT = [], SNT_META = {"ax": 132, "ground": 303, "frames": 80};      // build 74: the crawl (47 kneeling pictures, then a 39-picture loop) and the sentry
+const SNT = [], SNT_META = {"ax": 132, "ground": 303, "frames": 80};      // build 77: the sentry
 const BMS = [], BMS_META = {"ax": 130, "ground": 303}, YMS = [], YMS_META = {"ax": 134, "ground": 304};
 const obsSet = () => BMW.ready ? [BMW, BMW_META, BMS[0] || BMW[22], BMS[0] ? BMS_META : BMW_META] : [OBS, OBS_META, OBS_ST, OBS_ST_META];
 const pliSet = () => YMW.ready && !SL.on ? [YMW, YMW_META, YMS[0] || YMW[0], YMS[0] ? YMS_META : YMW_META] : [PLI, PLI_META, PLI_ST, PLI_ST_META];
@@ -1332,7 +1332,7 @@ function reset() {
     pli: null, obst: null, flare: 0, gloom: 0, gloomTo: 0, gateOpen: 0, act: null, actT: 0, ring: null, auto: null, finale: null, guard: 0, idle: 0, wins: 0,
     evanDone: !!TEST_X, evanGone: TEST_X ? 1 : 0, neigh: TEST_X > NEIGH_X + 300, gateSeen: false, walked: false, touched: false, leaving: false, fam: TEST_X > HOME_X ? 2 : 0, door: 0,      // build 13 (owner: "as far as we know pilgrim has no family, for now"): his door stays shut
     doorShut: false, roll: TEST_X ? { t: 999, x: 0, y: 0 } : null, runZone: !!TEST_X && TEST_X < RUN_END, outSaid: false, watched: TEST_X > WATCH_X, ears: TEST_X > HOME_X });
-  G.sunUp = 0; G.waitFn = null; G.drone = null; G.tank = null; G.drain = null; G.gateTried = null; G.gateOpening = null; G.gateOpts = null; G.sentryAway = false; G.sentryTw = 0; P.crawl = null; G.tvRun = !!TEST_X && TEST_X > TV_RUN_A; G.phGo = !!TEST_X && TEST_X > EVAN_X; G.phFade = G.phGo ? 1 : 0; if (ROW[0] && !ROW[0].who) ROW[0].open = 1;      // build 16: the party: the door of the building beside his (to the left), lit from the start
+  G.sunUp = 0; G.waitFn = null; G.drone = null; G.tank = null; G.train = null; G.gateTried = null; G.gateOpening = null; G.gateOpts = null; G.sentryAway = false; G.sentryTw = 0;  G.tvRun = !!TEST_X && TEST_X > TV_RUN_A; G.phGo = !!TEST_X && TEST_X > EVAN_X; G.phFade = G.phGo ? 1 : 0; if (ROW[0] && !ROW[0].who) ROW[0].open = 1;      // build 16: the party: the door of the building beside his (to the left), lit from the start
   G.through = false; G.homeTo = null; G.autoRun = 0; G.calm = 0; G.doorSaid = false; G.choiceKind = null; G.sawLight = !!TEST_X && TEST_X > EVAN_X; G.nchose = false; G.alone = false;
   G.zoom = 1 - (1 - ZOOM_GATE) * smooth(GATE - 1300, GATE - 380, START_X);      // starting near the gate (?at=gate): already drawn back
   G.evan.pt = TEST_X ? 239 : 0; G.evan.go = false; G.evan.st = EVS_META.frames * 100; downs.clear(); pushing = false; keys.r = keys.push = false;
@@ -1598,23 +1598,25 @@ const GATEWORDS = [
 ];
 const GATE_ALONE = [];      // build 64: the young man stayed behind: the pilgrim comes to the barricade alone, in silence
 // BUILD 74: THREE WAYS THROUGH THE BARRICADE (owner: "how do they get thru gate by just pushing- think how to make this realistic...maybe
-// give player some options"; "Do all three please"). A sentry stands beyond the gate (SENTRY_X); low in the barricade's face a few steps
-// back is a drain mouth (DRAIN_X). Choice 6 (gateChoice, pick 'gate'): ask the guard (only works if the young man came: he knows him;
-// alone, the sentry turns him away and the choice comes again without it), wait for the tank (it turns and rolls out behind the barricade,
-// the sentry hauls the gate open for it and watches it go; they slip through), or the drain (he walks back to it, takes off his pack and
-// crawls in pushing it ahead: assets/pilgrim-crawl.pack; the young man ducks in after him). The way taken is kept (pp-gate) for later levels.
+// give player some options"; "Do all three please"). A sentry stands beyond the gate (SENTRY_X). Choice 6 (gateChoice, pick 'gate'): ask
+// the guard (only works if the young man came: he knows him; alone, the sentry turns him away and the choice comes again without it), wait
+// for the tank (it turns and rolls out behind the barricade, the sentry hauls the gate open for it and watches it go; they slip through), or
+// the train (build 78, owner: "Drain option is corny- what about jump on train car instead - involving going back"; the drain is gone, DO
+// NOT BRING IT BACK): a freight train stands behind the fence, its engine tucked behind the barricade (OTR); it sounds its horn and creeps
+// out; he runs back along the fence to an open yard gate (TRAIN_GATE), waits for the flatcar and jumps up onto its empty rear deck, the
+// young man after him, and the train carries them out behind the barricade (trainTick, drawOutTrain). The way taken is kept (pp-gate).
 // Words drafted in the script app (scene 6), not yet approved: shown, not yet recorded.
-const SN = 'Sentry', DRAIN_X = 9690, SENTRY_X = DOOR1 + 45;
+const SN = 'Sentry', SENTRY_X = DOOR1 + 45;
 const SENTRY_STOP = [[SN, 'That\'s far enough. The gate\'s shut.']];
 const GUARD_ASK = [[PG, 'Let us through. Please.']], GUARD_ASK1 = [[PG, 'Let me through. Please.']];
 const GUARD_YES = [[YM, 'It\'s me. Open up.'], [SN, '...You? Out here?'], [YM, 'We\'re leaving.'], [SN, 'Go on, then. I never saw you.']];
 const GUARD_NO = [[SN, 'Orders. Nobody goes out. Go home, friend.']];
 const TANK_WAIT = [[PG, 'Wait.']], TANK_NOW = [[PG, 'Now.']];
-const DRAIN_SEE = [[PG, 'There. Under the wall.']], DRAIN_PACK = [[YM, 'You won\'t fit. Not with that pack.'], [PG, 'Then it goes first.']];
-const GATE_ALL = [...SENTRY_STOP, ...GUARD_ASK, ...GUARD_ASK1, ...GUARD_YES, ...GUARD_NO, ...TANK_WAIT, ...TANK_NOW, ...DRAIN_SEE, ...DRAIN_PACK];
+const TRAIN_SEE = [[PG, 'The train. It\'s going out.']], TRAIN_RUN = [[YM, 'It\'s moving!'], [PG, 'Run.']], TRAIN_RUN1 = [[PG, 'Run.']];
+const GATE_ALL = [...SENTRY_STOP, ...GUARD_ASK, ...GUARD_ASK1, ...GUARD_YES, ...GUARD_NO, ...TANK_WAIT, ...TANK_NOW, ...TRAIN_SEE, ...TRAIN_RUN];
 function gateChoice() {
-  const L = { guard: 'Ask the guard', tank: 'Wait for the tank', drain: 'Try the drain' }, tried = G.gateTried || {};
-  G.gateOpts = ['guard', 'tank', 'drain'].filter(k => !tried[k]);
+  const L = { guard: 'Ask the guard', tank: 'Wait for the tank', train: 'Jump the train' }, tried = G.gateTried || {};
+  G.gateOpts = ['guard', 'tank', 'train'].filter(k => !tried[k]);
   offer('gate', ...G.gateOpts.map(k => L[k]));
 }
 // the gate opens by itself (the sentry hauls it from beyond): the light, the tune, then on through it (as when it was pushed)
@@ -1624,27 +1626,83 @@ function gateTick() {
   G.gateOpen = Math.min(1, G.gateOpen + .005);
   if (G.gateOpen >= 1) { G.gateOpening = null; gateOpened(); const go = () => { G.through = true; G.throughT = G.t; G.state = 'play'; G.idle = 0; caption(END); }; if (o.sneak) talk(TANK_NOW, go); else go(); }
 }
-// the drain: he walks back to it, then kneels (the crawl video's first part, 8 pictures a second) and crawls in (its loop, 24 a second)
-function toDrain() {
-  G.drain = { ph: 'back', a: 0 };
-  if (G.pli && G.pli.mode === 'follow') { G.pli.mode = 'drainwait'; G.pli.face = -1; }
-  G.state = 'auto'; G.auto = { dir: -1, to: DRAIN_X - 85, then: () => { G.state = 'wait'; poseChange(16); P.face = 1; P.crawl = { f: 0 }; G.drain.ph = 'kneel'; } };
+// THE TRAIN (build 78). OTR: on its own line behind the fence (p .62), at real scale (88 px a metre at the road, so 54.6 here), its front
+// (road-equivalent place, as lineUp uses) at OTR.a: a shunting engine (14 m) and one flatcar (13 m) with a 20-foot container on its front
+// half, the rear half of the deck empty. TRAIN_GATE: an open gate in the fence (p .88) where he waits and jumps.
+const OTR = { p: .62, a: 10768, loco: 14, flat: 13, gap: 1 }, TRAIN_GATE = 8890;
+const otrM = () => 88 * OTR.p, otrBase = () => HORIZON + 140 * OTR.p, otrX = cam => lineUp(G.train ? G.train.a : OTR.a, OTR.p) - cam * OTR.p;      // its front on the screen
+const deckY = () => otrBase() - 1.25 * otrM();
+// the empty rear deck of the flatcar, on the screen: [left, right]
+const deckSpan = cam => { const m = otrM(), x = otrX(cam) - (OTR.loco + OTR.gap + OTR.flat) * m; return [x + .4 * m, x + 6 * m]; };
+const fenceGateX = cam => lineUp(TRAIN_GATE, .88) - cam * .88;
+function trainGo() { G.train = { a: OTR.a, v: 0, t: 0, horn: 0 }; trainHorn(); }
+function toTrain() {
+  const T = G.train; T.ph = 'back'; G.state = 'auto'; G.auto = { dir: -1, to: -1e9, then: () => { G.state = 'wait'; T.ph = 'wait'; P.face = -1; } };      // the goal is set each tick (trainTick): where the fence's gate is on the screen
+  if (G.pli && G.pli.mode === 'follow') G.pli.mode = 'train';
 }
-function drainTick() {
-  const D = G.drain; if (!D) return;
-  if (D.ph === 'kneel') { P.crawl.f += .133; if (P.crawl.f >= CRAWL_LOOP) D.ph = 'crawl'; }
-  else if (D.ph === 'crawl') { P.crawl.f += .4; if (P.crawl.f >= CRW_META.frames) P.crawl.f -= CRW_META.frames - CRAWL_LOOP; P.x += .3; D.a = smooth(DRAIN_X - 55, DRAIN_X + 25, P.x); if (D.a >= 1 && !D.in) D.in = G.t; }
+function trainTick() {
+  const T = G.train; if (!T) return; T.t++;
+  const cam = G.camDraw ?? G.cam, px = P.x - cam, [l, r] = deckSpan(cam);
+  const hold = (T.ph === 'back' || T.ph === 'wait') && l > px - 70;      // it never gets past him before he can jump (it creeps on only as he comes)
+  if (T.t > 70) T.v = hold ? Math.max(0, T.v - .01) : Math.min(T.ph === 'ride' ? 1.25 : .3, T.v + .004);      // it creeps, then, once they are on, gathers a little speed
+  T.a += T.v; trainSound(T.v);
+  if (T.ph === 'back' && G.auto) G.auto.to = P.x - (px - fenceGateX(cam));      // he runs back to the gate in the fence (a story move: the child need not hold)
+  else if (T.ph === 'wait') {      // watching the flatcar come; he jumps when its empty deck is beside him
+    if (px > l + 10 && px < r - 10) { T.ph = 'hop'; T.h = { t: 0, x0: px, off: Math.min(r - 20, px + 30) - otrX(cam) }; P.face = 1; }
+  } else if (T.ph === 'hop') {
+    T.h.t++; T.pOn = true; if (T.h.t >= 42) { T.ph = 'ride'; T.r = G.t; }
+  }
+  if (T.ph === 'ride' && !T.done) { const x = otrX(cam) + T.h.off; P.x = x + cam; if (x > (GATE - 760 + 330) - cam && G.t > T.r + 60) { T.done = true; finish(); } }      // carried out behind the barricade: the end
+  // the young man runs back with him and jumps a little after him
   const p = G.pli;
-  if (p && p.mode === 'drainwait' && D.in) p.mode = 'drainin';
-  if (p && p.mode === 'drainin') { p.face = -1; p.x -= .9; p.al = 1 - smooth(DRAIN_X + 45, DRAIN_X + 5, p.x); if (p.al <= 0) p.mode = 'gone'; }
-  if (D.in && !D.done && (!p || p.mode === 'gone' || p.mode === 'home') && G.t > D.in + 50) { D.done = true; G.sunUp = 0; finish(); }
+  if (p && p.mode === 'train') { p.face = -1; const tx = P.x + 55; if (p.x > tx) p.x = Math.max(tx, p.x - 3.2); if ((T.ph === 'hop' && T.h.t > 30) || T.ph === 'ride') { p.mode = 'trainhop'; p.h = { t: 0, x0: p.x - cam, off: T.h.off - 42 }; } }
+  if (p && p.mode === 'trainhop') { p.h.t = Math.min(42, p.h.t + 1); }
 }
-// the drain's mouth: a concrete pipe end low in the barricade's face, dark inside, mud at its lip
-function drainMouth() {
-  const c = ctx, x = DRAIN_X, b = GY + 4, arch = r => { c.beginPath(); c.moveTo(x - r, b); c.lineTo(x - r, b - r * .5); c.arc(x, b - r * .5, r, Math.PI, 0); c.lineTo(x + r, b); c.closePath(); };
-  c.globalAlpha = 1; c.fillStyle = SETC; arch(74); c.fill();
-  c.fillStyle = 'rgba(10,11,15,.94)'; arch(63); c.fill();
-  c.fillStyle = INK; c.beginPath(); c.ellipse(x, b - 2, 92, 9, 0, 0, 7); c.fill();      // the mud at its lip
+// drawn in drawPort between the far rails (p .55) and the fence (p .88): the engine, the flatcar, and the two once they are on it
+function drawOutTrain(c, cam) {
+  G.camDraw = cam; const m = otrM(), base = otrBase(), X = otrX(cam), Lx = (OTR.loco + OTR.gap + OTR.flat) * m;
+  if (X < -60 || X - Lx > VW + 60) return;
+  const col = portCol(.72, X, 0), dk = portCol(.82, X, 0); c.globalAlpha = 1;
+  const bogie = (x) => { c.fillStyle = css(dk); c.fillRect(x - 1.3 * m, base - .95 * m, 2.6 * m, .3 * m); for (const v of [-.8, 0, .8]) { c.beginPath(); c.arc(x + v * m, base - .45 * m, .45 * m, 0, 7); c.fill(); } };
+  // the engine: frame, a long hood, the cab at its front (to the right), a short hood before it, a dark window, a handrail
+  { const x0 = X - OTR.loco * m; c.fillStyle = css(col);
+    c.fillRect(x0, base - 1.5 * m, OTR.loco * m, .55 * m);
+    c.fillRect(x0 + .6 * m, base - 3.6 * m, 8.6 * m, 2.1 * m); c.fillRect(x0 + 2 * m, base - 3.85 * m, 1.2 * m, .3 * m);      // the long hood, its exhaust
+    c.fillRect(x0 + 9.6 * m, base - 4.3 * m, 3 * m, 2.8 * m); c.fillRect(x0 + 9.45 * m, base - 4.4 * m, 3.3 * m, .18 * m);      // the cab, its roof
+    c.fillRect(x0 + 12.6 * m, base - 2.7 * m, 1.2 * m, 1.2 * m);      // the short hood
+    c.fillStyle = css(mix(dk, [0, 0, 0], .35)); c.fillRect(x0 + 10.1 * m, base - 3.9 * m, .9 * m, .8 * m); c.fillRect(x0 + 11.4 * m, base - 3.9 * m, .9 * m, .8 * m);      // its windows, dark
+    c.fillStyle = css(col); c.fillRect(x0 + .3 * m, base - 2.45 * m, OTR.loco * m - .6 * m, .07 * m);      // the handrail
+    bogie(x0 + 3 * m); bogie(x0 + OTR.loco * m - 3 * m); }
+  // the flatcar: a deep frame, a 20-foot container on its front half, the rear half empty
+  { const x0 = X - Lx; c.fillStyle = css(col);
+    c.beginPath(); c.moveTo(x0, base - 1.25 * m); c.lineTo(x0 + OTR.flat * m, base - 1.25 * m); c.lineTo(x0 + OTR.flat * m, base - .95 * m); c.lineTo(x0 + OTR.flat * m * .8, base - .7 * m); c.lineTo(x0 + OTR.flat * m * .2, base - .7 * m); c.lineTo(x0, base - .95 * m); c.fill();
+    c.fillRect(x0 + OTR.flat * m, base - 1.15 * m, OTR.gap * m, .15 * m);      // the coupling
+    cbox(c, x0 + 6.6 * m, base - 1.25 * m - 2.6 * m, 6.1 * m, 2.6 * m, boxCol(.7, x0, 37, .22), 1, 1);
+    bogie(x0 + 2 * m); bogie(x0 + OTR.flat * m - 2 * m); }
+  // the pilgrim and the young man jumping up and riding (at this depth: smaller, and behind the fence)
+  const hop = (h, im, meta) => { const u = Math.min(1, h.t / 42), e = u * u * (3 - 2 * u), x = lerp(h.x0, X + h.off, e), y = lerp(GY, deckY(), e) - Math.sin(Math.PI * u) * 34, k = lerp(1, OTR.p, e);
+    drawFrame(im, meta, x, y + 1, 1, 1, CHR_K * k); };
+  const T = G.train; if (T && T.h && T.pOn) hop(T.h, ...(T.ph === 'hop' && T.h.t < 34 && PW.ready ? [PW[10], PW_META] : PST.ready ? [PST[0], PST_META] : [PW[0], PW_META]));
+  const p = G.pli; if (p && p.mode === 'trainhop') { const [W, M, S, SM] = pliSet(); hop(p.h, p.h.t < 34 ? W[4] : S, p.h.t < 34 ? M : SM); }
+  // the open gate in the fence: a gap in the mesh, one leaf swung back
+  { const gx = fenceGateX(cam), fb = HORIZON + 140 * .88, h = 120 * .88, fc = portCol(.82, gx, 0); if (gx > -40 && gx < VW + 40) {
+    c.fillStyle = css(fc, .9); c.fillRect(gx - 34, fb - h - 3, 3.5, h + 3); c.fillRect(gx + 34, fb - h - 3, 3.5, h + 3);      // its posts
+    c.fillStyle = css(fc, .5); c.beginPath(); c.moveTo(gx - 34, fb - h); c.lineTo(gx - 70, fb - h + 6); c.lineTo(gx - 70, fb - 4); c.lineTo(gx - 34, fb); c.fill(); } }      // the leaf, swung back
+}
+// the train's sounds, made in code: the horn (two low reed tones, long and short), and the wheels' clack over the rail joints with its speed
+let TRN_SND = null;
+function trainHorn() {
+  if (!AC || muted) return;
+  try { const t = AC.currentTime, g = AC.createGain(), lp = AC.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1400; g.gain.value = 0; lp.connect(g); g.connect(SFXG);
+    for (const f of [185, 233]) { const o = AC.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f; o.connect(lp); o.start(t); o.stop(t + 3.4); }
+    g.gain.setTargetAtTime(.09, t, .08); g.gain.setTargetAtTime(0, t + 1.5, .06); g.gain.setTargetAtTime(.09, t + 1.85, .08); g.gain.setTargetAtTime(0, t + 2.9, .1);
+  } catch (e) {}
+}
+function trainSound(v) {
+  if (!AC || muted) return;
+  if (!TRN_SND) { const nb = AC.createBuffer(1, AC.sampleRate * .12, AC.sampleRate), d = nb.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / (AC.sampleRate * .02)); TRN_SND = { nb, dist: 0 }; }
+  TRN_SND.dist += v; if (TRN_SND.dist < 60) return; TRN_SND.dist = 0;      // a rail joint every 60 units: two quick clacks (the two axles of a bogie)
+  for (const dt of [0, .09]) { try { const s = AC.createBufferSource(), f = AC.createBiquadFilter(), g = AC.createGain(); s.buffer = TRN_SND.nb; f.type = 'bandpass'; f.frequency.value = 900; f.Q.value = 1.2; g.gain.value = .35; s.connect(f); f.connect(g); g.connect(SFXG); s.start(AC.currentTime + dt); } catch (e) {} }
 }
 const END = [];      // build 27: no narrator
 
@@ -1671,7 +1729,7 @@ function pick(home) {
     try { localStorage.setItem('pp-gate', way); } catch (e) {}
     if (way === 'guard') talk(G.alone ? GUARD_ASK1 : GUARD_ASK, () => G.alone ? talk(GUARD_NO, () => { (G.gateTried = G.gateTried || {}).guard = 1; gateChoice(); }) : talk(GUARD_YES, () => openGate(false)));
     else if (way === 'tank') talk(TANK_WAIT, () => { G.state = 'wait'; if (G.tank) G.tank.leave = 1; later(330, () => { G.sentryAway = true; openGate(true); }); });
-    else talk(DRAIN_SEE, () => G.alone ? toDrain() : talk(DRAIN_PACK, toDrain));
+    else talk(TRAIN_SEE, () => { trainGo(); talk(G.alone ? TRAIN_RUN1 : TRAIN_RUN, toTrain); });
     return;
   }
   if (kind === 'young') {      // build 64: choice 5: only the light brings him
@@ -1817,7 +1875,7 @@ const pwFrame = () => ((Math.floor(P.anim) % PW.length) + PW.length) % PW.length
 // Stopping, he walks on to loop frame 31 and plays the start backwards to stand (P.stand.st 13 -> 0); setting off, it plays forwards (P.sp 0 -> 13) and joins the loop at 31.
 const PST = [], PST_META = {"ax": 132, "ground": 300, "frames": 14}, PST_JOIN = 31, PST_END = 13;
 const pstOn = () => pwOn() && PST.ready;
-const chrPose = () => P.crawl && CRW.ready ? [CRW[Math.min(CRW.length - 1, Math.floor(P.crawl.f))], CRW_META] : pwOn() && !P.turnV && !P.weep && !P.run ? (P.stand ? (PST.ready && P.stand.pf == null ? [PST[Math.round(P.stand.st || 0)], PST_META] : [PW[P.stand.pf ?? PW_STAND], PW_META]) : P.sp != null && PST.ready ? [PST[Math.min(PST_END, Math.floor(P.sp))], PST_META] : [PW[pwFrame()], PW_META]) : P.turnV && TURN.ready ? [TURN[Math.min(TURN.length - 1, Math.floor(P.turnV.t))], TURN_META] : P.weep && WEEP.ready ? [WEEP[Math.min(WEEP.length - 1, Math.floor(P.weep.t))], WEEP_META] : P.run ? (([set, meta]) => [set[((Math.floor(P.ranim) % set.length) + set.length) % set.length], meta])(runNow()) : P.stand ? [STD[stdFrame()], STD_META] : [CHR[chrFrame()], CHR_META];
+const chrPose = () => pwOn() && !P.turnV && !P.weep && !P.run ? (P.stand ? (PST.ready && P.stand.pf == null ? [PST[Math.round(P.stand.st || 0)], PST_META] : [PW[P.stand.pf ?? PW_STAND], PW_META]) : P.sp != null && PST.ready ? [PST[Math.min(PST_END, Math.floor(P.sp))], PST_META] : [PW[pwFrame()], PW_META]) : P.turnV && TURN.ready ? [TURN[Math.min(TURN.length - 1, Math.floor(P.turnV.t))], TURN_META] : P.weep && WEEP.ready ? [WEEP[Math.min(WEEP.length - 1, Math.floor(P.weep.t))], WEEP_META] : P.run ? (([set, meta]) => [set[((Math.floor(P.ranim) % set.length) + set.length) % set.length], meta])(runNow()) : P.stand ? [STD[stdFrame()], STD_META] : [CHR[chrFrame()], CHR_META];
 // Walking and standing join frame to frame. Running does not, so going into or out of the run the old picture dissolves
 // into the new one over a fifth of a second (the new one comes in on top, then the old one goes: nothing shows through).
 // n = ticks; quick = the new picture is there at once and the old one fades off it (used into and out of the run:
@@ -1891,13 +1949,13 @@ function walkTick(dir, max) {
   // the run: from Evangelist he runs, past his own door with his fingers in his ears, until the burden tires him (G.runZone)
   // (build 107 dropped him to a walk near the next place while words were still being said; build 110 gave the street
   // room instead, owner: "maybe we should put more space between things so timing works out")
-  const run = !!(G.runZone && dir > 0 && RUN.ready);
+  const run = !!(((G.runZone && dir > 0) || (G.train && G.train.ph === 'back' && dir < 0)) && RUN.ready);      // build 78: he also runs back to the train
   if (run !== P.run) {
     poseChange(6, true); P.run = run;
     if (run) P.ranim = runNow()[1].start || 0;      // he sets off from the run's narrowest stride, the frame nearest a standing figure
     if (!run) { P.sp = null; if (dir) { P.stand = null; P.anim = pstOn() ? PST_JOIN : 1; } else P.stand = { t: QUIET[0] }; }      // out of the run: into a walk, or standing quietly
   }
-  if (P.run) { P.stand = null; P.face = 1; P.vx = runNow()[1].vpx * CHR_K * .4; }      // each run at its own video's speed
+  if (P.run) { const rd = dir < 0 ? -1 : 1; P.stand = null; P.face = rd; P.vx = rd * runNow()[1].vpx * CHR_K * .4; }      // each run at its own video's speed
   else if (dir) {
     if (P.stand) { if (pstOn() && P.stand.pf == null) P.sp = P.stand.st || 0; else P.anim = P.stand.pf != null ? P.stand.pf + .5 : 1; P.stand = null; }
     P.face = dir; P.vx = dir * max;
@@ -2109,7 +2167,7 @@ function update() {
   // build 51 (owner: "when [he] runs can we not have doors fly open"): the neighbours' doors stay shut (a little crowd of onlookers is to come)
   if (!G.tvRun && P.x > TV_RUN_A - 240 && P.x < TV_RUN_A + 400 && !SPK) { G.tvRun = true; tvNews(); }      // build 51: the news from the window as he runs by
   if (G.roll) G.roll.t++; if (G.hint === 'roll' && --G.rollT <= 0) clearHint('roll');
-  people(); gather(); if (!SL.on && !HL.on && !CR.on) { droneTick(); tankTick(); gateTick(); drainTick(); } motes(); effects(); capTick(); acts(); ambience(); opening();
+  people(); gather(); if (!SL.on && !HL.on && !CR.on) { droneTick(); tankTick(); gateTick(); trainTick(); } motes(); effects(); capTick(); acts(); ambience(); opening();
   if (G.state === 'play') story();
   const target = Math.max(0, Math.min(LEVEL_W - VW, P.x - VW * (G.evanDone ? .38 : .62) + P.face * 40));      // room in front of him, whichever way he is going
   G.cam += (target - G.cam) * .05;
@@ -2175,7 +2233,7 @@ function people() {
     if (gap > 14) p.go = true; if (gap < 1) p.go = false;
   }
   if (p) {
-    const still = p.mode === 'talk' || p.mode === 'block' || p.mode === 'drainwait' || (p.mode === 'follow' && !p.go);
+    const still = p.mode === 'talk' || p.mode === 'block' || (p.mode === 'follow' && !p.go);
     p.st = clamp((p.st || 0) + (still && rest(p, pliSet()[1]) && pliSet()[2] ? .035 : -.06));
     if (p.mode === 'follow' && p.go && p.st <= 0) { const gap = (G.leaving ? DOOR1 + 90 : P.x - 70) - p.x; p.x += Math.max(0, Math.min(gap, gap > 46 ? 2 : MAXV)); }
   }
@@ -2659,6 +2717,7 @@ function drawPort(cam) {
         else cbox(c, x + 4 * k, cy, L - 8 * k, ch, boxCol(.6, x, a0 + i * 9, .24), al, 1);
       } });
   }
+  drawOutTrain(c, cam);      // build 78: the train he can jump
   // the fence along the lane (p .88): posts, a top rail, the mesh as a faint veil
   { const p = .88, base = HORIZON + 140 * p, k = p, h = 120 * k, a0 = PORT_A, a1 = PORT_B - 260;
     const x0 = lineUp(a0, p) - cam * p, x1 = lineUp(a1, p) - cam * p; if (x1 > -10 && x0 < VW + 10) {
@@ -3228,7 +3287,7 @@ function drawWorld() {
   const grad = hGrad(ctx, gcol[0], gcol[1], 1, 1, cam);
   INK = grad; SETC = hGrad(ctx, ...layerCol(.66), 1, 1, cam); DOORC = hGrad(ctx, ...layerCol(.86), 1, 1, cam);
   HINT = hGrad(ctx, PAL.hazeC, PAL.hazeW, .13, .17, cam);
-  if (on(GATE - 760, LEVEL_W - GATE + 760)) { doors(); gate(); drainMouth(); }      // the whole wall, from its start (W0) to the end of the level
+  if (on(GATE - 760, LEVEL_W - GATE + 760)) { doors(); gate(); }      // the whole wall, from its start (W0) to the end of the level
   for (const l of LAMPS) if (on(l.x - 20, 120)) streetLamp(l, cam);
   // birds sitting on things
   ctx.fillStyle = grad;
@@ -3326,14 +3385,14 @@ function drawWorld() {
   TALKM = talkMove(O);
   if (G.obst && G.obst.x > cam - 100) { const [W, M, S, SM] = obsSet(); walker(G.obst, W[Math.floor(G.obst.anim ?? M.rest[0]) % W.length], M, S, SM, G.obst.face || (G.obst.mode === 'home' ? -1 : 1), G.obst.al ?? 1); }
   TALKM = talkMove(PL);
-  if (G.pli && G.pli.mode !== 'gone') { const [W, M, S, SM] = pliSet(); figure(G.pli.x, a => walker(G.pli, W[Math.floor(G.pli.anim ?? 0) % W.length], M, S, SM, G.pli.face || 1, a * (G.pli.al ?? 1))); }
+  if (G.pli && G.pli.mode !== 'gone' && G.pli.mode !== 'trainhop') { const [W, M, S, SM] = pliSet(); figure(G.pli.x, a => walker(G.pli, W[Math.floor(G.pli.anim ?? 0) % W.length], M, S, SM, G.pli.face || 1, a * (G.pli.al ?? 1))); }
   { const dxs = P.x - cam - doorX(cam), a = G.door * smooth(300, 60, Math.abs(dxs)); RIM = a > .02 ? { dir: dxs > 0 ? -1 : 1, a } : null; }      // the door's light on him
   TALKM = talkMove(C);
   // build 74: the sentry beyond the gate, facing the town; for the tank he turns to watch it go out (a short dissolve to his mirror)
   if (SNT.ready && SENTRY_X - cam < VW + 120) { TALKM = talkMove(SN); const L = SNT.length, t = G.t * .133 % (2 * L - 2), f = SNT[Math.floor(t < L ? t : 2 * L - 2 - t)]; G.sentryTw = Math.min(1, (G.sentryTw || 0) + (G.sentryAway ? .04 : 0)); const k = G.sentryTw;
     if (k < 1) drawFrame(f, SNT_META, SENTRY_X - cam, GY, -1, k < .5 ? 1 : 2 * (1 - k)); if (k > 0) drawFrame(f, SNT_META, SENTRY_X - cam, GY, 1, k < .5 ? 2 * k : 1); }
   TALKM = talkMove(C);
-  figure(P.x, a => drawChristian(P.x - cam, P.y + 1, P.face, a * (1 - (G.drain ? G.drain.a : 0)))); RIM = null; TALKM = null;
+  figure(P.x, a => drawChristian(P.x - cam, P.y + 1, P.face, G.train && G.train.pOn ? 0 : a)); RIM = null; TALKM = null;
   // birds in the air
   ctx.lineCap = 'round'; ctx.strokeStyle = css(mix(gcol[0], gcol[1], warm(.5)), .9);
   for (const f of G.flyers) {
@@ -3989,11 +4048,11 @@ document.getElementById('on2').onclick = () => SL.on ? go3() : HL.on ? go5() : g
   // If it is not ready by its line he simply stands (WEEP.ready is checked there).
   loadPack('christian-weep', WEEP).catch(() => {}).then(() => loadPack('christian-turn', TURN)).then(() => bookLoaded('TURN')).catch(() => {}).then(nbLoad);
   Promise.all([loadPack('evangelist', EVA), loadPack('evangelist-stand', EVS), loadPack('phillip-stand', PHS).catch(() => {}), loadPack('phillip-point', PHP).catch(() => {})]).then(() => Promise.all([loadImg('family.webp').then(im => { FAM = im; if (im) FAM_SH = mkShadow(im); }), Promise.resolve().then(() => { const B = barricade(); GATE_P = bakeTint(B.gate, .42, .4); WALL_P = bakeTint(B.wall, .42, .4); }), ...['a', 'b', 'c'].map(key => loadImg('neighbor-' + key + '.webp').then(im => { WATCH_IM[key] = im; })), ...['a', 'b', 'c'].map(key => loadPack('neighbor-' + key, WATCH_PACK[key]).catch(() => {})), loadImg('christian-back.webp').then(im => { BACK = im; }), loadPack('christian-run', RUN), loadPack('christian-run-plain', RUNP)]))
-    .then(() => Promise.all([loadPack('obstinate', OBS), loadPack('pliable', PLI), loadPack('bigman-walk', BMW).catch(() => {}), ...CROWD.map((w, i) => loadPack('crowd-' + (i + 1), w.pk).catch(() => {})), loadImg('tank.webp').then(im => { if (im) TANK_IM = bakeTank(im); }), loadPack('youngman-walk', YMW).catch(() => {}), loadPack('bigman-stand', BMS).catch(() => {}), loadPack('pilgrim-crawl', CRW).catch(() => {}), loadPack('sentry-stand', SNT).catch(() => {}), loadPack('youngman-stand', YMS).catch(() => {}), loadImg('obstinate-stand.webp').then(im => { OBS_ST = im; }), loadImg('pliable-stand.webp').then(im => { PLI_ST = im; })]));
+    .then(() => Promise.all([loadPack('obstinate', OBS), loadPack('pliable', PLI), loadPack('bigman-walk', BMW).catch(() => {}), ...CROWD.map((w, i) => loadPack('crowd-' + (i + 1), w.pk).catch(() => {})), loadImg('tank.webp').then(im => { if (im) TANK_IM = bakeTank(im); }), loadPack('youngman-walk', YMW).catch(() => {}), loadPack('bigman-stand', BMS).catch(() => {}), loadPack('sentry-stand', SNT).catch(() => {}), loadPack('youngman-stand', YMS).catch(() => {}), loadImg('obstinate-stand.webp').then(im => { OBS_ST = im; }), loadImg('pliable-stand.webp').then(im => { PLI_ST = im; })]));
   for (const [who, txt] of INTRO) vox(who, txt);          // the first words, ready before Begin is pressed
 })();
 </script>
-<script src="slough.js?v=80"></script>
+<script src="slough.js?v=82"></script>
 <script src="hill.js?v=662"></script>
 <script src="rooms.js?v=2"></script>
 <script src="heaven.js?v=547"></script>
