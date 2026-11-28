@@ -249,7 +249,7 @@ every year.</div>
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 60 · Nov 28 2026</div>
+  <div id="build">build 61 · Nov 28 2026</div>
   <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
@@ -3388,10 +3388,10 @@ function wakeEyes(then) {
   // build 21: his eyes are a real video (assets/eyes-open.mp4, 7.5 s: asleep in bed to 2 s, waking 2.5 to 4.5 s, a blink near 6 s, awake); D.inn..D.hold span it
   // build 51 (owner: "open eyes a little quicker but then stare a little longer"): the clip (sources/eyes/eyes-cut-b51.txt) is 2 s asleep, the eyes
   // opening in 1 s (that part 1.5 times its own speed), then the stare, its last 2.4 s played back and forth; the stare now holds about 5 s
-  const D = { black: 400, inn: 1200, shut: 800, open: 1000, hold: 5000, out: 4200 };      // build 56: out 4200 (was 1500), the push into the window
+  const D = { black: 400, inn: 1200, shut: 800, open: 1000, hold: 5000, out: 1500 };      // build 61: the push into the window (build 57) is gone: out 1500 again
   // build 57: where the window's reflection sits in each iris (the existing catchlight, up and left of the pupil; in the 960 x 540 clip the
   // pupils hold at (247, 383) and (675, 383) once open), its size, and how far the push goes in (the window then fills the picture)
-  const REFL = [[229, 368], [661, 368]], REFL_S = 17, ZMAX = 300;
+  const REFL = [[229, 368], [661, 368]], REFL_S = 17;
   const WIN = document.createElement('canvas'), WM = document.createElement('canvas'); WIN.width = WIN.height = 96; WM.width = WM.height = 12;
   { const m = WM.getContext('2d'); m.fillStyle = '#fff'; m.fillRect(3, 3, 6, 6); }      // a soft square: drawn small, stretched up, so its edge is soft at any size
   const DROPS = Array.from({ length: 11 }, (_, i) => ({ x: 8 + ((i * 37) % 80), v: .03 + ((i * 13) % 7) / 220, o: (i * .37) % 1, l: 10 + (i * 7) % 18 }));
@@ -3442,29 +3442,29 @@ function wakeEyes(then) {
       // build 57 (owner, through the opening-book chat: a reflection of the room's one light, the rainy window, in each iris as he wakes;
       // then the camera pushes into one eye's reflection and the rainy window grows, softens and dissolves into the street, no black between)
       const fadeIn = Math.min(1, (t - T[1]) / D.inn), pu = t > T[5] ? cl((t - T[5]) / D.out) : 0;
-      const ZP = pu > 0 ? Math.exp(Math.log(ZMAX) * Math.pow(ease(cl(pu / .82)), 1.6)) : 1;      // the push: slow at first, then on in
+      // build 61 (owner, of the push into the eye: "don't like"): no push; the eyes go to black, then the street, as before build 57
       let src = null, op = 1, vtm = 0;
       if (still && EYESTILL[0].complete && EYESTILL[0].naturalWidth) { op = ease(cl((t - T[1] - 2000) / 1000)); vtm = 2.6 + .8 * op; src = 'still'; }      // the eyes open where the clip opens them (build 51: 2 to 3 s)
       else if (vid.readyState >= 2 && vid.videoWidth) { vtm = vid.currentTime; src = 'vid'; }
       if (src) {
         const sw = src === 'vid' ? vid.videoWidth : EYESTILL[0].naturalWidth, sh = src === 'vid' ? vid.videoHeight : EYESTILL[0].naturalHeight, sc = Math.max(BW / sw, BH / sh);
-        const ox = X0 + (BW - sw * sc) / 2, oy = Y0 + (BH - sh * sc) / 2, k = sw / 960, P = { x: ox + REFL[0][0] * k * sc, y: oy + REFL[0][1] * k * sc };
-        const pe = ease(cl(pu / .7)); c.save(); c.translate(P.x + (X0 + BW / 2 - P.x) * pe, P.y + (Y0 + BH / 2 - P.y) * pe); c.scale(ZP, ZP); c.translate(-P.x, -P.y);      // the eye's window drifts to the middle as we go in c.globalAlpha = fadeIn;
+        const ox = X0 + (BW - sw * sc) / 2, oy = Y0 + (BH - sh * sc) / 2, k = sw / 960;
+        c.save(); c.globalAlpha = fadeIn * (1 - ease(cl(pu / .45)));      // build 61: the eyes go to black first (fixes build 57, where a comment had swallowed this line)
         if (src === 'vid') cover(vid, sw, sh);      // build 31: the whole picture, no band, no vignette
         else { cover(EYESTILL[0], sw, sh); if (op > 0 && EYESTILL[1].naturalWidth) { c.globalAlpha = fadeIn * op; cover(EYESTILL[1], sw, sh); } }
-        // the window in each iris: fading in as the eyes open (video 2.6 to 3.4 s), then, in the push, whole
-        const ra = ease(cl((vtm - 2.6) / .8)), win = winTex(t), grow = ease(cl((pu - .35) / .45));
+        // the window in each iris: fading in as the eyes open (video 2.6 to 3.4 s), gone with the eyes
+        const ra = ease(cl((vtm - 2.6) / .8)), win = winTex(t);
         for (const [ex, ey] of REFL) {
           const cx = ox + ex * k * sc, cy = oy + ey * k * sc, z = REFL_S * k * sc;
-          c.globalAlpha = Math.min(1, ra * .6 + grow * .4); c.globalCompositeOperation = grow > .5 ? 'source-over' : 'screen';
+          c.globalAlpha = ra * .6 * (1 - ease(cl(pu / .45))); c.globalCompositeOperation = 'screen';
           c.drawImage(win, cx - z / 2, cy - z / 2, z, z);
         }
         c.restore(); c.globalAlpha = 1; c.globalCompositeOperation = 'source-over';
       }
     }
     c.restore();
-    if (t > T[5]) ec.style.opacity = 1 - ease(cl((t - T[5] - D.out * .8) / (D.out * .2)));      // build 57: the window, filling the picture, dissolves into the street
-    if (!told && t > T[5] + D.out * .7) { told = true; then(); }
+    if (t > T[5]) ec.style.opacity = 1 - cl((t - T[5] - D.out * .45) / (D.out * .55));
+    if (!told && t > T[5] + D.out * .5) { told = true; then(); }
     if (t < T[6]) requestAnimationFrame(frame); else { ec.style.display = 'none'; if (vid) try { vid.pause(); } catch (e) {} }
   };
   requestAnimationFrame(frame);
