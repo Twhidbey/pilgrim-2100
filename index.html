@@ -50,11 +50,12 @@ body.opened .tleaf{transform:translateZ(2px) rotateY(-180deg)}
 .tcover{position:absolute;inset:calc(var(--u,1) * -5px) calc(var(--u,1) * -6px) calc(var(--u,1) * -6px) 0;background:#2a211d center/100% 100%;border-radius:2px 7px 7px 2px;backface-visibility:hidden;-webkit-backface-visibility:hidden;cursor:pointer;box-shadow:0 calc(var(--u,1) * 1px) calc(var(--u,1) * 2px) rgba(0,0,0,.5)}
 /* the block of pages under the board (build 210): its own layer, so the ribbon can come out from between the pages,
    under the cover; cream edges with the fine lines of the leaves, a little lower and to the right of the board */
-.tpages{position:absolute;inset:calc(var(--u,1) * -7px) calc(var(--u,1) * -8px) calc(var(--u,1) * -8px) calc(var(--u,1) * 1px);border-radius:2px 6px 6px 2px;background:linear-gradient(90deg,#3e2219,#5a3a26 45%,#47281c);backface-visibility:hidden;-webkit-backface-visibility:hidden;box-shadow:0 calc(var(--u,1) * 4px) calc(var(--u,1) * 26px) rgba(0,0,0,.55),inset 0 0 0 1px rgba(20,8,4,.55);transition:opacity .4s}
+.tpages{position:absolute;inset:calc(var(--u,1) * -5px) calc(var(--u,1) * -6px) calc(var(--u,1) * -6px) 0;border-radius:2px 6px 6px 2px;background:linear-gradient(90deg,#3e2219,#5a3a26 45%,#47281c);backface-visibility:hidden;-webkit-backface-visibility:hidden;box-shadow:0 calc(var(--u,1) * 4px) calc(var(--u,1) * 26px) rgba(0,0,0,.55),inset 0 0 0 1px rgba(20,8,4,.55);transition:opacity .4s}
 /* build 101 (owner: "make pages look more realistic ... remove that perspective look"): seen straight from above, the leaves show only as an
    even thin edge of dull, aged red-and-gold on the three open sides, just past the soft cover (was a cream block set low and to the right, which read as a
    slab seen at an angle); the shadow falls evenly round the book */
 body.opened .tpages{opacity:0}
+/* build 114 (owner: "If you're looking top down at Bible you don't see pages"): the page block lies wholly under the cover (it only casts the book's shadow) */
 .tribbon{position:absolute;left:61%;bottom:calc(var(--u,1) * -31px);width:calc(var(--u,1) * 16px);height:calc(var(--u,1) * 27px);background:linear-gradient(90deg,transparent 18%,#6b1f18 18% 82%,transparent 82%);background-size:100% 100%;filter:drop-shadow(0 calc(var(--u,1) * 1px) calc(var(--u,1) * 1.2px) rgba(0,0,0,.55));backface-visibility:hidden;-webkit-backface-visibility:hidden;transition:opacity .4s}
 body.opened .tribbon{opacity:0}
 .tp{left:0;width:100%;border-radius:2px 0 0 2px;transform:rotateY(180deg);backface-visibility:hidden;-webkit-backface-visibility:hidden}
@@ -107,13 +108,8 @@ body.opened .tribbon{opacity:0}
 .tnote #levels .lv i{flex:0 0 1.5em;color:inherit}
 .tnote #levels .lv.dim{color:rgba(30,46,104,.75)}.tnote #levels .lv:not(.dim){color:var(--ink)}.tnote #levels .lv:not(.dim)::after{content:'\2190';color:var(--ink)}
 .tnote #levels .lv:active{color:#7a2a1e}
-.tslips{position:absolute;inset:0;transition:opacity .4s;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.tslips{position:absolute;top:calc(var(--u,1) * -40px);right:calc(var(--u,1) * -56px);bottom:calc(var(--u,1) * -24px);left:0;background:center/100% 100% no-repeat;transition:opacity .4s;backface-visibility:hidden;-webkit-backface-visibility:hidden;pointer-events:none}
 body.opened .tslips{opacity:0}
-.tslips i{position:absolute;display:block;box-shadow:0 0 calc(var(--u,1) * 2px) rgba(0,0,0,.4)}
-.tslips .s1{right:calc(var(--u,1) * -34px);top:18%;width:calc(var(--u,1) * 60px);height:calc(var(--u,1) * 54px);background:repeating-linear-gradient(180deg,#e9e2d1 0 calc(var(--u,1) * 9px),#a9bccb calc(var(--u,1) * 9px) calc(var(--u,1) * 9.6px));transform:rotate(-4deg)}
-.tslips .s2{right:calc(var(--u,1) * -28px);top:46%;width:calc(var(--u,1) * 50px);height:calc(var(--u,1) * 70px);background:#3d3a35;border:calc(var(--u,1) * 2.5px) solid #d9d0bd;transform:rotate(6deg)}
-.tslips .s3{left:58%;top:calc(var(--u,1) * -26px);width:calc(var(--u,1) * 34px);height:calc(var(--u,1) * 50px);background:#d8cdb3;transform:rotate(-8deg)}
-.tslips .s4{right:calc(var(--u,1) * -24px);top:74%;width:calc(var(--u,1) * 46px);height:calc(var(--u,1) * 26px);background:#e4dccb;transform:rotate(-2deg)}
 .tfoot{display:flex;align-items:center;justify-content:center;height:calc(var(--u,1) * 70px);margin-top:calc(var(--u,1) * 12px)}
 .tfoot h2{margin:0;opacity:.62;font-family:'IM Fell English',Georgia,serif;font-style:italic;text-transform:none;letter-spacing:0}
 body.opened .tfoot{visibility:hidden}
@@ -173,6 +169,16 @@ body.playing #autoWalk{display:block}
 body.talking #build,body.capped #build{visibility:hidden}
 #rot{position:fixed;left:0;right:0;text-align:center;font:13px Georgia,serif;color:rgba(207,198,187,.6);display:none;bottom:calc(env(safe-area-inset-bottom) + 64px);pointer-events:none}
 body.portrait #rot{display:block}
+/* build 114 (owner: "in portrait, put buttons out of scene please"): held upright, the menu button and the tray (his Bible, the slip)
+   sit in the dark space just above the picture, at its two ends, not over the scene */
+#tray{display:none;position:absolute;left:2px;bottom:calc(100% + 10px);gap:6px;z-index:5}
+body.portrait.playing #tray{display:flex}
+#tray button{width:44px;height:44px;padding:0;border:none;background:none;cursor:pointer;opacity:.6;-webkit-tap-highlight-color:transparent;transition:opacity .3s}
+body.talking #tray button{opacity:.38}
+#tray button:active{opacity:.9}
+#tray svg{width:100%;height:100%;stroke:#eadfc4;stroke-width:1.3;fill:none;stroke-linecap:round;stroke-linejoin:round}
+#trRoll{visibility:hidden}#tray.roll #trRoll{visibility:visible}
+body.portrait #ribbon{top:auto;bottom:calc(100% + 10px);right:2px;width:44px;height:44px}
 /* BUILD 422, HELD UPRIGHT: the words and choices below the picture, the buttons in a row at the foot of the screen,
    the book on the title as large as the screen allows (its own --u, set in fit()) */
 body.portrait #stage{overflow:visible}
@@ -203,7 +209,7 @@ body.portrait:not(.playing) #rot{display:none}
     <!-- THE BOOK (build 187): the title page as first printed in 1678, alone on a dark ground; "Open the book" swings the
          contents page open beside it. Nothing of the world shows until a level is chosen. -->
     <div class="tzoom"><div class="tbook">
-      <div class="tleaf"><div class="tslips"><i class="s1"></i><i class="s2"></i><i class="s3"></i><i class="s4"></i></div><div class="tpages"></div><div class="tribbon"></div><div class="tcover"></div><div class="tpage tp"><div class="bpg">
+      <div class="tleaf"><div class="tslips"></div><div class="tpages"></div><div class="tribbon"></div><div class="tcover"></div><div class="tpage tp"><div class="bpg">
         <div class="bhead"><span>HEBREWS 9</span><span>1203</span></div>
         <div class="btxt">
           <p data-v="22"><sup>22</sup>And almost all things are by the law purged with blood; and <u>without shedding of blood is no remission</u>.</p>
@@ -256,7 +262,7 @@ every year.</div>
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 113 · Nov 28 2026</div>
+  <div id="build">build 114 · Nov 28 2026</div>
   <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
@@ -310,7 +316,7 @@ function fit() {
     const top = Math.max(44, Math.round((h - sh) * .26));
     wrapEl.style.paddingTop = top + 'px';
     stage.style.setProperty('--below', Math.max(120, h - top - sh) + 'px');
-    const ut = Math.min(w * .9 / 320, h * .72 / 448);
+    const ut = Math.min(w / 430, h * .72 / 448);      // build 114: room beside the book for the papers tucked in it
     document.getElementById('title').style.setProperty('--u', ut.toFixed(4));
   } else { wrapEl.style.paddingTop = ''; document.getElementById('title').style.removeProperty('--u'); }
 }
@@ -2669,7 +2675,7 @@ function buildRow() {
   // house?)"): they are now at the neighbours' size on the same level, Obstinate in a doorway of his own (a cottage of
   // the same painting as Christian's, mirrored; his own is far back up the street) and Pliable on the step outside it.
   // build 106: the neighbours stand 300 further on, so his family's words are done before theirs begin
-  // build 113 (owner: "when pass pliable and obstinate i think their door doesn't look good and i don't like how pliable
+  // build 114 (owner: "when pass pliable and obstinate i think their door doesn't look good and i don't like how pliable
   // just appears next to door (should he have his own house or window?)"): each has his own cottage and door now, opening
   // as Christian comes like the others: Obstinate in the long low cottage, Pliable in the tall one beside it (no longer a
   // copy of Christian's own cottage, and Pliable no longer pops up in the lane)
@@ -3676,8 +3682,23 @@ function drawWorld() {
 // levels can add to the tray the same way. (For later, from the book: the roll he loses at the Arbour is another one,
 // given to him at the Cross.)
 const ITEM_X = 20, ITEM_Y = 18;
+const TRAY = (() => { const t = document.createElement('div'); t.id = 'tray';
+  t.innerHTML = '<button id="trBook" aria-label="His Bible"><svg viewBox="0 0 44 44"><rect x="14.5" y="12.5" width="15" height="19"/><path d="M18 12.5v19M21.5 18.5h5"/></svg></button>'
+    + '<button id="trRoll" aria-label="The slip"><svg viewBox="0 0 44 44"><path d="M14 18h16v8H14zM14 18a4 4 0 0 0 0 8M30 18a4 4 0 0 1 0 8M18 21h8M18 23.5h6"/></svg></button>';
+  stage.appendChild(t);
+  t.querySelector('#trBook').onclick = e => { e.stopPropagation(); KS.book(); };
+  t.querySelector('#trRoll').onclick = e => { e.stopPropagation(); if (G.roll && G.roll.t > 90) KS.roll(G.roll.sealed); };
+  return t; })();
 function drawItems() {
   if (G.state === 'title') return;
+  // build 114: held upright the tray is the row of buttons above the picture (#tray); only the slip's flight up out of the picture is drawn
+  if (document.body.classList.contains('portrait')) {
+    TRAY.classList.toggle('roll', !!(G.roll && G.roll.t > 90));
+    if (G.roll && G.roll.t <= 90) { const c = ctx, u = Math.min(1, G.roll.t / 90), e = u * u * (3 - 2 * u), x = lerp(G.roll.x, ITEM_X + 58, e), y = lerp(G.roll.y, -30, e) - Math.sin(Math.PI * e) * 46, k = lerp(1.7, 1, e);
+      c.save(); c.strokeStyle = '#eadfc4'; c.lineWidth = 1.3; c.lineJoin = c.lineCap = 'round'; c.globalAlpha = .95 * (1 - e * e); c.translate(x, y); c.scale(k, k);
+      c.strokeRect(-8, -4, 16, 8); c.beginPath(); c.arc(-8, 0, 4, Math.PI / 2, Math.PI * 1.5); c.moveTo(8, -4); c.arc(8, 0, 4, -Math.PI / 2, Math.PI / 2); c.moveTo(-4, -1); c.lineTo(4, -1); c.moveTo(-4, 1.5); c.lineTo(2, 1.5); c.stroke(); c.restore(); }
+    return;
+  }
   const c = ctx, quiet = document.body.classList.contains('talking') ? .34 : .55;
   c.save(); c.strokeStyle = '#eadfc4'; c.lineWidth = 1.3; c.lineJoin = c.lineCap = 'round'; c.globalAlpha = quiet;
   c.strokeRect(ITEM_X, ITEM_Y, 15, 19); c.beginPath(); c.moveTo(ITEM_X + 3.5, ITEM_Y); c.lineTo(ITEM_X + 3.5, ITEM_Y + 19); c.moveTo(ITEM_X + 7, ITEM_Y + 6); c.lineTo(ITEM_X + 12, ITEM_Y + 6); c.stroke();      // his book
@@ -3720,7 +3741,7 @@ stage.addEventListener('pointerdown', e => {
   e.preventDefault();
   const [sx, sy] = scenePt(e), r0 = cv.getBoundingClientRect(), rx = (e.clientX - r0.left) / r0.width * VW, ry = (e.clientY - r0.top) / r0.height * VH;      // rx, ry: on the screen itself (the tray), not in the zoomed world
   // his book and the roll in the tray open up close (keepsakes.js, build 176), whatever else is going on
-  if (G.state !== 'title' && rx < ITEM_X + 58 && ry < ITEM_Y + 36) { if (rx < ITEM_X + 23) { KS.book(); return; } if (G.roll && G.roll.t > 90) { KS.roll(G.roll.sealed); return; } }
+  if (G.state !== 'title' && !document.body.classList.contains('portrait') && rx < ITEM_X + 58 && ry < ITEM_Y + 36) { if (rx < ITEM_X + 23) { KS.book(); return; } if (G.roll && G.roll.t > 90) { KS.roll(G.roll.sealed); return; } }
   if (G.state !== 'title' && G.state !== 'end') G.taps.push({ x: sx, y: sy, t: 0 });
   if (G.state === 'dialog') {
     if (CR.on && G.act) { CR.touch(sx, sy); return; }
@@ -4124,6 +4145,46 @@ function nightLand(x, X0, Y0, w, h, o) {
     x.beginPath(); x.moveTo(px, y0 - 1); x.quadraticCurveTo(px + (r() - .5) * 3, y0 + len * .6, px + (r() - .5) * 5, y0 + len); x.stroke(); }
   document.querySelector('.tribbon').style.background = 'url(' + c.toDataURL() + ') center/100% 100% no-repeat';
 })();
+// build 114 (owner, of the slips sticking out of the closed Bible: "Sounds good" to making them read as papers tucked between the pages, not tabs):
+// three things only, at uneven places and angles, painted once in code as paper: the torn lined note (the menu inside), the yellowed
+// corner of an old photograph, a ticket stub at the foot; each with a soft grain, a slight curl (darker where it leaves the pages) and a
+// soft shadow on the table. The canvas reaches past the cover (.tslips: 40 above, 56 right, 24 below, in cover units of 320 x 448);
+// the cover and the page edge lie over their roots, so they come out from between the leaves.
+function tuckedSlips() {
+  const K = 3, OY = 40, CW = 320 + 56, CH = 448 + 40 + 24, c = mk(CW * K, CH * K), x = c.getContext('2d'), r = rng(114);
+  const grain = (cv, a) => { const g = cv.getContext('2d'), id = g.getImageData(0, 0, cv.width, cv.height), d = id.data;
+    for (let i = 0; i < d.length; i += 4) { if (!d[i + 3]) continue; const n = (r() - .5) * a; d[i] += n; d[i + 1] += n; d[i + 2] += n * .9; } g.putImageData(id, 0, 0); };
+  // one slip: drawn on its own canvas in its own frame (w x h units, the root at x 0), then laid at (px, py) turned by ang
+  const slip = (w, h, paint, px, py, ang) => {
+    const s = mk(Math.ceil(w * K), Math.ceil(h * K)), sx = s.getContext('2d'); sx.scale(K, K); paint(sx, w, h); grain(s, 10);
+    // the curl: shade toward the root (it bends out of the pages), a faint light ridge, a little dark again at the free end
+    sx.globalCompositeOperation = 'source-atop'; const g = sx.createLinearGradient(0, 0, w, 0);
+    g.addColorStop(0, 'rgba(20,12,6,.55)'); g.addColorStop(.22, 'rgba(20,12,6,.12)'); g.addColorStop(.5, 'rgba(255,240,215,.06)'); g.addColorStop(1, 'rgba(20,12,6,.14)');
+    sx.fillStyle = g; sx.fillRect(0, 0, w, h);
+    x.save(); x.translate(px * K, (py + OY) * K); x.rotate(ang * Math.PI / 180);
+    x.shadowColor = 'rgba(0,0,0,.6)'; x.shadowBlur = 5 * K; x.shadowOffsetX = 1.5 * K; x.shadowOffsetY = 3 * K;
+    x.drawImage(s, 0, -h * K / 2); x.restore(); };
+  const torn = (sx, pts) => { sx.beginPath(); pts.forEach(([a, b], i) => i ? sx.lineTo(a, b) : sx.moveTo(a, b)); sx.closePath(); };
+  // the lined note: torn ragged along its free end, blue rules, the red margin far inside the book
+  slip(66, 62, (sx, w, h) => {
+    const pts = [[0, 0]]; let tx = w - 8; for (let y = 0; y <= h; y += 1.5) { tx += (r() - .5) * 1.1 + (w - 8 + Math.sin(y * .09) * 3 - tx) * .08; pts.push([tx + (r() < .12 ? -(r() * 1.4) : 0), y]); } pts.push([0, h]);      // a soft, uneven tear
+    torn(sx, pts); sx.fillStyle = '#d9d1bc'; sx.fill(); sx.save(); sx.clip();
+    sx.strokeStyle = 'rgba(110,140,170,.55)'; sx.lineWidth = .55; for (let y = 6; y < h; y += 8.6) { sx.beginPath(); sx.moveTo(0, y); sx.lineTo(w, y); sx.stroke(); }
+    sx.strokeStyle = 'rgba(70,70,70,.35)'; sx.lineWidth = .7; sx.beginPath(); sx.moveTo(w - 30, 31.5); sx.lineTo(w - 22, 30.8); sx.moveTo(w - 31, 40.2); sx.lineTo(w - 25, 39.9); sx.stroke();      // a pencil stroke or two of his
+    sx.restore(); }, 300, 96, -3.5);
+  // the old photograph: a yellowed white border, a dark faded picture of a far skyline, a rounded corner
+  slip(44, 64, (sx, w, h) => {
+    sx.beginPath(); sx.moveTo(0, 0); sx.lineTo(w - 3, 0); sx.quadraticCurveTo(w, 0, w, 3); sx.lineTo(w, h - 3); sx.quadraticCurveTo(w, h, w - 3, h); sx.lineTo(0, h); sx.closePath();
+    sx.fillStyle = '#cbbd9c'; sx.fill(); const b = 4.2, g = sx.createLinearGradient(0, b, 0, h - b); g.addColorStop(0, '#5a5852'); g.addColorStop(.62, '#3b3935'); g.addColorStop(1, '#2a2825');
+    sx.fillStyle = g; sx.fillRect(0, b, w - b, h - 2 * b);
+    sx.fillStyle = 'rgba(30,29,27,.9)'; sx.beginPath(); sx.moveTo(0, h * .62); for (const [a, t] of [[4, .5], [9, .5], [9, .36], [13, .36], [13, .56], [19, .56], [19, .44], [24, .44], [24, .6], [w - b, .6]]) sx.lineTo(a, h * t); sx.lineTo(w - b, h - b); sx.lineTo(0, h - b); sx.fill();      // a far skyline
+    sx.fillStyle = 'rgba(214,201,170,.25)'; sx.fillRect(w - b - 1, b, 1, h - 2 * b); }, 302, 292, 5.5);
+  // a ticket stub out of the bottom edge, left of the ribbon (the top of the book is near the screen's top): a perforated end, two faint printed lines
+  slip(44, 22, (sx, w, h) => {
+    sx.beginPath(); sx.moveTo(0, 0); sx.lineTo(w, 0); for (let y = 0; y <= h; y += 3.4) { sx.lineTo(w, y); sx.arc(w, y + 1.7, 1, -Math.PI / 2, Math.PI / 2, true); } sx.lineTo(w, h); sx.lineTo(0, h); sx.closePath();
+    sx.fillStyle = '#cbbd9b'; sx.fill(); sx.strokeStyle = 'rgba(60,50,40,.35)'; sx.lineWidth = .8; sx.beginPath(); sx.moveTo(w - 13, 7); sx.lineTo(w - 6, 7); sx.moveTo(w - 15, 12); sx.lineTo(w - 6, 12); sx.stroke(); }, 118, 448 - 24, 84);
+  document.querySelector('.tslips').style.backgroundImage = 'url(' + c.toDataURL('image/png') + ')';
+}
 (function coverArt() {
   // build 276 (owner: "book cover is too realistic - need to be more like story itself"; and it flickered from the drawn
   // cover to the photograph as that loaded): the cover is painted once in code in the game's own language, nothing to
@@ -4155,6 +4216,11 @@ function nightLand(x, X0, Y0, w, h, o) {
   x.strokeStyle = 'rgba(0,0,0,.35)'; x.lineWidth = 2; x.strokeRect(70, 30, W - 100, H - 60);
   x.strokeStyle = 'rgba(110,86,66,.12)'; x.lineWidth = 1; x.strokeRect(72, 32, W - 104, H - 64);
   g = x.createRadialGradient(W / 2, H / 2, H * .25, W / 2, H / 2, H * .75); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,.35)'); x.fillStyle = g; x.fillRect(0, 0, W, H);
+  // build 114 (owner: "Sounds good" to one light on the cover): a faint warm pool from a lamp off to the upper left, the far corner falling to dark
+  g = x.createRadialGradient(W * .3, H * .26, 0, W * .3, H * .26, H * .62); g.addColorStop(0, 'rgba(255,196,140,.075)'); g.addColorStop(.55, 'rgba(255,196,140,.025)'); g.addColorStop(1, 'rgba(255,196,140,0)');
+  x.globalCompositeOperation = 'lighter'; x.fillStyle = g; x.fillRect(0, 0, W, H); x.globalCompositeOperation = 'source-over';
+  g = x.createRadialGradient(W * .3, H * .26, H * .45, W * .3, H * .26, H * 1.05); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,.22)'); x.fillStyle = g; x.fillRect(0, 0, W, H);
+  tuckedSlips();
   const el = document.querySelector('.tcover'), url = c.toDataURL('image/jpeg', .9); el.style.backgroundImage = 'url(' + url + ')';
   { const im = new Image(), ready = () => document.body.classList.add('coverready'); im.onload = ready; im.onerror = ready; im.src = url; setTimeout(ready, 1500); }
   // 2100 build 38 (owner: "opening should be Bible cover ... make it quick so I can get to game"): one touch on the cover
