@@ -249,7 +249,7 @@ every year.</div>
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 53 · Nov 28 2026</div>
+  <div id="build">build 54 · Nov 28 2026</div>
   <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
@@ -3363,6 +3363,8 @@ function wakeEyes(then) {
     if (t < DR && dv) {      // the video: in from black, its own flash and cloud, out to black
       if (t > VH && !dvOn) { dvOn = true; dv.dataset.live = 1; try { dv.playbackRate = RATE; const pr = dv.play(); if (pr && pr.catch) pr.catch(() => {}); } catch (e) {} }
       cover(dv, dv.videoWidth, dv.videoHeight);
+      // build 54 (owner: "Can we fade top of screen a little?"): the top of the dream falls softly into the dark (the top third, at most .62)
+      { const g = c.createLinearGradient(0, Y0, 0, Y0 + BH * .36); g.addColorStop(0, 'rgba(0,0,0,.62)'); g.addColorStop(.45, 'rgba(0,0,0,.24)'); g.addColorStop(1, 'rgba(0,0,0,0)'); c.fillStyle = g; c.fillRect(X0, Y0, BW, BH * .36); }
       const vt = (t - VH) / 1000 * RATE, white = vt < VW0 ? 0 : vt < VW1 ? ease((vt - VW0) / (VW1 - VW0)) : 1;
       if (white > 0) { c.fillStyle = `rgba(255,250,240,${white})`; c.fillRect(X0, Y0, BW, BH); }
       const black = t < 1200 ? 1 - t / 1200 : t > DR - 900 ? cl((t - (DR - 900)) / 700) : 0;
