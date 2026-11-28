@@ -172,7 +172,7 @@ const SL = (() => {
     // the outboard as in the photo: a big boxy cowling sitting right on the stern, its top rounded, a little lean back; the leg beneath it short
     n.moveTo(STERN - 3, -27); n.lineTo(STERN - 5, -55); n.quadraticCurveTo(STERN - 4, -66, STERN + 8, -67); n.lineTo(STERN + 27, -65);
     n.quadraticCurveTo(STERN + 38, -62, STERN + 38, -50); n.lineTo(STERN + 35, -35); n.quadraticCurveTo(STERN + 32, -30, STERN + 24, -29);
-    n.lineTo(STERN + 21, 5); n.lineTo(STERN + 8, 5); n.lineTo(STERN + 9, -27); n.closePath();
+    n.lineTo(STERN + 16, 5); n.lineTo(STERN + 1, 5); n.lineTo(STERN + 1, -27); n.closePath();      // the leg right against the stern (a gap showed open water between them)
     n.fill();
     n.strokeStyle = css(mix(col, LIGHT, .14)); n.lineWidth = 1.6; n.beginPath(); n.moveTo(BOW - 2, -31.6); n.quadraticCurveTo(BOW + 60, -27.6, STERN - 1, -25.6); n.stroke();      // the rub rail
     n.restore();
