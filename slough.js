@@ -79,15 +79,19 @@ const SL = (() => {
   const bankN = noise2(4), cloudN = noise2(21);
   // how much standing water there is across the slough (0 by the home bank .. 1 by the far bank), and whether a place
   // (x along the level, yy down the picture from the surface line) is pool (1) or mud (0): see mudMap in build()
-  const wetAt = x => smooth(-800, -215, x);
+  const wetAt = x => smooth(HOME0 + .247 * (BANK0 - HOME0), HOME0 + .935 * (BANK0 - HOME0), x);
   // (the noise runs between about .3 and .7, so the threshold crosses that range slowly from one bank to the other: a few
   // small pools at first, more and bigger ones further on, open water at last; long across and thin down the picture,
   // since pools are seen edge-on)
-  const BANK0 = -160, HOME0 = -1010;                       // where each bank meets the water
-  const poolT = (x, yy) => { const w = smooth(-770, -225, x); return .86 - .52 * w - .13 * (1 - w) * smooth(30, 90, yy); };      // build 257: near the home bank a few pools open in the foreground too (the mud under the men stays mud)
+  // build 65 (owner: "he's got to be in [the] middle (much larger pool, swept out by current) so [boat] is only reasonable way to
+  // help him out"; "Motorboat, for now free parts"): the far bank and the oak stand WIDEN further off, so where he sticks fast
+  // (STUCK_X, unchanged) is out in the middle of a wide water; Help comes to him there in a small motorboat (BOAT, below)
+  const WIDEN = 520, BANK0 = -160 + WIDEN, HOME0 = -1010;                       // where each bank meets the water
+  const WU = u => HOME0 + u * (BANK0 - HOME0);      // a place a fraction u of the way across (the pools were laid out in fractions of the old width)
+  const poolT = (x, yy) => { const w = smooth(WU(.282), WU(.923), x); return .86 - .52 * w - .13 * (1 - w) * smooth(30, 90, yy); };      // build 257: near the home bank a few pools open in the foreground too (the mud under the men stays mud)
   const poolN = (x, yy) => .72 * cloudN(x * .009, yy * .3 + 3) + .28 * cloudN(x * .024 + 9, yy * .55 + 1);      // build 260: less of the fine noise (fewer small islands: the critics' "camouflage")
   const poolAt = (x, yy) => { const T = poolT(x, yy), n = poolN(x, yy); return smooth(T - .06, T + .06, n) * mudEnd(x) + (1 - mudEnd(x)); };      // build 260: a softer edge (it stair-stepped)
-  const MUD_X0 = -1250, MUD_W = 1450, MUD_H = 270, MUDK = 1;      // (build 296 tried 2: about 5 s more to bake, too slow)
+  const MUD_X0 = -1250, MUD_W = 1450 + WIDEN, MUD_H = 270, MUDK = 1;      // (build 296 tried 2: about 5 s more to bake, too slow)
   // build 260: the map runs on under the far bank and fades there (it ended in a straight upright seam at BANK0)
   const mudEnd = x => 1 - smooth(BANK0 - 40, BANK0 + 170, x);      // build 203: the map runs from where the water begins (WATER_L): by the home bank it is all mud, no mirror (a paler column showed under Pliable where the mirror faded in)
     const WATER_L = -1250;                                  // the water in front of everything begins here; to the left is the plain
@@ -103,16 +107,17 @@ const SL = (() => {
   // steps after he stood up his feet were in the air beyond the land's end. The bank now has that short face, standing
   // where the video's bank stood, at its full height by HOME0 + 15
   const hum = x => x > BANK0 ? smooth(BANK0 + 230, BANK0 + 480, x) * (4 + 16 * bankN(x * .0045, 9)) : smooth(HOME0 - 160, HOME0 - 380, x) * (3 + 12 * bankN(x * .0045, 3));
-  const START = -1740, FALL_X = -760, PLI_FALL = -840, END_X = 470;      // build 368 (owner: "you can shorten walking path too"): START was -2750, END_X 660
+  const START = -1740, FALL_X = -760, PLI_FALL = -840, END_X = 470 + WIDEN;      // build 368 (owner: "you can shorten walking path too"): START was -2750, END_X 660
   // the plain's light follows how far he has come (gold at the start, mist by the bog); shared by the walk and the skip link
   const PLAIN_GOLD = x => 1 - smooth(-1640, -1100, x), PLAIN_MIST = x => smooth(-1560, -1000, x);      // build 396: the plain a third shorter (START was -2100)
   const WADE0 = FALL_X + 70;      // build 119: falling, Christian pitches on this much further, so the two are not on top of each other in the mire
   // Help kneels at the edge of the far bank; Christian must come to where his hand meets Help's (measured in slough-lab.html)
-  const HX = BANK0 + 34, GRASP = { dx: -(82 - 15 + 129), dy: 283 - 55 };
-  const HY = () => bankY(HX) + 4;
+  // build 65: Help kneels in his boat's bow where he knelt on the bank before (the boat's deck at the old bank's height, DECK)
+  const HX = -126, GRASP = { dx: -(82 - 15 + 129), dy: 283 - 55 }, DECK = -8;
+  const HY = () => DECK + 4;
   const STUCK_X = HX + GRASP.dx * CHR_K, STUCK_Y = () => HY() + GRASP.dy * CHR_K;
   const MD_IN = 16, MD_FAR = 28, REACH_F = 88, REACH_X = HX - 82;      // build 260: see DEEP IN THE MIRE in update()
-  const SINK = 100, PLI_SINK = 76, DEEP = 8, OAK_X = 110, OAK_S = 1.2;
+  const SINK = 100, PLI_SINK = 76, DEEP = 8, OAK_X = 110 + WIDEN, OAK_S = 1.2;
   const C_SINK = 64;      // build 125 (owner: "Christian is too submerged at first ... it'd be nice to see more of him at start"): he falls in to the waist, and sinks from there to SINK + DEEP as he crosses
   // build 115 (owner, of them standing at the bog's edge: "still white space between feet and ground"): on the muddy flat at
   // the water's level they stand a little sunk in it, and every picture of them there is cut at the water line
@@ -124,6 +129,30 @@ const SL = (() => {
   const sunk = t => .8 * smooth(0, 42, t) + .2 * smooth(30, 330, t);
   // where each man stands when the lift is over, in the lift picture's own pixels (measured from its last frame)
   const LIFT_CHR = 260, LIFT_HELP = 399;
+  // ---------- build 65: THE MOTORBOAT (drawn in code, one dark silhouette like the banks) ----------
+  // In its own units from where Help kneels (HX): the bow at -62 (he reaches over it), the stern and motor at STERN.
+  // It comes in from the right out of the mist (BOAT_IN), the motor cut part way so it glides to a stop beside him; after the
+  // lift it backs slowly (FERRY) until its stern lies against the far bank; when he goes on his way it leaves, bow first.
+  const BOAT_IN = 680, BOAT_T = 460, BOW = -62, STERN = 212, FERRY = BANK0 + 12 - (HX + STERN), FERRY_T = 640;
+  let boatOff = 0, boatV = 0, ferryT = 0, leaveT = 0, motor = null;
+  const inBoat = x => help && x > HX + boatOff + BOW + 10 && x < HX + boatOff + STERN - 2;
+  const standY = x => inBoat(x) ? DECK : bankY(x);
+  function motorSet(v) {      // a small outboard far off: a low buzz, beating a little, through a soft filter; v 0..1
+    if (!audio() || typeof SFXG === 'undefined') return;
+    if (!motor) { const o = AC.createOscillator(), o2 = AC.createOscillator(), lp = AC.createBiquadFilter(), am = AC.createGain(), g = AC.createGain(), lfo = AC.createOscillator(), lg = AC.createGain();
+      o.type = 'sawtooth'; o.frequency.value = 52; o2.type = 'square'; o2.frequency.value = 104.6; lp.type = 'lowpass'; lp.frequency.value = 340; lp.Q.value = .8;
+      lfo.frequency.value = 13; lg.gain.value = .35; am.gain.value = .65; lfo.connect(lg); lg.connect(am.gain);
+      o.connect(lp); o2.connect(lp); lp.connect(am); am.connect(g); g.gain.value = 0; g.connect(SFXG); o.start(); o2.start(); lfo.start(); motor = { g, o, o2 }; }
+    const now = AC.currentTime; motor.g.gain.setTargetAtTime(.05 * v, now, .5); motor.o.frequency.setTargetAtTime(44 + 14 * v, now, .4); motor.o2.frequency.setTargetAtTime(89 + 28 * v, now, .4);
+  }
+  function boatShape(n, x, a, col) {
+    if (a <= .01) return;
+    n.save(); n.globalAlpha = a; n.fillStyle = css(col); n.translate(x, 0); n.beginPath();
+    n.moveTo(BOW, -44); n.quadraticCurveTo(10, -35, STERN - 2, -33); n.lineTo(STERN, -33); n.lineTo(STERN - 2, 7); n.lineTo(-18, 7); n.quadraticCurveTo(-50, 5, BOW, -42); n.closePath();      // the hull: a raised bow, a low sheer, a square stern
+    n.moveTo(24, -31); n.lineTo(25, -50); n.lineTo(36, -53); n.lineTo(40, -31); n.closePath();      // a small steering console amidships
+    n.moveTo(STERN - 5, -33); n.lineTo(STERN - 7, -56); n.quadraticCurveTo(STERN + 8, -63, STERN + 22, -54); n.lineTo(STERN + 20, -40); n.lineTo(STERN + 10, -37); n.lineTo(STERN + 10, 10); n.lineTo(STERN + 4, 10); n.lineTo(STERN + 4, -33); n.closePath();      // the outboard: cowling up behind, the leg down into the water
+    n.fill(); n.restore();
+  }
 
   // ---------- the oak (the same seed, 18, as the approved still) ----------
   function oak(seed, hero = true, depth = 4) {
@@ -495,7 +524,7 @@ const SL = (() => {
 
   // the picture behind the title page when Level 2 is the child's level (build 119): the oak over the bog, nobody in it
   function title() {
-    build(); preload(); SL.show = true; ph = 'plain'; help = null; mv = null; lift = null; pli = null; fogH = 0; steps = []; rings = []; motes = [];
+    build(); preload(); SL.show = true; ph = 'plain'; help = null; mv = null; lift = null; boatOff = 0; ferryT = 0; if (motor) motorSet(0); pli = null; fogH = 0; steps = []; rings = []; motes = [];
     Object.assign(cam, { cx: -240, z: .6, wl: 392 }); Object.assign(look, { mist: .55, veil: 0, gold: .12, disc: 1, sky: .5 });
   }
   function start() {
@@ -512,10 +541,10 @@ const SL = (() => {
     C2.rt = 0; C2.sp = null; C2.handGo = false; C2.tv = null; C2.fy = null; C2.md = null; C2.rq0 = null; C2.q = 0; C2.hf = null; C2.hb = 0; C2.reachGo = false; C2.handT = 0; drops = []; churns = []; fReset(); strings = []; RECS = {}; for (const k in MS) delete MS[k]; C2.D = 0;
     ph = 'plain'; Object.assign(C2, { x: START, y: bankY(START) + 4, face: 1, anim: 12, alpha: 1, sink: 0, reach: 0, stand: 1, sd: QUIET[0], st: 0, faceA: 1, done: 0 });
     pli = { x: START - 80, y: 0, face: 1, anim: 0, alpha: 1, sink: 0, mode: 'follow', px: START - 80, stop: { t: 50, x0: START - 80 - 72.5 * CHR_K, cx: START } };      // he starts standing (his stop video's breathing part)
-    prints = []; fogH = 1; fogS = 1; help = null; mv = null; lift = null; rings = []; steps = []; gloom = gloomTo = 0; noteI = 0; strain = 0; slipT = 0; fearT = 300; fearsSaid = false; histT = 0; histA = 0; travT = 0; travA = 0; struggleSaid = false; stillSaid = false; goldT = 0; onwayT = 0; capsSaid = new Set(); nearSaid = true; pliGo = 0; cityT = -1; fearT2 = -1; fearHelpT = 0; preDk = 0; beatT = -1e9; quietT = 0; helpSayT = 0;
+    prints = []; fogH = 1; fogS = 1; help = null; mv = null; lift = null; boatOff = 0; ferryT = 0; if (motor) motorSet(0); rings = []; steps = []; gloom = gloomTo = 0; noteI = 0; strain = 0; slipT = 0; fearT = 300; fearsSaid = false; histT = 0; histA = 0; travT = 0; travA = 0; struggleSaid = false; stillSaid = false; goldT = 0; onwayT = 0; capsSaid = new Set(); nearSaid = true; pliGo = 0; cityT = -1; fearT2 = -1; fearHelpT = 0; preDk = 0; beatT = -1e9; quietT = 0; helpSayT = 0;
     motes = [...Array(LAST.length)].map((_, i) => ({ ox: -30 - Math.random() * 50, oy: -112 - Math.random() * 40, x: START, y: -150, tw: Math.random() * 6, i }));
     // the steps through the bog, hidden until the lights settle on them: low flat stones, no two alike (from the approved still)
-    const R = rngS(33); let sx = BANK0 - 6;
+    const R = rngS(33); let sx = HX + FERRY + BOW - 24;      // build 65: the steps begin beyond the moored boat's bow (the far bank is behind it)
     // build 396: uneven (a neat row of even ovals, each with a light on top, read as runway lights): widths, heights and
     // gaps all differ, a top with two low humps, and now and then a small stone lying beside the big one
     LAST.forEach((nt, i) => { const w = 12 + R() * 30, h = 3 + R() * 6, lean = (R() - .5) * 14, hump = .3 + R() * .4, sub = R() < .5 ? { dx: (R() < .5 ? -1 : 1) * (w + 4 + R() * 8), w: 5 + R() * 8, h: 1.5 + R() * 2.5 } : null;
@@ -720,7 +749,7 @@ const SL = (() => {
     fStep();
     // (5) how high the mud has reached on him, above his feet (it stays when he rises, and dries off very slowly)
     if (['fall', 'pli', 'back', 'backtalk', 'wade', 'stuck', 'help'].includes(ph) && !lift) C2.D = Math.max(C2.D || 0, C2.y);
-    else if (ph === 'drawn' || ph === 'hist' || ph === 'look' || ph === 'onway' || ph === 'on') C2.D = Math.max(48, (C2.D || 0) - .008);
+    else if (ph === 'drawn' || ph === 'ferry' || ph === 'hist' || ph === 'look' || ph === 'onway' || ph === 'on') C2.D = Math.max(48, (C2.D || 0) - .008);
     // A QUICK TURN (build 365, owner: "it'd be nice for help turning to be a quick turn and go instead of drawn out slow turn
     // with feet walking look ... much prefer a pivot on one foot or something quick ... christian also turns slow"): his
     // turn video is played through in TURN_TICKS ticks (under a second), eased in and out, instead of at its own speed
@@ -752,7 +781,7 @@ const SL = (() => {
       C2.x += v;
       if (nw && C2.sp != null) { C2.sp += v / PW_STEP; if (C2.sp >= PST_END) { C2.anim = PST_JOIN + (C2.sp - PST_END); C2.sp = null; } }
       else C2.anim = stepAnim(C2.anim, v, wkStep(), WM);
-      C2.y = bankY(C2.x) + 4 + MUDDY(C2.x);
+      C2.y = standY(C2.x) + 4 + (inBoat(C2.x) ? 0 : MUDDY(C2.x));
       C2.stand = C2.sd != null ? 1 : 0;
       // faint wet footprints in the soft ground near the bog (owner's idea, build 114: "mud prints or feet sinking slightly")
       const fr1 = ((Math.floor(C2.anim) % WS.length) + WS.length) % WS.length;
@@ -833,7 +862,7 @@ const SL = (() => {
       if (!fearsSaid && quiet(110)) { fearsSaid = true; struggleSaid = true; caption(FEARS); fearT2 = 0; }
       if (fearsSaid && !stillSaid && fearT2 > 300 && quiet(110)) { stillSaid = true; caption(STILL); }      // build 409
       // build 380: the storyteller waits until the drums have played and the dark has begun to lift, then a quiet breath
-      if ((strain > 120 || slipT > 220) && fearsSaid && stillSaid && fearT2 > FEAR_END - 60 && quiet(90)) { ph = 'help'; C2.x = STUCK_X; talk(STUCK, () => { help = { a: 0, t: 0, w: HWALK.length >= 96 ? HW_START : 1e9 }; helpSayT = G.t + 75; }); }
+      if ((strain > 120 || slipT > 220) && fearsSaid && stillSaid && fearT2 > FEAR_END - 60 && quiet(90)) { ph = 'help'; C2.x = STUCK_X; talk(STUCK, () => { help = { a: 0, t: 0, w: 0, bt: 0 }; boatOff = BOAT_IN; helpSayT = G.t + 75; }); }
     } else if (ph === 'help') {
       if (help && C2.reach < 1) C2.reach = Math.min(1, C2.reach + .05);
       // build 121 (owner: "help should rush in a little fast (like he knows it's [an emergency] - not run but quick nonetheless)
@@ -841,7 +870,13 @@ const SL = (() => {
       // as his video walks (.3 a tick), goes straight down on one knee at the edge (mv to video frame 82: kneeling, his arm
       // still low) and asks his question from there; at "Give me your hand" he holds it out (mv.to 150). Christian sees
       // him coming, lifts his head and has his arm up as Help arrives (C2.rt, his own clock; the two used to share mv).
-      if (help && help.w < HSEQ.length - 1) { help.w += .2; if (help.w >= HSEQ.length - 1) mv = { t: 40, to: 82 }; }
+      // build 65: he comes by boat: out of the mist from the right, the motor cut part way, gliding to a stop beside him;
+      // there he kneels in the bow (his video from standing, mv from 0) and the old order goes on
+      if (help && help.w < HSEQ.length - 1) {
+        help.bt = (help.bt || 0) + 1; const u = Math.min(1, help.bt / BOAT_T), o = BOAT_IN * Math.pow(1 - u, 2.4);
+        boatV = boatOff - o; boatOff = o; motorSet(1 - smooth(.42, .58, u));
+        if (help.bt % 7 === 0 && u < .9) rings.push({ x: HX + boatOff + BOW + 6, y: 0, t: 0, k: .5 + 1.4 * (1 - u) });
+        if (u >= 1) { help.w = HSEQ.length - 1; boatOff = 0; mv = { t: 0, to: 82 }; } }
       else if (help && !mv) mv = { t: 40, to: 82 };
       // build 287 (owner: "can christian not extend his hand, until it prompts him to take hand?"): he keeps struggling
       // while they talk and only lifts his head and arm once Help says "Give me your hand" (C2.handGo)
@@ -862,7 +897,7 @@ const SL = (() => {
       }
       if (helpSayT && G.t >= helpSayT) { helpSayT = 0; talk(HELP.slice(0, 1), () => {}); }      // build 380: a breath between "could not get out" and "Then a man came"
       if (help && help.w >= HSEQ.length - 1 && !help.said && !helpSayT && G.state === 'play') { help.said = true; talk(HELP.slice(1), () => {}); }
-      if (lift) { lift.t = Math.min(236, lift.t + .4); if (lift.t >= 236) { ph = 'drawn'; C2.done = 0; C2.x = HX + (LIFT_CHR - META.lift.ax) * CHR_K; C2.y = bankY(C2.x) + 4; C2.D = (META.lift.ground - liftWet(LIFT.length - 1).r) * CHR_K; C2.face = 1; C2.faceA = 1; C2.stand = 1; C2.sd = QUIET[0]; } }
+      if (lift) { lift.t = Math.min(236, lift.t + .4); if (lift.t >= 236) { ph = 'drawn'; C2.done = 0; C2.x = HX + (LIFT_CHR - META.lift.ax) * CHR_K; C2.y = DECK + 4; C2.D = (META.lift.ground - liftWet(LIFT.length - 1).r) * CHR_K; C2.face = 1; C2.faceA = 1; C2.stand = 1; C2.sd = QUIET[0]; } }
     } else if (ph === 'drawn') {
       // the lift's last picture dissolves into the two men standing apart, then he turns to look back
       C2.done = Math.min(1, C2.done + .03);
@@ -870,7 +905,12 @@ const SL = (() => {
       // the steps, so he looks back and the lights settle on them after "Go on your way" (it was the other way round)
       // build 417: Help tells of the slough's history first (a memory of the labourers in the mire), then Christian looks back
       // as the lights find the steps (Help's line of the steps), then "Go on your way", and Help goes
-      if (C2.done >= 1 && ph === 'drawn' && G.state === 'play' && !saying()) { ph = 'hist'; histT = 0; talk(HIST, () => { turnC(-1, 1.5); ph = 'look'; goldT = 0; }); }
+      if (C2.done >= 1 && ph === 'drawn' && G.state === 'play' && !saying()) { ph = 'ferry'; ferryT = 0; }
+    } else if (ph === 'ferry') {
+      // build 65: the boat backs slowly to the far bank with the two of them standing in it (eased in and out), the motor low
+      ferryT++; const o = FERRY * smooth(0, FERRY_T, ferryT), dv = o - boatOff; boatOff = o; C2.x += dv; motorSet(.45 * Math.sin(Math.PI * clamp(ferryT / FERRY_T)));
+      if (ferryT % 9 === 0 && dv > .2) rings.push({ x: HX + boatOff + STERN, y: 0, t: 0, k: .9 });
+      if (ferryT >= FERRY_T + 30 && G.state === 'play') { ph = 'hist'; histT = 0; talk(HIST, () => { turnC(-1, 1.5); ph = 'look'; goldT = 0; }); }
     } else if (ph === 'look') {
       if (!C2.tv) goldT++;
       // the lights leave him one by one and settle on the steps, each a note of the last phrase
@@ -898,7 +938,13 @@ const SL = (() => {
       const lv = help.lv;
       if (lv && !help.gone) {
         if (lv.t < HTURN.length - 1) { lv.p = Math.min(1, (lv.p || 0) + 1 / HTURN_TICKS); lv.t = lv.p >= 1 ? HTURN.length - 1 : lv.p * lv.p * (3 - 2 * lv.p) * (HTURN.length - 1); }      // build 365: a quick pivot (it took nearly seven seconds, walking round), then he goes
-        else { lv.w += .2; lv.d += 13.1 * .2 * CHR_K; if (lv.d > 640) help.gone = true; }      // 13.1 pack px of ground to each frame of his walk (HW_OFF)
+        else { lv.w += .2; lv.d += 13.1 * .2 * CHR_K; }      // 13.1 pack px of ground to each frame of his walk (HW_OFF)
+      }
+      // build 65: he does not walk away: he goes as he came, by boat, bow first back out over the water into the mist
+      if (lv && help.boatGo == null) help.boatGo = 0;
+      if (help.boatGo != null && !help.gone) { help.boatGo++; const u = help.boatGo; boatOff = FERRY - 900 * Math.pow(smooth(40, 900, u), 1.6); motorSet(smooth(20, 90, u) * (1 - smooth(600, 900, u)));
+        if (u % 8 === 0 && u > 60) rings.push({ x: HX + boatOff + BOW + 6, y: 0, t: 0, k: 1.2 });
+        if (u > 900) { help.gone = true; motorSet(0); }
       }
     }
     fogS = ph === 'look' ? 1 - smooth(60, 60 + LAST.length * 55 + 120, goldT) : ph === 'on' ? Math.max(0, fogS - .01) : fogS;
@@ -1004,16 +1050,17 @@ const SL = (() => {
     // draw back to the whole oak
     else if (ph === 'help' && !help) t = { cx: -290, z: .9, wl: 365 };
     else if (ph === 'help' || ph === 'drawn') t = { cx: -240, z: .6, wl: 392 };
-    else if (ph === 'hist') t = { cx: -560, z: .6, wl: 400 };      // its left edge stays right of where the mire begins      // build 417: back far enough to see the home bank, where the labourers come
-    else if (ph === 'look' && goldT > 40) t = { cx: -480, z: .62, wl: 400 };      // build 368 (C): the camera draws back from bank to bank while the lights find the steps
-    else t = { cx: Math.max(-330, C2.x + 120), z: .66, wl: 425 };
+    else if (ph === 'ferry') t = { cx: -240 + boatOff * .8, z: .6, wl: 392 };      // build 65: it follows the boat to the far bank
+    else if (ph === 'hist') t = { cx: -300, z: .6, wl: 400 };      // build 65: the boat at the far bank and the home bank both in the picture      // its left edge stays right of where the mire begins      // build 417: back far enough to see the home bank, where the labourers come
+    else if (ph === 'look' && goldT > 40) t = { cx: -300, z: .62, wl: 400 };      // build 368 (C): the camera draws back from bank to bank while the lights find the steps
+    else t = { cx: Math.max(-330 + FERRY, C2.x + 120), z: .66, wl: 425 };
     const e = ph === 'plain' ? .06 : .02;
     cam.cx += (t.cx - cam.cx) * e; cam.z += (t.z - cam.z) * e; cam.wl += (t.wl - cam.wl) * e;
     let L;
     if (ph === 'plain') { const mi = PLAIN_MIST(C2.x); L = { mist: mi, veil: .5 * smooth(-1300, FALL_X, C2.x), gold: PLAIN_GOLD(C2.x), disc: lerp(1, .3, mi), sky: lerp(0, 1, mi) }; }
     else if (ph === 'fall' || ph === 'pli' || ph === 'back' || ph === 'backtalk') L = { mist: 1, veil: .5, gold: 0, disc: .55, sky: 1 };      // build 395: less veil (the oak stays in the picture), a brighter far light
     else if (ph === 'wade' || ph === 'stuck' || ph === 'help') L = { mist: lerp(1, .3, p), veil: lerp(.5, 0, smooth(.3, 1, p)), gold: .1 * p, disc: lerp(.55, 1, p), sky: lerp(1, .5, p) };
-    else if (ph === 'drawn' || ph === 'hist') L = { mist: .3, veil: 0, gold: .1, disc: 1, sky: .5 };
+    else if (ph === 'drawn' || ph === 'ferry' || ph === 'hist') L = { mist: .3, veil: 0, gold: .1, disc: 1, sky: .5 };
     else L = { mist: .25, veil: 0, gold: ph === 'look' ? lerp(.1, 1, smooth(60, 60 + LAST.length * 55 + 120, goldT)) : 1, disc: 1, sky: .4 };
     for (const k in L) look[k] += (L[k] - look[k]) * .03;
     // --- sound: no rain here; a dark hum in the mist, a warm one in the gold, the burden's creak while he strains ---
@@ -1024,7 +1071,7 @@ const SL = (() => {
       MUFF.frequency.setTargetAtTime(20000, now, .3);
       creakG.gain.setTargetAtTime(ph === 'stuck' && want ? .03 : 0, now, .08); creakO.frequency.setTargetAtTime(48 + 14 * Math.sin(G.t / 13), now, .1);
       if (look.gold > .6 && Math.random() < .03) sfx.chirp();
-      if (typeof sfxLoop === 'function') sfxLoop('bog-bubbles', ['fall', 'pli', 'back', 'backtalk', 'wade', 'stuck', 'help', 'drawn', 'hist'].includes(ph) ? .09 * (1 - .5 * (lift ? clamp(lift.t / 236) : 0)) : 0);      // build 491: slow bubbles under the mire
+      if (typeof sfxLoop === 'function') sfxLoop('bog-bubbles', ['fall', 'pli', 'back', 'backtalk', 'wade', 'stuck', 'help', 'drawn', 'ferry', 'hist'].includes(ph) ? .09 * (1 - .5 * (lift ? clamp(lift.t / 236) : 0)) : 0);      // build 491: slow bubbles under the mire
     }
   }
   // a footfall in the water: rings, a slosh, and the next note of the tune
@@ -1046,12 +1093,12 @@ const SL = (() => {
     const X = x => (x - cx) * z + VW / 2, Y = y => wl + y * z;
     // (build 662, art direction: the level's last picture was a wide gold burst with rays, too near the Cross's sunrise)
     // as he walks on into the mist the gold cools toward silver-cream, and the shafts are fewer and fainter
-    const ahead0 = ph === 'on' ? smooth(-120, 360, C2.x) : 0;
+    const ahead0 = ph === 'on' ? smooth(-120 + WIDEN, 360 + WIDEN, C2.x) : 0;
     const warmth = look.gold * (1 - .6 * ahead0), lightCol = mix(LIGHT, GOLD, warmth * .8);
     // the far light: in the oak's branches when he is near, far off over the plain before
     const near = smooth(-1300, -250, cx);
     // build 124: as he goes on his way the far light is ahead of him again, low in the mist on the right (ahead: 0 at the oak .. 1)
-    const ahead = ph === 'on' ? smooth(-120, 360, C2.x) : 0;
+    const ahead = ph === 'on' ? smooth(-120 + WIDEN, 360 + WIDEN, C2.x) : 0;
     const discX = lerp(lerp(VW / 2 + (OAK_X + 72 * OAK_S - cx) * z * .12, X(OAK_X + 72 * OAK_S), near), VW * .8, ahead), discY = lerp(lerp(150, Y(-258 * OAK_S), near), hor - 105, ahead);      // the far light in the oak's branches
     ctx.setTransform(S, 0, 0, S, 0, 0); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
     // sky: the clear one, the misty one over it
@@ -1175,28 +1222,24 @@ const SL = (() => {
     // Help: he comes out of the mist on the far bank, steps to the edge, kneels and holds out his hand
     TALKM = null;
     const vt = mv ? mv.t : 0, lt = lift ? lift.t : -1, mixIn = lift ? clamp(lt / 3.2) : 0, talkH = talkMove(H), talkC = talkMove(C);
-    if (ph === 'drawn' || ph === 'hist' || ph === 'look' || ph === 'onway' || ph === 'on') {
+    if (ph === 'drawn' || ph === 'ferry' || ph === 'hist' || ph === 'look' || ph === 'onway' || ph === 'on') {
       const d = ph === 'drawn' ? C2.done : 1;
       FIG_WET = liftWet(LIFT.length - 1); if (d < 1) figure(n, 'lift', LIFT[LIFT.length - 1], META.lift, HX, HY(), 1, fig, true, 1 - d); FIG_WET = null;
       const hx0 = HX + (LIFT_HELP - META.lift.ax) * CHR_K, lv = help && help.lv;
       if (help && help.gone) {}
-      else if (!lv) { TALKM = talkH || { sh: 0, sy: breath(3) }; figure(n, 'help', HELPF[0], META.help, hx0, HY(), 1, fig, false, d); }
-      else if (lv.t < HTURN.length - 1) figure(n, 'help', HTURN[Math.floor(lv.t)], META.hturn, hx0, HY(), 1, fig, false, d);
-      else {      // walking back the way he came, into the mist: his walk mirrored, one stride over and over
-        const x = hx0 + lv.d, a = d * (1 - smooth(420, 640, lv.d));
-        if (lv.w < 2) figure(n, 'help', HTURN[HTURN.length - 1], META.hturn, hx0, HY(), 1, fig, false, a * (1 - smooth(.6, 2, lv.w)));
-        figure(n, 'helpw', HWALK[16 + Math.floor(lv.w) % 16], META.hwalk, x, bankY(x) + 4, -1, fig, false, a * smooth(0, .6, lv.w));
-      }
+      else { TALKM = talkH || { sh: 0, sy: breath(3) }; figure(n, 'help', HELPF[0], META.help, hx0 + boatOff, HY(), 1, fig, false, d * (help && help.boatGo ? 1 - smooth(560, 880, help.boatGo) : 1)); }      // build 65: he stays in his boat, and goes in it
       TALKM = talkC; FIG_WET = { D: C2.D || 0, a: .72 }; drawChr(n, fig, d); TALKM = null; FIG_WET = null;
     } else {
       TALKM = vt > 0 ? null : talkH || { sh: 0, sy: breath(3) };      // not while he kneels and reaches: his hand must stay where Christian's meets it; standing, he breathes (build 120)
-      if (help && help.w < HSEQ.length - 1) { const [f, o] = HSEQ[Math.floor(help.w)], hx = HX + o * CHR_K; figure(n, 'help', HWALK[f], META.hwalk, hx, bankY(hx) + 4, 1, fig, false, help.a); }
+      if (help && help.w < HSEQ.length - 1) figure(n, 'help', HELPF[0], META.help, HX + boatOff, HY(), 1, fig, false, help.a);      // build 65: standing in his boat as it comes in
       else if (help && mixIn < 1) figure(n, 'help', HELPF[at(HELP_SRC, vt)], META.help, HX, HY(), 1, fig, false, help.a * (1 - mixIn));
       TALKM = null;
       if (lift) { const lf = at(LIFT_SRC, lt); MREC = 'L'; FIG_WET = liftWet(lf); figure(n, 'lift', LIFT[lf], META.lift, HX, HY(), 1, fig, true, mixIn); MREC = null; FIG_WET = null; }
       chrLate = 0;
       if (!lift || mixIn < 1) { if (['fall', 'pli', 'back', 'backtalk', 'wade', 'stuck', 'help'].includes(ph)) chrLate = 1 - mixIn; else { TALKM = C2.reach > 0 ? null : talkC; drawChr(n, fig, 1 - mixIn); TALKM = null; } }
     }
+    // build 65: the boat's hull in front of whoever is in it (it hides their legs below the gunwale, as a boat's side does)
+    if (help && !help.gone) boatShape(n, HX + boatOff, help.boatGo ? 1 - smooth(560, 880, help.boatGo) : 1, land);
     // the lights he gathered
     // FEET IN THE SOFT GROUND (owner, build 114: feet "floating above ground a little - maybe sink them in a bit", and
     // the idea of "mud prints or feet sinking slightly in mud"): the land's own edge is laid again over the bottom of
@@ -1478,7 +1521,7 @@ const SL = (() => {
       f.globalAlpha = a; f.drawImage(fogBank, 0, by - 470 * z, 800 * z, 470 * z);
       f.globalAlpha = a * .8; f.drawImage(fogBank, (-50 + Math.sin(G.t * .004) * 10) * z, by - 410 * z, 900 * z, 410 * z);
       f.restore(); f.globalAlpha = 1;
-      const hx = help && !help.lv && help.w < HSEQ.length - 1 ? HX + HSEQ[Math.floor(help.w)][1] * CHR_K : help && !help.lv ? HX : null;
+      const hx = help && !help.lv ? HX + boatOff : null;      // build 65: where his boat is
       if (hx != null) { const x0 = X(hx + 30), g = f.createLinearGradient(x0, 0, x0 + 120 * z, 0); g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(1, 'rgba(0,0,0,0)');
         f.globalCompositeOperation = 'destination-out'; f.fillStyle = g; f.fillRect(0, 0, x0 + 120 * z, VH); f.globalCompositeOperation = 'source-over'; }
       ctx.drawImage(fogC, 0, 0, VW, VH); }
@@ -1487,7 +1530,7 @@ const SL = (() => {
     // (it stands in the world, from 380 to 840 and solid beyond, so he walks into it and it hides him), and the far
     // light, ahead of him again, glows through it and throws long soft shafts down across the mist, slowly shifting
     if (ph === 'on') {
-      const s1 = smooth(-150, 260, C2.x), xa = X(380), xb = X(840), fogCol = mix(tone(.93), GOLD, .22 * warmth);
+      const s1 = smooth(-150 + WIDEN, 260 + WIDEN, C2.x), xa = X(380 + WIDEN), xb = X(840 + WIDEN), fogCol = mix(tone(.93), GOLD, .22 * warmth);
       if (s1 > .01 && xa < VW) { const g = ctx.createLinearGradient(xa, 0, xb, 0); g.addColorStop(0, css(fogCol, 0)); g.addColorStop(.45, css(fogCol, .5 * s1)); g.addColorStop(1, css(fogCol, .97 * s1));
         ctx.fillStyle = g; ctx.fillRect(Math.max(0, xa), 0, VW, VH); }
       if (ahead > .02) {
@@ -1686,7 +1729,7 @@ const SL = (() => {
       if (ta >= 1) return; alpha *= 1 - smooth(.5, 1, ta);
     }
     let blendIm = null, blendK = 0;
-    const inWater = C2.y > 2 && ph !== 'look' && ph !== 'onway' && ph !== 'on' && ph !== 'drawn' && ph !== 'hist';
+    const inWater = C2.y > 2 && ph !== 'look' && ph !== 'onway' && ph !== 'on' && ph !== 'drawn' && ph !== 'ferry' && ph !== 'hist';
     const WS = wkSet(); let walkIm = WS[((Math.floor(C2.anim) % WS.length) + WS.length) % WS.length], walkM = wkMeta();
     if (NEWP() && C2.sp != null) { walkIm = PST[Math.min(PST_END, Math.floor(C2.sp))]; walkM = PST_META; }      // build 55: setting off from standing
     // in the mire he heaves and struggles (one video loop) instead of walking

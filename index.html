@@ -249,7 +249,7 @@ every year.</div>
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 63 · Nov 28 2026</div>
+  <div id="build">build 65 · Nov 28 2026</div>
   <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
@@ -1323,7 +1323,7 @@ function reset() {
     evanDone: !!TEST_X, evanGone: TEST_X ? 1 : 0, neigh: TEST_X > NEIGH_X + 300, gateSeen: false, walked: false, touched: false, leaving: false, fam: TEST_X > HOME_X ? 2 : 0, door: 0,      // build 13 (owner: "as far as we know pilgrim has no family, for now"): his door stays shut
     doorShut: false, roll: TEST_X ? { t: 999, x: 0, y: 0 } : null, runZone: !!TEST_X && TEST_X < RUN_END, outSaid: false, watched: TEST_X > WATCH_X, ears: TEST_X > HOME_X });
   G.sunUp = 0; G.waitFn = null; G.drone = null; G.tank = null; G.tvRun = !!TEST_X && TEST_X > TV_RUN_A; G.phGo = !!TEST_X && TEST_X > EVAN_X; G.phFade = G.phGo ? 1 : 0; if (ROW[0] && !ROW[0].who) ROW[0].open = 1;      // build 16: the party: the door of the building beside his (to the left), lit from the start
-  G.through = false; G.homeTo = null; G.autoRun = 0; G.calm = 0; G.doorSaid = false; G.choiceKind = null; G.sawLight = !!TEST_X && TEST_X > EVAN_X; G.nchose = false;
+  G.through = false; G.homeTo = null; G.autoRun = 0; G.calm = 0; G.doorSaid = false; G.choiceKind = null; G.sawLight = !!TEST_X && TEST_X > EVAN_X; G.nchose = false; G.alone = false;
   G.zoom = 1 - (1 - ZOOM_GATE) * smooth(GATE - 1300, GATE - 380, START_X);      // starting near the gate (?at=gate): already drawn back
   G.evan.pt = TEST_X ? 239 : 0; G.evan.go = false; G.evan.st = EVS_META.frames * 100; downs.clear(); pushing = false; keys.r = keys.push = false;
   if (TEST_X) for (const l of LIGHTS) if (l.x < Math.max(TEST_X, 2000)) l.got = true;
@@ -1459,7 +1459,7 @@ async function say(who, txt) {
 }
 // fetch every line's recording quietly, in story order, while the child is already playing
 async function fetchVoices() {
-  const all = [...INTRO, ...TV_NEWS, ...PARTY_NO, ...FIELDS, ...EVAN, ...ASK_GO, ...ASK_NO, ...EVAN2, ...NAME_ASK, ...NAME_THANKS, ...GONE, ...NEIGH_BURN, ...NEIGH_HOME, ...RUNS, ...DOOR_WORDS, ...FAMILY, ...LIFE, ...WATCH, ...FETCH, ...NEIGH_CALL]; for (const c of CAPS) all.push(...c.lines); all.push(...NEIGH, ...HOME, ...ONWARD, ...PART, ...GATEWORDS, ...END);
+  const all = [...INTRO, ...TV_NEWS, ...PARTY_NO, ...FIELDS, ...EVAN, ...ASK_GO, ...ASK_NO, ...EVAN2, ...NAME_ASK, ...NAME_THANKS, ...GONE, ...NEIGH_BURN, ...NEIGH_HOME, ...NEIGH_GO, ...YOUNG_ASK, ...YOUNG_LIGHT, ...YOUNG_AWAY, ...RUNS, ...DOOR_WORDS, ...FAMILY, ...LIFE, ...WATCH, ...FETCH, ...NEIGH_CALL]; for (const c of CAPS) all.push(...c.lines); all.push(...NEIGH, ...HOME, ...ONWARD, ...PART, ...GATEWORDS, ...END);
   for (const [who, txt] of all) { if (who === TIP) continue; const v = vox(who, txt); await v.raw; await voxBuf(v); }
 }
 function caption(arr) { for (const l of arr) G.capQ.push(l); }
@@ -1541,8 +1541,13 @@ const FETCH = [];      // build 27: no narrator
 // build 175 had the first two called out as the two caught up with him; since build 506 (owner) they are said once they have met (the book, {19}): NEIGH_CALL opens the talk NEIGH
 // (people() below)
 // BUILD 27: SCENE 5, TWO NEIGHBOURS CATCH UP (approved), then choice 4 (pick: 'neigh'), the young man comes, the big man goes home (PART)
-const NEIGH_CALL = [[BM, 'Come back. You\'re scaring people.'], [PG, 'We\'ve wasted enough time. Come with me.'], [BM, 'And leave everything we have?']];
-const NEIGH_BURN = [[PG, 'It\'s all going to burn.']], NEIGH_HOME = [[PG, 'Then go home.']];
+// BUILD 64: SCENE 5 REWRITTEN (owner: "them in front of him stopping him (ominously) ... they aren't friends but potential hooligans"; the pilgrim
+// "not snarky, just man of few words"; approved in the script app). Two strangers stand in his way in the port; choice 4; the big man waves him
+// on and walks back to town; choice 5 decides whether the young man comes (only "Do you see that light?" brings him).
+const NEIGH_CALL = [[BM, 'Where you running to?'], [PG, 'Out of this forsaken place.'], [BM, 'Nobody goes out. Not past us.'], [YM, 'What\'s in the pack?']];
+const NEIGH_BURN = [[PG, 'Nothing you\'d want. It\'s all going to burn.'], [BM, 'Burn?'], [PG, 'All of it.']], NEIGH_HOME = [[PG, 'Let me pass.'], [BM, 'Or what?']];
+const NEIGH_GO = [[BM, 'You\'re out of your mind. Go on, then. Get out of here.']], YOUNG_ASK = [[YM, 'Where would you even go?']];
+const YOUNG_LIGHT = [[PG, 'Do you see that light?']], YOUNG_AWAY = [[PG, 'Away from here.'], [YM, 'That\'s not a place.']];
 const NEIGH = [
   [C, 'That cannot be. Come with me instead, good neighbors.'],
   [O, 'What! And leave our friends and our comforts behind us?'],      // {20}; then the child chooses (the choice is ours, not the book's)
@@ -1552,7 +1557,7 @@ const HOME = [
   [C, 'No. I cannot stay here. My burden is too heavy.', null, () => { G.gloomTo = 0; }],
 ];
 const ONWARD = [[C, 'Yes. All you leave behind is not worth a little of what I seek. Come with me, and see for yourselves.']];
-const PART = [[YM, 'If what you say is true... I\'ll come.'], [BM, 'Then you\'re both fools. I\'m going home.']];      // build 27
+const PART = [[YM, '...If it\'s real, I\'ll come.'], [BM, 'Then you\'re both fools.']];      // build 64: only after "Do you see that light?"
 // FOR LEVEL 2 (owner, build 68: "pliable's discussion with christian should move to beginning of level 2"). In the book
 // ({25} to {28}) Christian and Pliable "went talking over the plain" after Obstinate has gone back, and that talk ends
 // with both of them falling into the Slough of Despond ({29}). These four lines were said on the road to the gate here
@@ -1564,11 +1569,13 @@ const LEVEL2_OPENING = [
   [C, 'There shall be no more crying, nor sorrow. We shall shine like the sun.'],
 ];
 // BUILD 27: SCENE 6, THE BARRICADE (approved)
+const GATE_TIP = [TIP, isTouch ? 'Hold the gate to push it open.' : 'Hold the gate (or the space bar) to push it open.', 'gate'];      // a side message, never spoken
 const GATEWORDS = [
   [YM, 'They\'ve walled the city in.'],
   [PG, 'Then we go through.'],
-  [TIP, isTouch ? 'Hold the gate to push it open.' : 'Hold the gate (or the space bar) to push it open.', 'gate'],      // a side message, never spoken
+  GATE_TIP,
 ];
+const GATE_ALONE = [GATE_TIP];      // build 64: the young man stayed behind: the pilgrim comes to the barricade alone, in silence
 const END = [];      // build 27: no narrator
 
 // ---------- the choice: go home, or go on ----------
@@ -1583,9 +1590,17 @@ const nameChoice = () => offer('name', 'And who are you?', 'Thank you.', '(say n
 function pick(home) {
   if (G.state !== 'choice') return;
   const kind = G.choiceKind;
-  if (kind === 'neigh') {      // build 27: choice 4; either way the young man comes and the big man goes home
-    choiceEl.className = ''; document.body.classList.remove('talking'); G.choiceKind = null; G.nchose = true;
-    talk(home === true ? NEIGH_BURN : NEIGH_HOME, () => { G.obst.wait = true; G.pli.mode = 'follow'; P.turn = 1; caption(PART); });
+  if (kind === 'neigh') {      // build 64: choice 4; a long look, the big man waves him on and walks back to town, then the young man asks
+    choiceEl.className = ''; document.body.classList.remove('talking'); G.choiceKind = null;
+    talk(home === true ? NEIGH_BURN : NEIGH_HOME, () => { G.state = 'wait'; later(home === true ? 110 : 170, () => talk(NEIGH_GO, () => { G.obst.mode = 'home'; G.state = 'wait'; later(70, () => talk(YOUNG_ASK, () => offer('young', 'Do you see that light?', 'Away from here.', '(say nothing)'))); })); });
+    return;
+  }
+  if (kind === 'young') {      // build 64: choice 5: only the light brings him
+    choiceEl.className = ''; document.body.classList.remove('talking'); document.getElementById('chThird').style.display = 'none'; G.choiceKind = null; G.nchose = true;
+    const stay = () => { G.alone = true; G.pli.mode = 'home'; G.state = 'play'; G.idle = 0; };
+    if (home === true) talk(YOUNG_LIGHT, () => { G.state = 'wait'; later(150, () => { G.pli.mode = 'follow'; G.state = 'play'; G.idle = 0; caption(PART); }); });
+    else if (home === false) talk(YOUNG_AWAY, stay);
+    else { G.state = 'wait'; later(120, stay); }      // he says nothing; the young man shrugs and goes
     return;
   }
   if (kind === 'party' || kind === 'ask' || kind === 'name') {      // build 16: the new scenes' choices
@@ -2035,8 +2050,10 @@ function story() {
   for (const c of CAPS) if (!c.done && P.x > c.x && (!c.pli || (G.pli && G.pli.mode === 'follow'))) { c.done = true; caption(c.lines); if (c.watch) G.watch = 520; }
   if (G.fam === 2 && !G.watched && P.x > WATCH_X) { G.watched = true; caption(WATCH); G.watch = 520; }      // the neighbours come out to see him run
   if (G.runZone && P.x > RUN_END) { G.runZone = false; caption(FETCH); }      // by now he is a good way off, and walks
-  if (!G.neigh && P.x > NEIGH_X && OBS.ready && PLI.ready) { G.neigh = true; G.obst = { x: G.cam - 80, mode: 'run' }; G.pli = { x: G.cam - 150, mode: 'run' }; }
-  if (!G.gateSeen && P.x > GATE_STOP) { G.gateSeen = true; talk(GATEWORDS, () => { G.through = true; G.throughT = G.t; G.idle = 0; caption(END); }); }
+  // build 64: the two strangers are already standing in his way when he comes; they fade in out of the dark between the containers
+  if (!G.obst && !G.neigh && P.x > NEIGH_X - 700 && OBS.ready && PLI.ready) { G.obst = { x: NEIGH_X + 190, mode: 'block', st: 1, al: 0, face: -1 }; G.pli = { x: NEIGH_X + 275, mode: 'block', st: 1, al: 0, face: -1 }; }
+  if (!G.neigh && G.obst && P.x > NEIGH_X && G.state === 'play' && !saying()) { G.neigh = true; G.obst.mode = G.pli.mode = 'talk'; talk(NEIGH_CALL, () => offer('neigh', 'Nothing you\'d want. It\'s all going to burn.', 'Let me pass.')); }
+  if (!G.gateSeen && P.x > GATE_STOP) { G.gateSeen = true; talk(G.alone ? GATE_ALONE : GATEWORDS, () => { G.through = true; G.throughT = G.t; G.idle = 0; caption(END); }); }
   if (G.through && !G.leaving && P.x >= DOOR1 + 89) { G.state = 'auto'; G.leaving = true; clearHint('walk'); }      // through the gate (the child walked him there): Pliable follows, then the end
   if (G.homeTo && P.x <= G.homeTo.to + 1) { const h = G.homeTo; G.homeTo = null; clearHint('walk'); h.then(); return; }
   if (G.homeTo && P.stand && G.idle === 150) hint('walk', 'Hold to walk back toward home.');
@@ -2045,6 +2062,7 @@ function story() {
 // Obstinate and Pliable
 function people() {
   const o = G.obst, p = G.pli;
+  for (const w of [o, p]) if (w && w.al != null && w.al < 1) w.al = Math.min(1, w.al + .012);      // build 64: out of the dark
   if (o && o.mode === 'run') {
     if (o.x <= P.x - 235) { o.x += 2.2; p.x += 2.2; }        // hurrying after him, but still walking; they wait a step behind while words are said
     // build 506 (owner: "shouldn't christian not respond to pliable and obstinant till they meet?"): the book, {19}: "they overtook
@@ -2054,16 +2072,19 @@ function people() {
   // Standing (owner: they should stand while talking, not freeze mid-stride): once a walker has come to rest, his painted
   // standing pose dissolves in (st 0 = walking picture, 1 = standing picture); before he walks again it dissolves out.
   const rest = (w, meta) => meta.rest.includes(Math.floor(w.anim ?? meta.rest[0]) % meta.frames);
-  if (o) o.st = clamp((o.st || 0) + (o.mode === 'talk' && rest(o, obsSet()[1]) && obsSet()[2] ? .035 : -.06));
+  if (o) o.st = clamp((o.st || 0) + ((o.mode === 'talk' || o.mode === 'block') && rest(o, obsSet()[1]) && obsSet()[2] ? .035 : -.06));
   if (o && o.wait && !G.capQ.length && (G.t > (G.capEnd || 0) + 20 || G.cap <= 0)) { o.wait = false; o.mode = 'home'; }      // his last line said: now he turns for home
-  if (o && o.mode === 'home' && o.st <= 0 && o.x > G.cam - 200) o.x -= obsSet()[1].vpx * CHR_K * .4;      // his video's own walking pace
+  if (o && o.mode === 'home') { o.face = -1; if (o.st <= 0 && o.x > G.cam - 200) o.x -= obsSet()[1].vpx * CHR_K * .4; }      // his video's own walking pace (back to town)
+  if (p && p.mode === 'home') { p.face = -1; if (p.st <= 0 && p.x > G.cam - 200) p.x -= pliSet()[1].vpx * CHR_K * .4; else if (p.x <= G.cam - 200) p.mode = 'gone'; }      // build 64: he stays behind with the big man
+  if (p && p.mode === 'follow') p.face = 1;
+  if (G.leaving && (!p || p.mode !== 'follow')) { G.leaving = false; finish(); }      // build 64: through the gate alone
   if (p && p.mode === 'follow') {                             // Pliable keeps a little behind Christian, hurrying only if he falls back
     const gap = (G.leaving ? DOOR1 + 90 : P.x - 70) - p.x;      // at the end he follows Christian in through the gate and on
     if (G.leaving && gap < 4) { G.leaving = false; p.mode = 'gone'; finish(); }      // through the gate: he stays gone
     if (gap > 14) p.go = true; if (gap < 1) p.go = false;
   }
   if (p) {
-    const still = p.mode === 'talk' || (p.mode === 'follow' && !p.go);
+    const still = p.mode === 'talk' || p.mode === 'block' || (p.mode === 'follow' && !p.go);
     p.st = clamp((p.st || 0) + (still && rest(p, pliSet()[1]) && pliSet()[2] ? .035 : -.06));
     if (p.mode === 'follow' && p.go && p.st <= 0) { const gap = (G.leaving ? DOOR1 + 90 : P.x - 70) - p.x; p.x += Math.max(0, Math.min(gap, gap > 46 ? 2 : MAXV)); }
   }
@@ -3068,11 +3089,11 @@ function drawWorld() {
     else if (pa > .01) { if (!G.evan.pt && EVS.ready) drawFrame(EVS[Math.floor(G.evan.st) % EVS_META.frames], EVS_META, G.evan.x - cam, GY, 1, pa); else drawFrame(EVA[atTime(EVA_META, t)], EVA_META, G.evan.x - cam, GY, 1, pa); } }
   // a walker: his walking frame, with his standing pose dissolving over it when he has stopped (first the standing pose
   // comes in on top, then the walking one goes: the background never shows through him)
-  const walker = (w, fr, meta, stIm, stMeta, face, a) => { const st = w.st || 0; if (st < 1) drawFrame(fr, meta, w.x - cam, GY, face, a * (st < .5 ? 1 : 2 * (1 - st))); if (st > 0) drawFrame(stIm, stMeta, w.x - cam, GY, 1, a * (st < .5 ? 2 * st : 1)); };
+  const walker = (w, fr, meta, stIm, stMeta, face, a) => { const st = w.st || 0; if (st < 1) drawFrame(fr, meta, w.x - cam, GY, face, a * (st < .5 ? 1 : 2 * (1 - st))); if (st > 0) drawFrame(stIm, stMeta, w.x - cam, GY, w.face || 1, a * (st < .5 ? 2 * st : 1)); };      // build 64: a standing man may face either way
   TALKM = talkMove(O);
-  if (G.obst && G.obst.x > cam - 100) { const [W, M, S, SM] = obsSet(); walker(G.obst, W[Math.floor(G.obst.anim ?? M.rest[0]) % W.length], M, S, SM, G.obst.mode === 'home' ? -1 : 1, 1); }
+  if (G.obst && G.obst.x > cam - 100) { const [W, M, S, SM] = obsSet(); walker(G.obst, W[Math.floor(G.obst.anim ?? M.rest[0]) % W.length], M, S, SM, G.obst.face || (G.obst.mode === 'home' ? -1 : 1), G.obst.al ?? 1); }
   TALKM = talkMove(PL);
-  if (G.pli && G.pli.mode !== 'gone') { const [W, M, S, SM] = pliSet(); figure(G.pli.x, a => walker(G.pli, W[Math.floor(G.pli.anim ?? 0) % W.length], M, S, SM, 1, a)); }
+  if (G.pli && G.pli.mode !== 'gone') { const [W, M, S, SM] = pliSet(); figure(G.pli.x, a => walker(G.pli, W[Math.floor(G.pli.anim ?? 0) % W.length], M, S, SM, G.pli.face || 1, a * (G.pli.al ?? 1))); }
   { const dxs = P.x - cam - doorX(cam), a = G.door * smooth(300, 60, Math.abs(dxs)); RIM = a > .02 ? { dir: dxs > 0 ? -1 : 1, a } : null; }      // the door's light on him
   TALKM = talkMove(C);
   figure(P.x, a => drawChristian(P.x - cam, P.y + 1, P.face, a)); RIM = null; TALKM = null;
@@ -3730,7 +3751,7 @@ document.getElementById('on2').onclick = () => SL.on ? go3() : HL.on ? go5() : g
   for (const [who, txt] of INTRO) vox(who, txt);          // the first words, ready before Begin is pressed
 })();
 </script>
-<script src="slough.js?v=60"></script>
+<script src="slough.js?v=65"></script>
 <script src="hill.js?v=662"></script>
 <script src="rooms.js?v=2"></script>
 <script src="heaven.js?v=547"></script>
