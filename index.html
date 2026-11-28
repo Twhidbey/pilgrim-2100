@@ -249,7 +249,7 @@ every year.</div>
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 72 · Nov 28 2026</div>
+  <div id="build">build 74 · Nov 28 2026</div>
   <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
@@ -1092,8 +1092,8 @@ function knockBuf(seed) {
 // step in Level 1's wheat). stepOn(surface, v, heavy) plays one, with the burden's quiet creak by heavy; sfx.step stands in until loaded.
 const STEP_N = { grass: 6, dirt: 6, stone: 6, gravel: 4, wood: 6, leaves: 4 };
 const STEP_FILES = Object.entries(STEP_N).flatMap(([k, n]) => [...Array(n).keys()].map(i => 'step-' + k + '-' + i));
-const SFX_V = 493, SFX_FILES = [...STEP_FILES, 'knock-0', 'knock-1', 'knock-2', 'knock-3', 'bog-fall-a', 'bog-fall-b', 'bog-lift', 'bog-bubbles',
-  ...[0, 1, 2, 3, 4, 5].map(i => 'bog-wade-' + i), ...[0, 1, 2].map(i => 'bog-plop-' + i), ...[0, 1, 2].map(i => 'bog-suck-' + i), 'bog-heave-0', 'bog-heave-1', 'tank-rumble'], SFXB = {};
+const SFX_V = 494, SFX_FILES = [...STEP_FILES, 'knock-0', 'knock-1', 'knock-2', 'knock-3', 'bog-fall-a', 'bog-fall-b', 'bog-lift', 'bog-bubbles',
+  ...[0, 1, 2, 3, 4, 5].map(i => 'bog-wade-' + i), ...[0, 1, 2].map(i => 'bog-plop-' + i), ...[0, 1, 2].map(i => 'bog-suck-' + i), 'bog-heave-0', 'bog-heave-1', 'tank-rumble', 'far-gunfire'], SFXB = {};
 const SFXL = {}, sfxLast = {};
 // build 506 (owner: "the footprints sounds ... needs to be lowered too (make consistent rule please)"): THE RULE FOR FOOTSTEPS: every
 // footfall of his in every level is played at STEP_VOL, walking 1, running STEP_RUN; the wheat's rustle .8 of a step, a squelch in
@@ -1393,7 +1393,7 @@ const TXT_MIN = 16, TXT_MAX = 21, TXT_K = .036, TXT_MIN_UP = 11, TXT_K_UP = .052
 addEventListener('resize', () => { if (dlg.classList.contains('on')) fitWords(dlg.querySelector('.txt')); });
 function words(who, txt, cls) {
   const shown = who !== RD && who !== RD2;      // build 26 (owner: "radio voice does not need script below"): the radio is heard, never written
-  dWho.textContent = shown ? who : ''; dTxt.textContent = shown ? txt : ''; dlg.className = 'on ' + cls;
+  dWho.textContent = shown ? (who === PG ? 'Traveler' : who) : '';      // build 73 (owner: "Traveler"): the name shown; his recordings stay filed under 'Pilgrim' dTxt.textContent = shown ? txt : ''; dlg.className = 'on ' + cls;
   const box = dlg.querySelector('.txt'); box.style.animation = 'none'; void box.offsetWidth; box.style.animation = '';
   fitWords(box);
   if (!cls.includes('hint')) say(who, txt); else hush();
@@ -1525,7 +1525,7 @@ const FIELDS = [];      // build 16: no narrator
 const EVAN = [
   [PH, 'Son, you look like a man who\'s woken up.'],      // build 51 (owner chose it; was "Why are you crying?"); to be recorded when the voice account has credit
   [PG, 'This book says I must die, and then be judged. I\'m not ready for either.'],
-  [PG, '"Flee from the wrath to come."', 0, () => { G.roll = { t: 0, x: G.evan.x - G.cam + 30, y: GY - 92 }; note(79, .035, 2.4); }],
+  [PH, 'Flee from the wrath to come.', 0,      /* build 73 (owner): Phillip says it as he hands over the slip (was the traveler reading it) */ () => { G.roll = { t: 0, x: G.evan.x - G.cam + 30, y: GY - 92 }; note(79, .035, 2.4); }],
 ];
 const ASK_GO = [[PG, 'Where do I go?']], ASK_NO = [[PG, 'Leave me alone.']];
 const EVAN2 = [
@@ -2630,7 +2630,7 @@ function drawDrone(cam) {
 // picture (sources/tank: gen-tank.py, cut-tank.py; assets/tank.webp), no markings, gun level, toned to its level like the port: on its own
 // level between the rails and the fence (p .7), well behind him, at real scale (2.6 m high against a man's 1.8 m; 61 px a metre at p .7).
 // It waits past the drone and, as he comes, rolls slowly toward the town (about 5 km/h) with a little shudder and a low rumble made in code.
-const TANK = { a: 9650, p: .7, k: .213, gnd: 904 }; let TANK_IM = null, TANK_SND = null;
+const TANK = { a: 9650, p: .7, k: .213, gnd: 904, go: 9400, run: 640 }; let TANK_IM = null, TANK_SND = null;
 function bakeTank(im) { const out = {}; for (const [n, i] of [['cool', 0], ['warm', 1]]) { const c = mk(im.width, im.height), q = c.getContext('2d'); q.drawImage(im, 0, 0); q.globalCompositeOperation = 'source-atop'; q.fillStyle = css(layerCol(.7)[i], .8); q.fillRect(0, 0, im.width, im.height); out[n] = c; } return out; }
 function tankSound(v) {
   if (!AC || muted) { if (TANK_SND) TANK_SND.g.gain.value = 0; return; }
@@ -2647,17 +2647,30 @@ function tankSound(v) {
   const t = AC.currentTime;
   for (const [g, k] of TANK_SND.rec ? [[TANK_SND.g.gain, 0], [TANK_SND.rec.gain, 2.6]] : [[TANK_SND.g.gain, 1]]) { g.cancelScheduledValues(t); g.setTargetAtTime(v * k, t, .3); g.setTargetAtTime(0, t + .5, .4); }
 }
+// FAR GUNFIRE (build 72, owner: "There should be sounds of far off gunfire as they near barrier at end"): a 32 s loop of sparse
+// distant shots, short bursts and one far boom (assets/sfx/far-gunfire.mp3: CC0 recordings from OpenGameArt, muffled and given a long
+// echo; see CREDITS.txt), coming in as he nears the barricade and loudest at it. Heard only: nothing of it is shown.
+let GUN_SND = null;
+function farGunfire() {
+  if (!AC || muted || !SFXB['far-gunfire']) { if (GUN_SND) GUN_SND.gain.value = 0; return; }
+  if (!GUN_SND) { try { const r = AC.createBufferSource(), g = AC.createGain(); r.buffer = SFXB['far-gunfire']; r.loop = true; g.gain.value = 0; r.connect(g); g.connect(SFXG); r.start(); GUN_SND = g; } catch (e) { return; } }
+  const v = .5 * smooth(8700, 9500, P.x) * (G.state === 'end' ? .5 : 1), t = AC.currentTime;
+  GUN_SND.gain.cancelScheduledValues(t); GUN_SND.gain.setTargetAtTime(v, t, .6); GUN_SND.gain.setTargetAtTime(0, t + .6, .5);      // falls silent by itself if the level stops ticking it
+}
 function tankTick() {      // build 71: its movement in the update, not the drawing (it moved only when drawn)
   if (!TANK_IM) return; const T = G.tank || (G.tank = { a: TANK.a, go: false });
-  // build 71: it sets off once he is past the last lights (was 900 before it), so it comes out from behind the barricade on the clear road before it
-  if (P.x > TANK.a - 560) T.go = true; if (T.go) T.a = Math.max(TANK.a - 2600, T.a - 1.15);      // rolling toward the town
-  tankSound(T.go ? .16 * (1 - smooth(250, 1300, Math.abs(T.a - P.x))) : 0);
+  // build 72 (owner: "Tank should still be pretty close to barrier just precedes it by a few secs"): it comes out from behind the
+  // barricade's slope only a few seconds before he reaches the barricade, rolls a short way (TANK.run) and stops there, its engine idling
+  if (P.x > TANK.go) T.go = true;
+  if (T.go) { const left = T.a - (TANK.a - TANK.run); T.v = left > 0 ? 1.7 * smooth(0, 110, left) : 0; T.a -= T.v; }
+  tankSound(T.go ? (T.v > .05 ? .16 : .09) * (1 - smooth(250, 1300, Math.abs(T.a - P.x))) : 0);
+  farGunfire();
 }
 function drawTank(cam) {
   const T = G.tank; if (!TANK_IM || !T) return;
   const x = lineUp(T.a, TANK.p) - cam * TANK.p, base = HORIZON + 140 * TANK.p, w = TANK_IM.cool.width * TANK.k, h = TANK_IM.cool.height * TANK.k;
   if (x + w < -40 || x - w > VW + 40) return;
-  const jit = T.go ? Math.sin(G.t * 1.9) * .35 + Math.sin(G.t * .7) * .25 : 0, y = base + 2 - TANK.gnd * TANK.k + jit, wm = warm(x / VW), c = ctx;
+  const jit = T.v > .05 ? Math.sin(G.t * 1.9) * .35 + Math.sin(G.t * .7) * .25 : 0, y = base + 2 - TANK.gnd * TANK.k + jit, wm = warm(x / VW), c = ctx;
   c.save(); c.translate(x, 0); c.scale(-1, 1);      // the picture faces right; it rolls left, toward the town
   c.drawImage(TANK_IM.cool, -w / 2, y, w, h); if (wm > .01) { c.globalAlpha = wm; c.drawImage(TANK_IM.warm, -w / 2, y, w, h); c.globalAlpha = 1; }
   c.restore();

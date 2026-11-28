@@ -32,3 +32,10 @@ tank-rumble.mp3 (build 71: the tank by the barricade in Level 1)
   Licence: CC0 (public domain)
   Changes: the engine loop lowered about 22% and played twice, the rumble's middle looped with a crossfade, the two mixed,
   softened above 1.8 kHz. The changed file is shared under CC-BY 3.0.
+
+far-gunfire.mp3 (build 72: far-off gunfire near the barricade in Level 1)
+  Made from "Gunshots" (OpenGameArt.org, https://opengameart.org/content/gunshots), "Random gunfire SFX"
+  (https://opengameart.org/content/random-gunfire-sfx) and "25 CC0 bang / firework SFX" (shot and cannon sounds,
+  https://opengameart.org/content/25-cc0-bang-firework-sfx)
+  Licence: CC0 (public domain)
+  Changes: single shots cut out, muffled, given a long echo, laid sparsely into a 32 s loop with a few short bursts and one far boom.
