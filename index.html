@@ -23,7 +23,7 @@ if (/[?&]edit(=|&|$)/.test(location.search)) {
 </script>
 <title>Pilgrim's Progress</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=La+Belle+Aurore&family=Herr+Von+Muellerhoff&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=La+Belle+Aurore&family=Herr+Von+Muellerhoff&family=Nanum+Pen+Script&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
 <style>
 html,body{margin:0;height:100%;background:#1b1c22;overflow:hidden;-webkit-text-size-adjust:100%;text-size-adjust:100%;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
 #wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
@@ -72,8 +72,47 @@ body.opened .tribbon{opacity:0}
 #levels .lv:active{color:#8a2a1e}
 #levels .lvx{display:flex;align-items:baseline;white-space:nowrap;font-family:'IM Fell English',Georgia,serif;font-style:italic;font-size:max(7px,calc(var(--u,1) * 12.5px));background:none;border:none;color:rgba(42,32,24,.5);padding:.5em .2em .3em;cursor:pointer;text-align:left}
 #levels .lvx i{flex:0 0 2.8em;font-style:normal;color:#8a2a1e}#levels .lvx i::before{content:'\25C7'}#levels .lvx.on{color:#2a2018}#levels .lvx.on i::before{content:'\25C6'}
+/* HIS BIBLE (2100 build 27; owner: "Bible with wide margins and hand notes stuffed in, game menu can be [a] note tucked in
+   Bible"): the book is now his own worn wide-margin Bible, open at Hebrews 9 and 10 (the words as in keepsakes.js, KJV),
+   his notes in ink in the wide outer margins; the menu is a pencilled note on lined paper tucked into it */
+.bpg{position:absolute;inset:calc(var(--u,1) * 22px) calc(var(--u,1) * 22px) calc(var(--u,1) * 24px);font-family:Georgia,'Times New Roman',serif;color:#2b241d}
+.tp .bpg .btxt{position:absolute;left:25%;right:0;top:calc(var(--u,1) * 26px);bottom:0;overflow:hidden}
+.tc .bpg .btxt{position:absolute;left:0;right:25%;top:calc(var(--u,1) * 26px);bottom:0;overflow:hidden}
+.bhead{display:flex;justify-content:space-between;font-size:calc(var(--u,1) * 9px);letter-spacing:.16em;color:rgba(43,36,29,.7);border-bottom:calc(var(--u,1) * .6px) solid rgba(43,36,29,.35);padding-bottom:calc(var(--u,1) * 4px)}
+.tp .bhead{margin-left:25%}.tc .bhead{margin-right:25%}
+.btxt p{margin:0 0 calc(var(--u,1) * 3px);font-size:calc(var(--u,1) * 10px);line-height:1.4;color:#1f1a15;text-align:justify;hyphens:auto}
+.btxt sup{font-size:.62em;font-weight:700;color:#7a2a1e;margin-right:.18em;vertical-align:.45em;line-height:0}
+.btxt u{text-decoration:none;background:linear-gradient(transparent 82%,rgba(28,34,62,.55) 82%,rgba(28,34,62,.55) 90%,transparent 90%)}
+.bch{float:left;font-size:calc(var(--u,1) * 30px);line-height:.9;margin:calc(var(--u,1) * 1px) calc(var(--u,1) * 5px) 0 0;color:#7a2a1e}
+.tbook{--hand:'Nanum Pen Script';--ink:rgba(30,46,104,.9)}
+.hn{position:absolute;color:var(--ink);line-height:1.22;pointer-events:none;transform:rotate(var(--r,-2deg)) scale(var(--s,1));transform-origin:50% 0;font-family:var(--hand),cursive;text-transform:uppercase;letter-spacing:0;font-size:calc(var(--u,1) * 13px)}
+.hn span{display:inline-block;white-space:pre}.hn span.w,.tnote span.w{white-space:nowrap;display:inline}
+.tp .hn.foot{left:27%;width:70%;bottom:calc(var(--u,1) * 16px);top:auto !important;font-size:calc(var(--u,1) * 16px)}
+.tp .hn{left:0;width:24%}.tc .hn{right:1%;width:22%;font-size:calc(var(--u,1) * 11px);transform-origin:100% 0}
+.hbar{position:absolute;left:24.6%;height:calc(var(--u,1) * 28px);width:calc(var(--u,1) * 3px);border-left:calc(var(--u,1) * 1.1px) solid rgba(26,32,60,.6);border-radius:0 0 0 60%;transform:rotate(2deg)}
+.tslipin{position:absolute;left:54%;top:52%;width:40%;height:30%;background:linear-gradient(160deg,#4a4640,#2c2a27);border:calc(var(--u,1) * 3px) solid #ddd5c4;box-shadow:0 calc(var(--u,1) * 2px) calc(var(--u,1) * 5px) rgba(0,0,0,.3);transform:rotate(9deg)}
+.tnote{position:absolute;left:9%;top:30%;width:66%;height:50%;transform:rotate(-3deg);background:
+  linear-gradient(180deg,rgba(0,0,0,0) 49.4%,rgba(90,80,60,.13) 50%,rgba(255,255,255,.25) 50.6%,rgba(0,0,0,0) 52%),
+  repeating-linear-gradient(180deg,transparent 0 calc(var(--u,1) * 21px),rgba(88,128,170,.32) calc(var(--u,1) * 21px) calc(var(--u,1) * 21.8px)),
+  linear-gradient(90deg,transparent calc(var(--u,1) * 26px),rgba(190,70,70,.35) calc(var(--u,1) * 26px) calc(var(--u,1) * 26.8px),transparent calc(var(--u,1) * 26.8px)),
+  #efe9da;box-shadow:0 calc(var(--u,1) * 3px) calc(var(--u,1) * 10px) rgba(0,0,0,.35);clip-path:polygon(0 3%,7% 1.5%,14% 3.2%,22% .8%,31% 2.6%,40% 1.2%,48% 3%,57% .6%,66% 2.4%,74% 1%,83% 2.8%,91% .9%,100% 2.5%,100% 100%,0 100%)}
+.nin{position:absolute;inset:0 calc(var(--u,1) * 14px) calc(var(--u,1) * 10px) calc(var(--u,1) * 34px);font-family:var(--hand),cursive;color:var(--ink);text-transform:uppercase;letter-spacing:0}
+/* every line of the note sits ON a ruled line (the rules are 21.8 apart, at the foot of each band) */
+.nh{font-size:calc(var(--u,1) * 20px);line-height:1;height:calc(var(--u,1) * 65.4px);text-align:center;box-sizing:border-box;padding-top:calc(var(--u,1) * 21px)}
+.tnote #levels .lv.dim{opacity:.78}
+.tnote #levels .lv{font-family:var(--hand),cursive;text-transform:uppercase;letter-spacing:0;font-size:max(11px,calc(var(--u,1) * 19px));line-height:1;height:calc(var(--u,1) * 21.8px);padding:0 .1em calc(var(--u,1) * 4px);align-items:flex-end;box-sizing:border-box;border:none;color:rgba(60,58,56,.55)}
+.tnote #levels .lv i{flex:0 0 1.5em;color:inherit}
+.tnote #levels .lv.dim{color:rgba(30,46,104,.75)}.tnote #levels .lv:not(.dim){color:var(--ink)}.tnote #levels .lv:not(.dim)::after{content:'\2190';color:var(--ink)}
+.tnote #levels .lv:active{color:#7a2a1e}
+.tslips{position:absolute;inset:0;transition:opacity .4s;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+body.opened .tslips{opacity:0}
+.tslips i{position:absolute;display:block;box-shadow:0 0 calc(var(--u,1) * 2px) rgba(0,0,0,.4)}
+.tslips .s1{right:calc(var(--u,1) * -34px);top:18%;width:calc(var(--u,1) * 60px);height:calc(var(--u,1) * 54px);background:repeating-linear-gradient(180deg,#e9e2d1 0 calc(var(--u,1) * 9px),#a9bccb calc(var(--u,1) * 9px) calc(var(--u,1) * 9.6px));transform:rotate(-4deg)}
+.tslips .s2{right:calc(var(--u,1) * -28px);top:46%;width:calc(var(--u,1) * 50px);height:calc(var(--u,1) * 70px);background:#3d3a35;border:calc(var(--u,1) * 2.5px) solid #d9d0bd;transform:rotate(6deg)}
+.tslips .s3{left:58%;top:calc(var(--u,1) * -26px);width:calc(var(--u,1) * 34px);height:calc(var(--u,1) * 50px);background:#d8cdb3;transform:rotate(-8deg)}
+.tslips .s4{right:calc(var(--u,1) * -24px);top:74%;width:calc(var(--u,1) * 46px);height:calc(var(--u,1) * 26px);background:#e4dccb;transform:rotate(-2deg)}
 .tfoot{display:flex;align-items:center;justify-content:center;height:calc(var(--u,1) * 70px);margin-top:calc(var(--u,1) * 12px)}
-.tfoot h2{margin:0;opacity:.62;font-family:'IM Fell English',Georgia,serif;font-style:italic;text-transform:none;letter-spacing:.05em}
+.tfoot h2{margin:0;opacity:.62;font-family:'IM Fell English',Georgia,serif;font-style:italic;text-transform:none;letter-spacing:0}
 body.opened .tfoot{visibility:hidden}
 body.portrait .tc .tpin{left:calc(var(--u,1) * 18px);right:calc(var(--u,1) * 14px);padding-left:calc(var(--u,1) * 6px);padding-right:calc(var(--u,1) * 4px)}body.portrait #levels .lv i{flex-basis:2em}
 /* the opening (builds 663, 665): the book itself seen from so close that the picture in its cover's window fills the
@@ -157,39 +196,47 @@ body.portrait:not(.playing) #rot{display:none}
     <!-- THE BOOK (build 187): the title page as first printed in 1678, alone on a dark ground; "Open the book" swings the
          contents page open beside it. Nothing of the world shows until a level is chosen. -->
     <div class="tzoom"><div class="tbook">
-      <div class="tleaf"><div class="tpages"></div><div class="tribbon"></div><div class="tcover"></div><div class="tpage tp"><div class="tpin">
-        <div class="t1">THE</div>
-        <div class="t2">Pilgrim's Progress</div>
-        <div class="t3">FROM</div>
-        <div class="t4">THIS WORLD,</div>
-        <div class="t1">TO</div>
-        <div class="t4">That which is to come:</div>
-        <div class="trule"></div>
-        <div class="t5">Delivered under the Similitude of a</div>
-        <div class="t4 sp">DREAM</div>
-        <div class="t5">Wherein is Discovered, The manner of his setting out, His Dangerous Journey; And safe Arrival at the Desired Countrey.</div>
-        <div class="trule"></div>
-        <div class="t5">I have used Similitudes, <i>Hos.</i> 12. 10.</div>
-        <div class="trule"></div>
-        <div class="t3">By JOHN BUNYAN.</div>
-        <div class="trule d"></div>
-        <div class="t6"><i>LONDON,</i> Printed for <i>Nath. Ponder</i> at the <i>Peacock</i> in the <i>Poultrey</i> near <i>Cornhil</i>, 1678.</div>
+      <div class="tleaf"><div class="tslips"><i class="s1"></i><i class="s2"></i><i class="s3"></i><i class="s4"></i></div><div class="tpages"></div><div class="tribbon"></div><div class="tcover"></div><div class="tpage tp"><div class="bpg">
+        <div class="bhead"><span>HEBREWS 9</span><span>1203</span></div>
+        <div class="btxt">
+          <p data-v="22"><sup>22</sup>And almost all things are by the law purged with blood; and <u>without shedding of blood is no remission</u>.</p>
+          <p><sup>24</sup>For Christ is not entered into the holy places made with hands, which are the figures of the true; but into heaven itself, now to appear in the presence of God for us:</p>
+          <p><sup>25</sup>Nor yet that he should offer himself often, as the high priest entereth into the holy place every year with blood of others;</p>
+          <p><sup>26</sup>For then must he often have suffered since the foundation of the world: but now once in the end of the world hath he appeared to put away sin by the sacrifice of himself.</p>
+          <p data-v="27"><sup>27</sup><u>And as it is appointed unto men once to die, but after this the judgment</u>:</p>
+          <p data-v="28"><sup>28</sup>So Christ was once offered to bear the sins of many; and unto them that look for him shall he appear the second time without sin <u>unto salvation</u>.</p>
+        </div>
+        <div class="hn foot" style="--r:-3deg">dreamed it again.
+the whole city.</div>
+        <div class="hn" data-at="22" style="--r:-2deg">no remission</div>
+        <div class="hn" data-at="27" style="--r:-4deg">I fear it.</div><div class="hbar" data-at="27"></div>
+        <div class="hn" data-at="28" style="--r:3deg">unto salvation &mdash; how??</div>
       </div></div>
       </div>
-      <div class="tpage tc"><div class="tpin">
-        <div class="t3 sp">THE CONTENTS.</div>
-        <div class="trule"></div>
+      <div class="tpage tc"><div class="bpg">
+        <div class="bhead"><span>1204</span><span>HEBREWS 10</span></div>
+        <div class="btxt">
+          <div class="bch">10</div>
+          <p>For the law having a shadow of good things to come, and not the very image of the things, can never with those sacrifices which they offered year by year continually make the comers thereunto perfect.</p>
+          <p><sup>2</sup>For then would they not have ceased to be offered? because that the worshippers once purged should have had no more conscience of sins.</p>
+          <p data-v="3"><sup>3</sup>But in those sacrifices there is a remembrance again made of sins every year.</p>
+        </div>
+        <div class="hn" data-at="3" style="--r:5deg">every year.
+every year.</div>
+      </div>
+      <div class="tslipin"></div>
+      <div class="tnote"><div class="nin">
+        <div class="nh">the way</div>
         <div id="levels" style="display:none">
-          <button class="lv" data-lv="1"><i>I.</i>The City of Destruction</button>
-          <button class="lv" data-lv="2"><i>II.</i>The Slough of Despond</button>
-          <button class="lv" data-lv="3"><i>III.</i>Mr. Worldly Wiseman</button>
-          <button class="lv" data-lv="4" style="display:none"><i>IV.</i>The Interpreter&#8217;s House</button>
-          <button class="lv" data-lv="5"><i>V.</i>The Cross</button>
+          <button class="lv" data-lv="1"><i>1.</i>The city</button>
+          <button class="lv" data-lv="2"><i>2.</i>The fields</button>
+          <button class="lv" data-lv="3"><i>3.</i>The mountain</button>
+          <button class="lv" data-lv="4" style="display:none"><i>&ndash;</i>The house</button>
+          <button class="lv" data-lv="5"><i>4.</i>The steeple</button>
           <button class="lvx" id="darkRooms" style="display:none"><i></i>Shew the darker rooms</button>
         </div>
-        <div class="trule d"></div>
-        <div class="t6 tdream">As I walked through the wilderness of this world, I lighted on a certain place where was a Den, and I laid me down in that place to sleep: and, as I slept, I dreamed a dream.</div>
       </div></div>
+      </div>
     </div></div>
     <div class="tfoot"><h2 id="sub">Getting ready…</h2></div>
   </div>
@@ -202,7 +249,7 @@ body.portrait:not(.playing) #rot{display:none}
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 32 · Nov 28 2026</div>
+  <div id="build">build 36 · Nov 28 2026</div>
   <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
@@ -1557,6 +1604,10 @@ const RUN_META = {"ax": 136, "ground": 309, "frames": 29, "start": 27, "vpx": 17
 // it is his rising). Frame 0 joins his quiet standing picture. hold = the breathing part, played back and forth.
 const KNEEL = [], KNEEL_META = {"ax": 336, "ground": 298, "frames": 96, "step": .2, "hold": [50, 95]};
 const WEEP = [], WEEP_META = {"ax": 101, "ground": 302, "frames": 96, "step": .13};      // Christian opens his book, reads, weeps and trembles (assets/christian-weep.pack); step = stored frames per tick
+// build 36: Phillip, the 2100 Evangelist, in Level 1 (sources/phillip: gen-phillip.py, video-point.py, point.mp4). PHS: standing, video frames 0..24 and back (a seamless
+// loop); PHP: video frames by src, he stands, raises his arm (video 48..90) and holds the point (120..239 played slowly back and forth). The old EVA/EVS stay for Level 3.
+const PHS = [], PHS_META = {"ax": 132, "ground": 404, "frames": 48}, PHP = [], PHP_META = {"ax": 132, "ground": 404, "frames": 73, "src": [0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 50, 52, 54, 56, 58, 60, 62, 64, 66, 68, 70, 72, 74, 76, 78, 80, 82, 84, 86, 88, 90, 92, 94, 96, 98, 100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 140, 144, 148, 152, 156, 160, 164, 168, 172, 176, 180, 184, 188, 192, 196, 200, 204, 208, 212, 216, 220, 224, 228, 232, 236]};
+const PHN = () => PHS.ready && PHP.ready;
 const EVS = [], EVS_META = {"ax": 82, "ground": 311, "frames": 48};      // Evangelist standing, facing right, breathing
 const RUNP_META = {"ax": 132, "ground": 298, "frames": 28, "start": 20, "vpx": 16.6, "steps": [0, 15]}, RUNP = [];
 RUN_META.steps = [7, 22];
@@ -1565,7 +1616,7 @@ const runNow = () => PR.ready && pwOn() ? [PR, PR_META] : G.ears || !RUNP.ready 
 function coverEars() { if (G.ears) return; if (P.run) poseChange(8, true); G.ears = true; }
 const CHR = [], PLI = [], OBS = [], EVA = [], STD = [], RUN = [], CHR_K = .52, RUN_STEP = RUN_META.vpx * CHR_K, RUNV = RUN_STEP * .4,   // the run at its video's own speed (24 frames a second)
    CHR_STEP = CHR_META.vpx * CHR_K, PLI_STEP = PLI_META.vpx * CHR_K, OBS_STEP = OBS_META.vpx * CHR_K;
-const PACK_V = 43;                          // bump when the .pack files change, so phones fetch the new ones
+const PACK_V = 44;                          // bump when the .pack files change, so phones fetch the new ones
 // SOLID FIGURES (build 202; owner: "in both level 2 and 3, pilgrims sprite is clear in spots. we need to fix this"). The
 // figures were cut from their white paper by how white each pixel is, so the white paper showing inside the watercolour
 // (highlights on the cloak, the pack, the hood) was cut away too and the scene showed through those spots (2 to 7 per cent
@@ -1884,7 +1935,7 @@ function update() {
   // picture as frame 178 of his pointing video). When he is to point, the breath first runs quickly on to frame 0, then
   // the pointing video plays from 178: he raises his arm and points on past Christian to the light (180..239).
   G.evan.idle = 178;
-  if (!G.evan.pt && G.evanDone && (G.evanGone || G.evan.go)) { const f = G.evan.st % EVS_META.frames; if (!EVS.ready || f < .5 || f > EVS_META.frames - .5) G.evan.pt = 178; else G.evan.st += f < EVS_META.frames / 2 ? -.5 : .5; }
+  if (!G.evan.pt && G.evanDone && (G.evanGone || G.evan.go)) { const f = G.evan.st % EVS_META.frames; if (!EVS.ready || f < .5 || f > EVS_META.frames - .5) G.evan.pt = PHN() ? 40 : 178; else G.evan.st += f < EVS_META.frames / 2 ? -.5 : .5; }
   else if (!G.evan.pt) G.evan.st += .1;
   if (G.evan.pt) G.evan.pt = Math.min(239, G.evan.pt + .4);
   // walking
@@ -2760,7 +2811,9 @@ function drawWorld() {
   ctx.restore();
   // the people
   TALKM = talkMove(E);
-  if (Math.abs(G.evan.x - cam - VW / 2) < VW) { const t = G.evan.pt ? (G.evan.pt < 239 ? G.evan.pt : 212 + 27 * (.5 + .5 * Math.sin(G.t / 50))) : G.evan.idle || 0; const pa = 1 - (G.phFade || 0); if (pa > .01) { if (!G.evan.pt && EVS.ready) drawFrame(EVS[Math.floor(G.evan.st) % EVS_META.frames], EVS_META, G.evan.x - cam, GY, 1, pa); else drawFrame(EVA[atTime(EVA_META, t)], EVA_META, G.evan.x - cam, GY, 1, pa); } }
+  if (Math.abs(G.evan.x - cam - VW / 2) < VW) { const t = G.evan.pt ? (G.evan.pt < 239 ? G.evan.pt : 212 + 27 * (.5 + .5 * Math.sin(G.t / 50))) : G.evan.idle || 0; const pa = 1 - (G.phFade || 0);
+    if (pa > .01 && PHN()) { const u = G.evan.pt ? (G.evan.pt < 239 ? G.evan.pt : 120 + 119 * (.5 + .5 * Math.cos(G.t / 90))) : 0; if (!G.evan.pt) drawFrame(PHS[Math.floor(G.evan.st) % PHS.length], PHS_META, G.evan.x - cam, GY, 1, pa); else drawFrame(PHP[atTime(PHP_META, u)], PHP_META, G.evan.x - cam, GY, 1, pa); }
+    else if (pa > .01) { if (!G.evan.pt && EVS.ready) drawFrame(EVS[Math.floor(G.evan.st) % EVS_META.frames], EVS_META, G.evan.x - cam, GY, 1, pa); else drawFrame(EVA[atTime(EVA_META, t)], EVA_META, G.evan.x - cam, GY, 1, pa); } }
   // a walker: his walking frame, with his standing pose dissolving over it when he has stopped (first the standing pose
   // comes in on top, then the walking one goes: the background never shows through him)
   const walker = (w, fr, meta, stIm, stMeta, face, a) => { const st = w.st || 0; if (st < 1) drawFrame(fr, meta, w.x - cam, GY, face, a * (st < .5 ? 1 : 2 * (1 - st))); if (st > 0) drawFrame(stIm, stMeta, w.x - cam, GY, 1, a * (st < .5 ? 2 * st : 1)); };
@@ -3142,6 +3195,36 @@ function nightLand(x, X0, Y0, w, h, o) {
 }
 // the title page's paper (build 187): laid paper as in a book of the 1670s: warm cream, cloudy pulp, faint chain lines,
 // a few spots of foxing, darker toward the edges. Made once, small, and stretched over both pages.
+// 2100 build 30 (owner: "handwriting should be pretty varied and more scratchy not cursive"): every hand-written letter
+// is set a little off on its own (tilt, lift, size), and each margin note is placed beside the verse it answers
+(function scrawl() {
+  { const h = new URLSearchParams(location.search).get('hand'); if (h) document.querySelector('.tbook').style.setProperty('--hand', "'" + h + "'"); }
+  // 2100 build 32 (owner: "need more variation"): no two letters alike. Each letter its own width and height (a stretch),
+  // its own slant, tilt and pressure (ink weight), a little uneven spacing; the line wanders slowly (a sine whose pace and
+  // phase are the note's own), and each note has its own slant, size and ink, as if written on a different day
+  // 2100 build 33 (owner, with a photo of quick small-capital printing in a gel pen): as that hand writes, the first letter
+  // of each word is a full capital and the rest smaller capitals, low and wide, set close (often touching), on a steady
+  // line with a slight forward lean; the variety is in each letter's own width, height and lean, not in letters tipping
+  const r = rng(77), jit = (el, k) => { const out = [], ph = r() * 6.3, fr = .25 + r() * .3, lean = -(3 + r() * 5); let i = 0, first = true;
+    if (k >= 1) { el.style.setProperty('--r', '0deg'); el.style.setProperty('--s', (.9 + r() * .12).toFixed(2)); el.style.opacity = (.84 + r() * .16).toFixed(2); }
+    for (const ch of el.textContent) { if (ch === '\n') { out.push('</span><br><span class="w">'); first = true; continue; } if (ch === ' ') { out.push('</span> <span class="w">'); i += 1.5; first = true; continue; }
+      const big = first && /[A-Za-z]/.test(ch); first = false;
+      const fs = big ? (1.02 + r() * .14) : (.7 + r() * .1), t = ((r() - .5) * 4 * k).toFixed(1), sk = (lean + (r() - .5) * 8 * k).toFixed(1),
+        y = 0, sx = (big ? 1.02 : 1.14) + (r() - .5) * .24 * k, sy = 1 + (r() - .5) * .14 * k,
+        m = ((/[Ii1]/.test(ch) ? .07 : -.02) + (r() - .5) * .06 * k).toFixed(3), ink = r() < .2 ? ';opacity:.74' : '';
+      i++;
+      out.push('<span style="font-size:' + fs.toFixed(2) + 'em;margin-right:' + m + 'em;transform-origin:50% 88%;transform:translateY(' + y + 'px) rotate(' + t + 'deg) skewX(' + sk + 'deg) scale(' + sx.toFixed(3) + ',' + sy.toFixed(3) + ')' + ink + '">' + ch.replace('&', '&amp;').replace('<', '&lt;') + '</span>'); }
+    el.innerHTML = '<span class="w">' + out.join('') + '</span>'; };
+  for (const n of document.querySelectorAll('.hn')) jit(n, 1);
+  for (const n of document.querySelectorAll('.tnote .nh')) jit(n, .8);
+  for (const b of document.querySelectorAll('.tnote #levels .lv')) { const i = b.querySelector('i'), sp = document.createElement('span'); sp.textContent = b.lastChild.textContent; b.lastChild.remove(); b.appendChild(sp); jit(sp, .9); sp.style.display = 'inline'; }
+  const place = () => { for (const n of document.querySelectorAll('.bpg [data-at]')) { const pg = n.closest('.bpg'), at = n.dataset.at;
+      if (at === 'top') { n.style.top = 'calc(var(--u,1) * 2px)'; continue; }
+      const v = pg.querySelector('[data-v="' + at + '"]'); if (!v) continue; const tx = v.closest('.btxt');
+      n.style.top = (tx.offsetTop + v.offsetTop + (n.classList.contains('hbar') ? 0 : -2)) + 'px'; } };
+  place(); addEventListener('resize', () => setTimeout(place, 50)); if (document.fonts) document.fonts.ready.then(place);
+  window.placeNotes = place;
+})();
 (function paperPages() {
   const W = 330, H = 448, c = mk(W, H), x = c.getContext('2d'), r = rng(1678);
   x.fillStyle = '#e8dbbd'; x.fillRect(0, 0, W, H);
@@ -3187,33 +3270,35 @@ function nightLand(x, X0, Y0, w, h, o) {
   // load, so it never changes. Soft watercolour washes on rough paper, a few flat tones (the photograph of a real calf
   // binding, builds 206 to 243, is in git), a hand-drawn double frame with one dull gold line, and in the middle a small
   // arched window: the game's layered hills, pale far and darker near, under the one far light.
-  const W = 660, H = 896, c = mk(W, H), x = c.getContext('2d'), r = rng(1678);
-  const blob = (px, py, rad, col, n = 22) => { x.fillStyle = col; x.beginPath();
-    for (let i = 0; i <= n; i++) { const a = i / n * Math.PI * 2, k = rad * (.72 + r() * .5); i ? x.lineTo(px + Math.cos(a) * k, py + Math.sin(a) * k * .8) : x.moveTo(px + Math.cos(a) * k, py + Math.sin(a) * k * .8); }
-    x.fill(); };
-  // build 358 (owner: "clean up the board"): a cleaner, warmer brown; fewer, softer washes and no dark rings round them
-  // (they read as cracks and dirt); the random numbers are still drawn in the same order, so the hills are unchanged
-  x.fillStyle = '#2a211d'; x.fillRect(0, 0, W, H);
-  for (let i = 0; i < 260; i++) blob(r() * W, r() * H, 30 + r() * 110, r() < .5 ? 'rgba(42,24,14,.035)' : 'rgba(132,92,58,.03)');
-  for (let i = 0; i < 40; i++) { const px = r() * W, py = r() * H, rad = 40 + r() * 90; blob(px, py, rad, 'rgba(128,90,58,.025)'); r(); }
-  let g = x.createLinearGradient(0, 0, 70, 0); g.addColorStop(0, 'rgba(24,15,10,.5)'); g.addColorStop(1, 'rgba(24,15,10,0)'); x.fillStyle = g; x.fillRect(0, 0, 70, H);
-  const line = (pts, lw, col) => { x.lineWidth = lw; x.strokeStyle = col; x.lineJoin = x.lineCap = 'round'; x.beginPath();
-    pts.forEach(([a0, b0], i) => { const [a1, b1] = pts[(i + 1) % pts.length], L = Math.hypot(a1 - a0, b1 - b0), n = Math.max(2, L / 26 | 0);
-      for (let j = 0; j < n; j++) { const t = j / n, jx = (r() - .5) * 1.6, jy = (r() - .5) * 1.6; (i || j) ? x.lineTo(a0 + (a1 - a0) * t + jx, b0 + (b1 - b0) * t + jy) : x.moveTo(a0 + jx, b0 + jy); } });
-    x.closePath(); x.stroke(); };
-  const rect = (x0, y0, x1, y1) => [[x0, y0], [x1, y0], [x1, y1], [x0, y1]];
-  for (const k of [0, 1]) { line(rect(70, 62, W - 46, H - 62), 5 - k * 2, 'rgba(30,19,13,' + (.32 - k * .1) + ')'); line(rect(84, 76, W - 60, H - 76), 2.4, 'rgba(30,19,13,.28)'); }
-  line(rect(77, 69, W - 53, H - 69), 1.6, 'rgba(196,160,98,.36)');
-  // (build 663; owner: the cover "doesn't have the wow factor that the levels have ... maybe it's the shade of brown"):
-  // the board is nearly black-brown and the window much larger, so the picture glows; in it the game's returning
-  // picture at night (nightLand): a great sky, misty ridges, the small pilgrim on the left, the far light on the right
-  const cx = W / 2 + 12, ww = 222, top = 110, bot = 760, arch = () => { x.beginPath(); x.moveTo(cx - ww, bot); x.lineTo(cx - ww, top + ww); x.arc(cx, top + ww, ww, Math.PI, 0); x.lineTo(cx + ww, bot); x.closePath(); };
-  x.save(); arch(); x.clip(); nightLand(x, cx - ww, top, ww * 2, bot - top, COVER_WIN); x.restore();
-  for (const k of [0, 1]) { x.lineWidth = 7 - k * 4; x.strokeStyle = 'rgba(30,19,13,' + (.2 + k * .2) + ')'; arch(); x.stroke(); }
-  x.save(); x.lineWidth = 1.5; x.strokeStyle = 'rgba(196,160,98,.4)'; x.beginPath(); x.moveTo(cx - ww - 10, bot + 10); x.lineTo(cx - ww - 10, top + ww); x.arc(cx, top + ww, ww + 10, Math.PI, 0); x.lineTo(cx + ww + 10, bot + 10); x.closePath(); x.stroke(); x.restore();
-  // paper grain and a soft darkening toward the edges
-  const id = x.getImageData(0, 0, W, H), d = id.data; for (let i = 0; i < d.length; i += 4) { const n = (r() - .5) * 10; d[i] += n; d[i + 1] += n * .92; d[i + 2] += n * .82; } x.putImageData(id, 0, 0);
-  g = x.createRadialGradient(W / 2, H / 2, H * .3, W / 2, H / 2, H * .72); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(16,10,6,.38)'); x.fillStyle = g; x.fillRect(0, 0, W, H);
+  // 2100 build 27: his own Bible, a soft black leather cover worn brown at the corners and along the spine, the gilt
+  // title mostly rubbed away, a crease where it has been bent open a thousand times. Painted once in code.
+  const W = 660, H = 896, c = mk(W, H), x = c.getContext('2d'), r = rng(2100);
+  x.fillStyle = '#1d1a18'; x.fillRect(0, 0, W, H);
+  // leather grain: fine pebbling, then broad soft patches of wear
+  { const id = x.getImageData(0, 0, W, H), d = id.data;
+    for (let i = 0; i < d.length; i += 4) { const n = (r() - .5) * 14 + (r() < .06 ? -10 : 0); d[i] += n; d[i + 1] += n * .95; d[i + 2] += n * .9; }
+    x.putImageData(id, 0, 0); }
+  const wear = (px, py, rad, a) => { const g = x.createRadialGradient(px, py, 0, px, py, rad); g.addColorStop(0, 'rgba(96,70,50,' + a + ')'); g.addColorStop(1, 'rgba(96,70,50,0)'); x.fillStyle = g; x.fillRect(px - rad, py - rad, rad * 2, rad * 2); };
+  for (let i = 0; i < 70; i++) wear(r() * W, r() * H, 20 + r() * 90, .02 + r() * .04);
+  for (const [px, py] of [[W, 0], [W, H], [0, 0], [0, H]]) { wear(px, py, 120, .5); wear(px, py, 60, .4); }
+  // the spine side rubbed brown, and the hinge crease
+  let g = x.createLinearGradient(0, 0, 80, 0); g.addColorStop(0, 'rgba(84,60,42,.55)'); g.addColorStop(1, 'rgba(84,60,42,0)'); x.fillStyle = g; x.fillRect(0, 0, 80, H);
+  x.strokeStyle = 'rgba(0,0,0,.5)'; x.lineWidth = 3; x.beginPath(); x.moveTo(44, 0); for (let y = 0; y <= H; y += 20) x.lineTo(44 + (r() - .5) * 1.5, y); x.stroke();
+  x.strokeStyle = 'rgba(120,92,70,.18)'; x.lineWidth = 1.2; x.beginPath(); x.moveTo(48, 0); for (let y = 0; y <= H; y += 20) x.lineTo(48 + (r() - .5) * 1.5, y); x.stroke();
+  // creases where the soft cover has been bent: thin pale lines with a dark side
+  for (let k = 0; k < 9; k++) { let px = 60 + r() * (W - 120), py = 40 + r() * (H - 80); const ang = (r() - .5) * 1.6 + (r() < .5 ? 0 : Math.PI / 2), len = 30 + r() * 140;
+    x.lineWidth = 1; x.strokeStyle = 'rgba(130,104,84,.16)'; x.beginPath(); x.moveTo(px, py);
+    for (let t = 0; t < len; t += 8) { px += Math.cos(ang) * 8 + (r() - .5) * 2; py += Math.sin(ang) * 8 + (r() - .5) * 2; x.lineTo(px, py); } x.stroke(); }
+  // the gilt title, mostly rubbed away (worn on its own canvas, then laid on the leather)
+  { const t = mk(W, H), tx = t.getContext('2d'); tx.textAlign = 'center'; tx.font = '600 46px Georgia,serif'; tx.fillStyle = 'rgba(176,144,86,.6)';
+    for (const [w, y] of [['HOLY', 300], ['BIBLE', 360]]) tx.fillText(w.split('').join(String.fromCharCode(8202)), W / 2 + 18, y);
+    tx.globalCompositeOperation = 'destination-out';
+    for (let i = 0; i < 700; i++) { const px = W / 2 - 150 + r() * 340, py = 250 + r() * 130, rad = 1 + r() * (r() < .08 ? 12 : 4); tx.fillStyle = 'rgba(0,0,0,' + (.3 + r() * .6) + ')'; tx.beginPath(); tx.arc(px, py, rad, 0, 7); tx.fill(); }
+    x.drawImage(t, 0, 0); }
+  // a thin blind line round the edge, worn through in places
+  x.strokeStyle = 'rgba(0,0,0,.35)'; x.lineWidth = 2; x.strokeRect(70, 30, W - 100, H - 60);
+  x.strokeStyle = 'rgba(110,86,66,.12)'; x.lineWidth = 1; x.strokeRect(72, 32, W - 104, H - 64);
+  g = x.createRadialGradient(W / 2, H / 2, H * .25, W / 2, H / 2, H * .75); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,.35)'); x.fillStyle = g; x.fillRect(0, 0, W, H);
   const el = document.querySelector('.tcover'), url = c.toDataURL('image/jpeg', .9); el.style.backgroundImage = 'url(' + url + ')';
   { const im = new Image(), ready = () => document.body.classList.add('coverready'); im.onload = ready; im.onerror = ready; im.src = url; setTimeout(ready, 1500); }
   el.onclick = () => { if (!document.body.classList.contains('opening')) openBook(); };
@@ -3227,7 +3312,8 @@ function nightLand(x, X0, Y0, w, h, o) {
 // code. Not shown to the automated tests (they click the cover themselves) nor on a link that names a place.
 (function opening() {
   const el = document.getElementById('opening'), q = new URLSearchParams(location.search);
-  if ((navigator.webdriver && !q.has('showopen')) || /[?&](level|at|room)=/.test(location.search)) return;
+  // 2100 build 27: his Bible has no painted window to zoom from, so the old opening is off (the dream and the eyes open Level 1)
+  return;
   const zoom = document.querySelector('.tzoom'), cover = document.querySelector('.tcover');
   const win = document.createElement('div'); win.className = 'twin'; win.innerHTML = '<canvas></canvas><div class="ol"></div>'; cover.appendChild(win);
   const oc = win.firstChild; let gone = false, drawn = '', feet = 0;
@@ -3328,7 +3414,7 @@ document.getElementById('on2').onclick = () => SL.on ? go3() : HL.on ? go5() : g
   // the weeping (second opening line) is no longer waited for before "Open the book": a third less to fetch first.
   // If it is not ready by its line he simply stands (WEEP.ready is checked there).
   loadPack('christian-weep', WEEP).catch(() => {}).then(() => loadPack('christian-turn', TURN)).then(() => bookLoaded('TURN')).catch(() => {}).then(nbLoad);
-  Promise.all([loadPack('evangelist', EVA), loadPack('evangelist-stand', EVS)]).then(() => Promise.all([loadImg('family.webp').then(im => { FAM = im; if (im) FAM_SH = mkShadow(im); }), Promise.resolve().then(() => { const B = barricade(); GATE_P = bakeTint(B.gate, .42, .4); WALL_P = bakeTint(B.wall, .42, .4); }), ...['a', 'b', 'c'].map(key => loadImg('neighbor-' + key + '.webp').then(im => { WATCH_IM[key] = im; })), ...['a', 'b', 'c'].map(key => loadPack('neighbor-' + key, WATCH_PACK[key]).catch(() => {})), loadImg('christian-back.webp').then(im => { BACK = im; }), loadPack('christian-run', RUN), loadPack('christian-run-plain', RUNP)]))
+  Promise.all([loadPack('evangelist', EVA), loadPack('evangelist-stand', EVS), loadPack('phillip-stand', PHS).catch(() => {}), loadPack('phillip-point', PHP).catch(() => {})]).then(() => Promise.all([loadImg('family.webp').then(im => { FAM = im; if (im) FAM_SH = mkShadow(im); }), Promise.resolve().then(() => { const B = barricade(); GATE_P = bakeTint(B.gate, .42, .4); WALL_P = bakeTint(B.wall, .42, .4); }), ...['a', 'b', 'c'].map(key => loadImg('neighbor-' + key + '.webp').then(im => { WATCH_IM[key] = im; })), ...['a', 'b', 'c'].map(key => loadPack('neighbor-' + key, WATCH_PACK[key]).catch(() => {})), loadImg('christian-back.webp').then(im => { BACK = im; }), loadPack('christian-run', RUN), loadPack('christian-run-plain', RUNP)]))
     .then(() => Promise.all([loadPack('obstinate', OBS), loadPack('pliable', PLI), loadImg('obstinate-stand.webp').then(im => { OBS_ST = im; }), loadImg('pliable-stand.webp').then(im => { PLI_ST = im; })]));
   for (const [who, txt] of INTRO) vox(who, txt);          // the first words, ready before Begin is pressed
 })();
