@@ -202,7 +202,7 @@ body.portrait:not(.playing) #rot{display:none}
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 30 · Nov 28 2026</div>
+  <div id="build">build 32 · Nov 28 2026</div>
   <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
@@ -1419,7 +1419,7 @@ const INTRO = [
   [PG, 'Not tonight.'],
   [FR, 'Not tonight? You\'ve never said that.'],
   [PG, 'They all go on as if it will always be the same. I know how it\'s going to end.'],
-  [PG, '"It is appointed for us once to die, and after that, the judgment." I found it in this book. I\'m overcome with dread.', 0, () => { if (WEEP.ready) P.weep = { t: 0 }; }],
+  [PG, '"It is appointed for us once to die, and after that, the judgment." I found it in this book. I\'m overcome with dread.', 0, () => { if (WEEP.ready && !pwOn()) P.weep = { t: 0 }; }],
   [PG, 'I\'ve wasted enough time. What should I do? Who should I go to?'],
 ];
 const PARTY_NO = [[PG, 'No. I can\'t.']];
@@ -1560,11 +1560,12 @@ const WEEP = [], WEEP_META = {"ax": 101, "ground": 302, "frames": 96, "step": .1
 const EVS = [], EVS_META = {"ax": 82, "ground": 311, "frames": 48};      // Evangelist standing, facing right, breathing
 const RUNP_META = {"ax": 132, "ground": 298, "frames": 28, "start": 20, "vpx": 16.6, "steps": [0, 15]}, RUNP = [];
 RUN_META.steps = [7, 22];
-const runNow = () => G.ears || !RUNP.ready ? [RUN, RUN_META] : [RUNP, RUNP_META];
+const PR = [], PR_META = {"ax": 132, "ground": 299, "frames": 24, "start": 5, "vpx": 13.5, "steps": [10, 22]};      // build 32: the 2100 pilgrim's run (assets/pilgrim-run.pack, one whole stride of sources/pilgrim/run.mp4, frames 71..94), Level 1 only
+const runNow = () => PR.ready && pwOn() ? [PR, PR_META] : G.ears || !RUNP.ready ? [RUN, RUN_META] : [RUNP, RUNP_META];
 function coverEars() { if (G.ears) return; if (P.run) poseChange(8, true); G.ears = true; }
 const CHR = [], PLI = [], OBS = [], EVA = [], STD = [], RUN = [], CHR_K = .52, RUN_STEP = RUN_META.vpx * CHR_K, RUNV = RUN_STEP * .4,   // the run at its video's own speed (24 frames a second)
    CHR_STEP = CHR_META.vpx * CHR_K, PLI_STEP = PLI_META.vpx * CHR_K, OBS_STEP = OBS_META.vpx * CHR_K;
-const PACK_V = 42;                          // bump when the .pack files change, so phones fetch the new ones
+const PACK_V = 43;                          // bump when the .pack files change, so phones fetch the new ones
 // SOLID FIGURES (build 202; owner: "in both level 2 and 3, pilgrims sprite is clear in spots. we need to fix this"). The
 // figures were cut from their white paper by how white each pixel is, so the white paper showing inside the watercolour
 // (highlights on the cloak, the pack, the hood) was cut away too and the scene showed through those spots (2 to 7 per cent
@@ -1643,7 +1644,7 @@ const chrPose = () => pwOn() && !P.turnV && !P.weep && !P.run ? (P.stand ? [PW[P
 // owner, build 76, "when christian switches to run he gets thicker": a slow dissolve showed both figures at once)
 function poseChange(n = 12, quick = false) { const [im, meta] = chrPose(); P.blend = { im, meta, face: P.face, t: 0, n, quick }; }
 function drawChristian(x, y, face, alpha) {
-  const [im, meta] = chrPose(), b = P.blend, bk = BACK ? P.bk || 0 : 0;
+  const [im, meta] = chrPose(), b = P.blend, bk = BACK && !pwOn() ? P.bk || 0 : 0;
   if (P.turnV) face = Math.abs(face);      // the turn's frames face their own way
   if (bk > 0) {                              // turned to look back at his door: the back view comes in on top, then the side view goes
     if (bk < 1) drawFrame(im, meta, x, y, face, alpha * (bk < .5 ? 1 : 2 * (1 - bk)));
@@ -1850,7 +1851,7 @@ let TURN = []; const TURN_META = {"ax": 90, "ground": 302, "frames": 30, "step":
 // BUILD 109 (owner: "shouldn't christian turn to see where evangelist is pointing before viewer can click and he says I
 // think i do"): on "Do you see that shining light?" he turns round to look where Evangelist points (turnToLight); only
 // when he has turned (turnedToLight) can the light be touched, and then he answers "I think I do."
-function turnToLight() { if (P.face > 0) return; if (TURN.ready && P.stand) P.turnV = { t: 0 }; else if (BACK && P.stand) { P.turnTo = 1; P.wantBack = true; } else P.turn = 1; }
+function turnToLight() { if (P.face > 0) return; if (pwOn()) { P.turn = 1; return; } if (TURN.ready && P.stand) P.turnV = { t: 0 }; else if (BACK && P.stand) { P.turnTo = 1; P.wantBack = true; } else P.turn = 1; }
 const turnedToLight = () => P.face > 0 && !P.turnV && !P.turnTo && !P.turn;
 function lightTouched() { if (!turnedToLight()) return; G.sawLight = true; G.flare = 1.2; sfx.chord(); next(true); }
 function gateOpened() {
@@ -2176,30 +2177,71 @@ const rowMeta = key => key === 'h' ? HOUSE_META : NB_META[key], rowPic = key => 
 // as a grey picture and baked like the paintings were (bakeTint). floors = how many floors above the shop.
 // Build 14 (owner, with photographs of Queen Anne: "Queen Anne for street view"): brick, a low shop strip with an awning and a tall
 // blade sign (unlit: the power is spotty; no neon, by the art direction), paired windows, a corbelled cornice.
-const STREET = { h: { floors: 3, roof: 'box', pairs: true }, b: { floors: 3, roof: 'tank', esc: true, blade: 'side' }, c: { floors: 0, roof: 'step', awning: true, blade: 'tall' } };
+// Build 31 (owner, with photographs of Queen Anne's low brick shops, downtown's glass storefronts and Pioneer Square: "More on getting
+// Seattle streets look to level 1"): each front is drawn from those streets: brick of its own shade (tan Queen Anne brick, darker red
+// Pioneer Square brick), upper windows as sashes with sills and lintels (arched heads on the Pioneer Square one), a fire escape with
+// railings, a painted sign band under a cornice (its panel blank: no words), a shop floor of tall plate glass in thin frames over a
+// low kickplate with a transom of small panes, cast-iron pilasters with caps between the bays, a blade sign hung from a scrolled
+// iron bracket (blank), and on the low Queen Anne shop a café closed for the night: a low iron railing, chairs tipped against
+// their tables, umbrellas furled, a barrel planter. Grey pictures, baked like the paintings (bakeTint).
+const STREET = { h: { floors: 3, roof: 'box', pairs: true, brick: '#929292', bracket: 1 }, b: { floors: 3, roof: 'tank', esc: true, blade: 'side', brick: '#7c7c7c', arch: true, pil: true }, c: { floors: 0, roof: 'step', awning: true, blade: 'tall', brick: '#9c9c9c', cafe: true } };
 function streetFront(key) {
   const M = rowMeta(key), F = STREET[key], FL = 104, shop = 196, H0 = Math.round(M.h), E = shop + F.floors * FL + 26 - H0, H = H0 + E, W = Math.ceil(M.w);
   const sh = v => [v[0], v[1] + E, v[2], v[3]];
   M.door = sh(M.door); M.wins = M.wins.map(sh); M.h = H;
   const T = 130, m = mk(W, H + T), c = m.getContext('2d'), Rr = rng(key.charCodeAt(0) * 31 + 7), r = (a, b) => a + (b - a) * Rr();      // T: room above for the roof things and the tall sign
-  c.fillStyle = '#8c8c8c'; c.fillRect(0, T, W, H);
-  for (let y = T + 20; y < T + H; y += 5) { c.fillStyle = `rgba(0,0,0,${r(.05, .1)})`; c.fillRect(0, y, W, 1); for (let x = (y / 5 % 2) * 7; x < W; x += 14) c.fillRect(x, y - 4, 1, 4); }      // brick courses
-  for (let i = 0; i < 700; i++) { c.fillStyle = `rgba(${Rr() < .5 ? '255,255,255' : '0,0,0'},${r(.02, .07)})`; c.fillRect(r(0, W), T + r(0, H), r(3, 9), r(1, 3)); }      // and weather on them
-  c.fillStyle = '#6a6a6a'; c.fillRect(-4, T, W + 8, 12); c.fillStyle = '#777'; c.fillRect(0, T + 12, W, 4); for (let x = 6; x < W - 6; x += 16) c.fillRect(x, T + 16, 6, 6);      // a corbelled cornice
-  const sy = T + H - shop; c.fillStyle = '#5e5e5e'; c.fillRect(0, sy - 12, W, 16);                              // the sign band over the shops
-  const cols = Math.max(2, Math.round(W / 74)), cw = W / cols;
-  for (let f = 0; f < F.floors; f++) { const y = T + 30 + f * FL; for (let i = 0; i < cols; i++) { const ws = F.pairs ? [[.16, .3], [.54, .3]] : [[.24, .52]]; for (const [a, ww] of ws) { c.fillStyle = '#4a4a4a'; c.fillRect(i * cw + cw * a, y + 12, cw * ww, FL * .6); c.fillStyle = '#5a5a5a'; c.fillRect(i * cw + cw * a, y + 12 + FL * .3, cw * ww, 2); c.fillStyle = '#9a9a9a'; c.fillRect(i * cw + cw * (a - .03), y + 12 + FL * .6, cw * (ww + .06), 4); } } }
-  if (F.esc) { c.strokeStyle = '#3e3e3e'; c.lineWidth = 3; const ex = W * .62, ew = W * .3; for (let f = 0; f < F.floors; f++) { const y = T + 30 + f * FL + FL * .78; c.strokeRect(ex, y, ew, 3); c.beginPath(); c.moveTo(ex + (f % 2 ? 6 : ew - 6), y); c.lineTo(ex + (f % 2 ? ew - 6 : 6), y + FL); c.stroke(); } }
-  c.fillStyle = '#626262'; for (let i = 0; i <= cols; i++) c.fillRect(i * cw - 3, sy + 4, 6, shop - 4);      // piers between the shopfronts
-  if (F.awning) { c.fillStyle = '#4e4e4e'; c.beginPath(); c.moveTo(-4, sy - 8); c.lineTo(W + 4, sy - 8); c.lineTo(W + 4, sy + 6); c.lineTo(-4, sy + 6); c.fill(); for (let x = 0; x < W; x += 30) { c.fillStyle = '#585858'; c.fillRect(x, sy - 8, 15, 14); } }      // a long awning over the shops
-  if (F.blade === 'tall') { const bx = W * .22; c.fillStyle = '#3e3e3e'; c.fillRect(bx, T - 96, 30, sy - T + 70); c.beginPath(); c.moveTo(bx - 4, T - 96); c.lineTo(bx + 15, T - 118); c.lineTo(bx + 34, T - 96); c.fill(); c.fillStyle = '#4a4a4a'; for (let y = T - 84; y < sy - 40; y += 24) c.fillRect(bx + 7, y, 16, 15); }      // a tall blade sign, its letters dark
-  if (F.blade === 'side') { c.fillStyle = '#3e3e3e'; c.fillRect(W - 26, T + 40, 22, 150); c.fillRect(W - 30, T + 54, 6, 4); c.fillRect(W - 30, T + 170, 6, 4); }
-  if (F.roof === 'step') { c.fillStyle = '#8c8c8c'; c.fillRect(W * .55, T - 18, W * .3, 18); c.fillRect(W * .62, T - 30, W * .16, 12); }
+  const G = T + H, rect = (col, x, y, w, h) => { c.fillStyle = col; c.fillRect(x, y, w, h); };
+  rect(F.brick || '#8c8c8c', 0, T, W, H);
+  for (let y = T + 20; y < G; y += 5) { c.fillStyle = `rgba(0,0,0,${r(.05, .1)})`; c.fillRect(0, y, W, 1); for (let x = (y / 5 % 2) * 7; x < W; x += 14) c.fillRect(x, y - 4, 1, 4); }      // brick courses
+  for (let i = 0; i < 900; i++) { c.fillStyle = `rgba(${Rr() < .5 ? '255,255,255' : '0,0,0'},${r(.02, .08)})`; c.fillRect(r(0, W), T + r(0, H), r(3, 9), r(1, 3)); }      // and weather on them
+  // the cornice: a projecting top, a row of corbels, a plain frieze
+  rect('#6a6a6a', -4, T, W + 8, 9); rect('#7e7e7e', -2, T + 9, W + 4, 4); c.fillStyle = '#727272'; for (let x = 6; x < W - 6; x += 16) c.fillRect(x, T + 13, 6, 7); rect('#848484', 0, T + 20, W, 3);
+  const sy = G - shop, cols = Math.max(2, Math.round(W / 74)), cw = W / cols;
+  // upper windows: two-pane sashes with a stone sill and a lintel (an arched brick head on the Pioneer Square front)
+  for (let f = 0; f < F.floors; f++) { const y = T + 34 + f * FL, wh = FL * .58;
+    for (let i = 0; i < cols; i++) for (const [a, ww] of F.pairs ? [[.16, .3], [.54, .3]] : [[.25, .5]]) {
+      const x = i * cw + cw * a, w = cw * ww;
+      if (F.arch) { c.fillStyle = '#9a9a9a'; c.beginPath(); c.moveTo(x - 4, y + 10); c.quadraticCurveTo(x + w / 2, y - 6, x + w + 4, y + 10); c.lineTo(x + w + 4, y + 15); c.quadraticCurveTo(x + w / 2, y, x - 4, y + 15); c.fill(); }
+      else rect('#a2a2a2', x - 3, y + 5, w + 6, 5);      // the lintel
+      rect('#3e3e3e', x, y + 12, w, wh); rect('#525252', x + 2, y + 14, w - 4, wh * .46); rect('#4a4a4a', x + 2, y + 16 + wh * .48, w - 4, wh * .46);      // the sashes, the upper catching a little more sky
+      rect('#383838', x, y + 12 + wh * .47, w, 2.5); rect('#363636', x + w / 2 - 1, y + 12, 2, wh);
+      rect('#b0b0b0', x - 4, y + 12 + wh, w + 8, 4); rect('#6a6a6a', x - 3, y + 16 + wh, w + 6, 2);      // the sill and its shadow
+    } }
+  if (F.esc) {      // a fire escape: a landing with railings at each floor, a ladder between
+    const ex = W * .6, ew = W * .32; c.strokeStyle = '#363636'; c.fillStyle = '#363636';
+    for (let f = 0; f < F.floors; f++) { const y = T + 34 + f * FL + FL * .78; c.fillRect(ex, y, ew, 3); c.fillRect(ex, y - 20, ew, 2); for (let x = ex; x <= ex + ew; x += 5) c.fillRect(x, y - 20, 1, 20); c.lineWidth = 2.4; c.beginPath(); c.moveTo(ex + (f % 2 ? 8 : ew - 8), y); c.lineTo(ex + (f % 2 ? ew - 8 : 8), y + FL - 20); c.stroke(); } }
+  // the sign band under its own cornice, with one blank framed panel
+  rect('#646464', 0, sy - 26, W, 30); rect('#7a7a7a', -3, sy - 30, W + 6, 5); rect('#545454', W * .14, sy - 21, W * .72, 18); rect('#6c6c6c', W * .14 + 2, sy - 19, W * .72 - 4, 14);
+  // the shop floor: in each bay a transom of small panes, tall plate glass in thin frames, a low kickplate
+  for (let i = 0; i < cols; i++) { const x = i * cw + 5, w = cw - 10;
+    rect('#4c4c4c', x, sy + 6, w, 26); c.fillStyle = '#7a7a7a'; for (let u = 1; u < 4; u++) c.fillRect(x + w * u / 4 - 1, sy + 6, 2, 26); rect('#7a7a7a', x, sy + 31, w, 3);
+    rect('#343434', x, sy + 34, w, shop - 70); const g = c.createLinearGradient(0, sy + 34, 0, G - 36); g.addColorStop(0, 'rgba(255,255,255,.08)'); g.addColorStop(1, 'rgba(255,255,255,0)'); c.fillStyle = g; c.fillRect(x, sy + 34, w, shop - 70);      // dark glass, a faint sheen at its top
+    c.fillStyle = '#808080'; c.fillRect(x, sy + 34, 2.5, shop - 70); c.fillRect(x + w - 2.5, sy + 34, 2.5, shop - 70); c.fillRect(x + w / 2 - 1.2, sy + 34, 2.4, shop - 70);      // thin light frames, as in the Queen Anne shops
+    rect('#5a5a5a', x, G - 36, w, 36); rect('#6e6e6e', x, G - 36, w, 3); }
+  c.fillStyle = F.pil ? '#5c5c5c' : F.brick || '#8a8a8a';      // between the bays: brick piers, or cast-iron pilasters with caps (Pioneer Square)
+  for (let i = 0; i <= cols; i++) { const x = i * cw; c.fillRect(x - 5, sy + 4, 10, shop - 4); if (F.pil) { rect('#6e6e6e', x - 8, sy + 2, 16, 6); rect('#6e6e6e', x - 7, G - 10, 14, 10); c.fillStyle = '#5c5c5c'; } }
+  if (F.awning) { c.fillStyle = '#4e4e4e'; c.beginPath(); c.moveTo(-4, sy - 4); c.lineTo(W + 4, sy - 4); c.lineTo(W + 4, sy + 10); c.lineTo(-4, sy + 10); c.fill(); for (let x = 0; x < W; x += 30) rect('#585858', x, sy - 4, 15, 14); }      // a long awning over the shops
+  const bracketSign = (bx, by, dir) => {      // a blank sign hung from a scrolled iron bracket on the wall
+    c.fillStyle = '#323232'; c.fillRect(bx, by, 3, 10); c.fillRect(bx, by, dir * 46, 2.5);
+    c.strokeStyle = '#323232'; c.lineWidth = 1.8; c.beginPath(); c.moveTo(bx + 1, by + 10); c.quadraticCurveTo(bx + dir * 6, by + 3, bx + dir * 24, by + 2); c.stroke(); c.beginPath(); c.arc(bx + dir * 9, by + 6, 3, 0, 6); c.stroke();
+    const sx = bx + dir * 14, sw = dir * 30; c.fillRect(sx + dir * 4, by + 2, 1.2, 6); c.fillRect(sx + sw - dir * 5, by + 2, 1.2, 6); rect('#3c3c3c', Math.min(sx, sx + sw), by + 8, Math.abs(sw), 26); rect('#5a5a5a', Math.min(sx, sx + sw) + 3, by + 11, Math.abs(sw) - 6, 20); };
+  if (F.blade === 'tall') { const bx = W * .22; c.fillStyle = '#3e3e3e'; c.fillRect(bx, T - 96, 30, sy - T + 70); c.beginPath(); c.moveTo(bx - 4, T - 96); c.lineTo(bx + 15, T - 118); c.lineTo(bx + 34, T - 96); c.fill(); c.fillStyle = '#4a4a4a'; for (let y = T - 84; y < sy - 40; y += 24) c.fillRect(bx + 7, y, 16, 15); }      // a tall blade sign, unlit
+  if (F.blade === 'side') bracketSign(W - 6, sy - 64, -1);
+  if (F.bracket) bracketSign(6, sy - 64, 1);
+  if (F.cafe) {      // a café shut for the night: a low iron railing, chairs tipped against their tables, umbrellas furled, a barrel planter
+    const cy = G, rx0 = W * .05, rx1 = W * .95; c.fillStyle = '#2e2e2e';
+    for (let k2 = 0; k2 < 5; k2++) { const tx = rx0 + 30 + k2 * (rx1 - rx0 - 60) / 4;
+      c.fillRect(tx - 1.5, cy - 30, 3, 30); c.fillRect(tx - 10, cy - 31, 20, 2.5);      // a little table
+      c.save(); c.translate(tx + 12, cy); c.rotate(-.35); c.fillRect(0, -26, 2, 26); c.fillRect(0, -26, 10, 2); c.fillRect(10, -26, 2, 26); c.fillRect(0, -14, 12, 2); c.restore();      // a folding chair leaned on it
+      if (k2 % 2 === 0) { c.fillRect(tx - 1, cy - 78, 2, 48); c.beginPath(); c.moveTo(tx - 4, cy - 50); c.lineTo(tx, cy - 82); c.lineTo(tx + 4, cy - 50); c.fill(); } }      // a furled umbrella
+    c.fillRect(rx0, cy - 34, rx1 - rx0, 2.5); c.fillRect(rx0, cy - 16, rx1 - rx0, 1.6); for (let x = rx0; x <= rx1; x += 7) c.fillRect(x, cy - 34, 1.2, 34);      // the railing
+    rect('#444', rx1 - 20, cy - 22, 18, 22); c.fillStyle = '#2e2e2e'; c.beginPath(); c.ellipse(rx1 - 11, cy - 24, 12, 6, 0, 0, 7); c.fill(); }      // the barrel planter
+  if (F.roof === 'step') { c.fillStyle = F.brick || '#8c8c8c'; c.fillRect(W * .55, T - 18, W * .3, 18); c.fillRect(W * .62, T - 30, W * .16, 12); }
   else if (F.roof === 'box') { c.fillStyle = '#7a7a7a'; c.fillRect(W * .58, T - 22, W * .2, 22); c.fillRect(W * .2, T - 9, W * .08, 9); }
   else if (F.roof === 'tank') { c.fillStyle = '#6e6e6e'; const tx = W * .28; c.fillRect(tx, T - 34, 44, 22); c.beginPath(); c.moveTo(tx - 2, T - 34); c.lineTo(tx + 22, T - 40); c.lineTo(tx + 46, T - 34); c.fill(); for (const lx of [4, 20, 36]) c.fillRect(tx + lx, T - 12, 3, 12); }
   else { c.fillStyle = '#6e6e6e'; c.fillRect(W * .66, T - 16, W * .12, 16); c.fillRect(W * .7, T - 30, 6, 14); c.fillRect(W * .3, T - 10, W * .1, 10); }      // vents and boxes (a mast with a crossbar read as a cross)
   for (const v of key === 'h' ? [M.door, ...M.wins] : M.wins) c.clearRect(v[0], T + v[1], v[2], v[3]);      // the old holes, where they were
-  if (key !== 'h') { const [dx, dy, dw, dh] = M.door; c.fillStyle = '#3c3c3c'; c.fillRect(dx, T + dy, dw, dh); c.fillStyle = '#555'; c.fillRect(dx + dw * .12, T + dy + dh * .1, dw * .76, dh * .4); }      // a shut glass-paned door
+  if (key !== 'h') { const [dx, dy, dw, dh] = M.door; rect('#2e2e2e', dx - 4, T + dy - 4, dw + 8, dh + 4); rect('#3c3c3c', dx, T + dy, dw, dh); rect('#505050', dx + dw * .14, T + dy + dh * .08, dw * .72, dh * .55); rect('#7a7a7a', dx + dw * .14, T + dy + dh * .08 + dh * .27, dw * .72, 2); }      // a shut glass-paned door, set back in its entry
   M.h = H + T; M.door = sh2(M.door, T); M.wins = M.wins.map(v => sh2(v, T)); if (M.ch) M.ch = [M.ch[0], T + 2];      // ch: where a touch on the roof sends up smoke
   return m;
 }
@@ -2273,7 +2315,7 @@ function drawRow(cam) {
     const B = rowPic(it.key), M = rowMeta(it.key), x = it.x - cam * p, w = M.w * k, h = M.h * k, y = L.base + 3 - h; if (!B || x > VW + 20 || x + w < -20) continue;
     const wm = warm((x + w / 2) / VW), dark = css(mix(layerCol(.9)[0], layerCol(.9)[1], wm));
     c.save(); if (it.flip) { c.translate(x + w, 0); c.scale(-1, 1); } else c.translate(x, 0);
-    M.wins.forEach((v, i) => { const wx = v[0] * k - 2, wy = y + v[1] * k - 2, ww = v[2] * k + 4, wh = v[3] * k + 4; if (it.lit[i]) room(c, wx, wy, ww, wh, lerp(.8, .45, wm), dark, it.x * .37 + i * 5, it.st, i && M.wins[i][1] === M.wins[0][1] ? 1 : 0); else { c.fillStyle = dark; c.fillRect(wx, wy, ww, wh); } });
+    M.wins.forEach((v, i) => { const wx = v[0] * k - 2, wy = y + v[1] * k - 2, ww = v[2] * k + 4, wh = v[3] * k + 4; if (it.lit[i]) room(c, wx, wy, ww, wh, lerp(.8, .45, wm), dark, it.x * .37 + i * 5, v[1] > M.h - 200 ? 7 + (it.st + i) % 3 : it.st, i && M.wins[i][1] === M.wins[0][1] ? 1 : 0);      /* build 31: a window on the shop floor shows a shop */ else { c.fillStyle = dark; c.fillRect(wx, wy, ww, wh); } });
     c.drawImage(B.cool, 0, y, w, h); if (wm > .01) { c.globalAlpha = wm; c.drawImage(B.warm, 0, y, w, h); c.globalAlpha = 1; }
     sills(c, M.wins, k, y, dark);
     const o = it.open || 0, e = o * o * (3 - 2 * o);
@@ -2357,6 +2399,13 @@ function room(c, x, y, w, h, a, dark, v, st = 0, side = 0) {
   } else if (st === 5) {          // a short frilled cloth across the top, and a jug on the sill
     c.globalAlpha = .8; c.beginPath(); c.moveTo(x, y); c.lineTo(x + w, y); c.lineTo(x + w, y + h * .2); for (let k = 6; k >= 0; k--) c.quadraticCurveTo(x + w * (k + .5) / 6, y + h * .27, x + w * k / 6, y + h * .2); c.fill();
     c.globalAlpha = .9; const jx = X(.7); c.beginPath(); c.ellipse(jx, y + h - h * .1, w * .09, h * .1, 0, 0, 7); c.fill(); c.fillRect(jx - w * .04, y + h - h * .26, w * .08, h * .08);
+  } else if (st >= 7) {           // build 31: a shop window lit from inside (st 7: shelves along the back; 8: a lamp hanging over a counter; 9: blinds half down)
+    c.globalAlpha = .75;
+    if (st === 7) for (const u of [.3, .55, .8]) { c.fillRect(x, y + h * u, w, 1.6); for (let i = 0; i < 5; i++) if (r(10 + i + u * 7) < .7) c.fillRect(x + w * (.08 + .18 * i), y + h * u - h * .09, w * .1, h * .09); }
+    else if (st === 8) { const lx = X(.5); c.fillRect(lx - .5, y, 1, h * .28); c.fillStyle = css(PAL.light, Math.min(1, br * 1.3)); c.beginPath(); c.ellipse(lx, y + h * .31, w * .1, h * .04, 0, 0, 7); c.fill(); c.fillStyle = dark; c.fillRect(x, y + h * .72, w, h * .28); }
+    else { for (let yy = y; yy < y + h * .5; yy += 3) c.fillRect(x, yy, w, 1.6); c.fillRect(x, y + h * .5, w, 1.4); }
+    c.globalAlpha = 1; c.fillRect(x + w / 2 - .7, y, 1.4, h);      // one upright frame, as in plate glass
+    c.restore(); return;
   } else {                        // plain bars and a candle burning on the sill
     const cx = X(.3); c.globalAlpha = 1; c.fillStyle = css(PAL.light, Math.min(1, br * 1.2)); c.beginPath(); c.ellipse(cx, y + h * .8, 1.6, 3, 0, 0, 7); c.fill();
     c.fillStyle = css([250, 235, 205], .9 * a); c.fillRect(cx - 1.5, y + h * .84, 3, h * .16); c.fillStyle = dark;
@@ -2380,7 +2429,7 @@ function home(cam) {                       // drawn in screen units, before the 
   if (x > VW + 20 || x + M.w * k < -20) return;
   const wm = warm(doorX(cam) / VW), dark = css(mix(layerCol(.9)[0], layerCol(.9)[1], wm)), cy = y + dy + dh * .5;
   // behind the painting: dim light in the windows, and the doorway (dark, then warm light as the door swings back to the left)
-  M.wins.forEach((w, i) => room(c, x + w[0] * k - 2, y + w[1] * k - 2, w[2] * k + 4, w[3] * k + 4, lerp(1, .55, wm), dark, 3 + i * 4, 0, i));
+  M.wins.forEach((w, i) => room(c, x + w[0] * k - 2, y + w[1] * k - 2, w[2] * k + 4, w[3] * k + 4, lerp(1, .55, wm), dark, 3 + i * 4, w[1] > M.h - 200 ? 7 + i : 0, i));      // build 31: his ground floor is a shop too
   c.fillStyle = dark; c.fillRect(x + dx - 2, y + dy - 2, dw + 4, dh + 4);
   if (e > 0) {
     const g = c.createRadialGradient(x + dx + dw * .55, cy, 0, x + dx + dw * .55, cy, 110); g.addColorStop(0, css(PAL.light, .95 * e)); g.addColorStop(1, css(PAL.win, .8 * e));
@@ -2684,7 +2733,7 @@ function drawWorld() {
       } }
     // His shadow in that light: his own shape laid down on the ground, pointing away from the door. The ground is seen
     // almost edge-on, so the shadow is long sideways and only a little way down the picture (flat, like the pool).
-    const dxs = P.x - cam - doorX(cam), near = G.door * smooth(330, 90, Math.abs(dxs)), bk = BACK ? P.bk || 0 : 0;
+    const dxs = P.x - cam - doorX(cam), near = G.door * smooth(330, 90, Math.abs(dxs)), bk = BACK && !pwOn() ? P.bk || 0 : 0;
     if (near > .02) {
       const [im, meta] = bk > .5 ? [BACK, BACK_META] : chrPose(), face = bk > .5 ? 1 : P.face, w = im.width * CHR_K, h = im.height * CHR_K;
       const W = Math.ceil(w / 2), H = Math.ceil(h / 2), c = shC.getContext('2d');
@@ -3002,7 +3051,7 @@ function drawDream(c, u, fire) {
 // traced one (no Space Needle; sources/dream/skyline.png), then a video from it: the flash behind the towers at about 2 s, the fireball and
 // the cloud rising, the camera tilting up after it (sources/dream/blast.mp4, 10 s). Silent. The code-drawn dream stays as the fallback.
 const DREAMVID = (() => { try { const v = document.createElement('video'); v.src = 'assets/dream.' + (v.canPlayType('video/mp4; codecs="avc1.640028"') ? 'mp4' : 'webm') + '?v=29'; v.muted = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('muted', ''); v.preload = 'auto'; v.load(); return v; } catch (e) { return null; } })();
-const EYEVID = (() => { try { const v = document.createElement('video'); v.src = 'assets/eyes-open.' + (v.canPlayType('video/mp4; codecs="avc1.640028"') ? 'mp4' : 'webm') + '?v=25';      /* H.264 where it plays, else VP9 */ v.muted = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('muted', ''); v.preload = 'auto'; v.load(); return v; } catch (e) { return null; } })();
+const EYEVID = (() => { try { const v = document.createElement('video'); v.src = 'assets/eyes-open.' + (v.canPlayType('video/mp4; codecs="avc1.640028"') ? 'mp4' : 'webm') + '?v=31';      /* H.264 where it plays, else VP9 */ v.muted = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('muted', ''); v.preload = 'auto'; v.load(); return v; } catch (e) { return null; } })();
 function wakeEyes(then) {
   const ec = document.getElementById('eyes'); if (!ec) { setTimeout(then, 1700); return; }
   if (!DREAM) bakeDream();
@@ -3023,35 +3072,38 @@ function wakeEyes(then) {
     if (run !== runN) { ec.style.display = 'none'; return; }
     const t = now - t0, d = Math.min(2, window.devicePixelRatio || 1), W = Math.round(innerWidth * d), H = Math.round(innerHeight * d);
     if (ec.width !== W || ec.height !== H) { ec.width = W; ec.height = H; }
-    c.setTransform(1, 0, 0, 1, 0, 0); c.fillStyle = '#000'; c.fillRect(0, 0, W, H);
+    // build 31 (owner: "black frame on eyes make look like movie and not cohesive with rest"): the dream and the eyes are shown in the
+    // game's own picture (the box of #cv), on the page's own dark round it, so the street later comes up in the very same place
+    c.setTransform(1, 0, 0, 1, 0, 0); c.fillStyle = '#1b1c22'; c.fillRect(0, 0, W, H);
+    const cb = (document.getElementById('cv') || ec).getBoundingClientRect(), X0 = cb.left * d, Y0 = cb.top * d, BW = cb.width * d, BH = cb.height * d;
+    c.save(); c.beginPath(); if (c.roundRect) c.roundRect(X0, Y0, BW, BH, 6 * d); else c.rect(X0, Y0, BW, BH); c.clip(); c.fillStyle = '#000'; c.fillRect(X0, Y0, BW, BH);
+    const cover = (src, w, h) => { const sc = Math.max(BW / w, BH / h); c.drawImage(src, X0 + (BW - w * sc) / 2, Y0 + (BH - h * sc) / 2, w * sc, h * sc); };
     if (t < DR && dv) {      // the video: in from black, its own flash and cloud, out to black
       if (t > VH && !dvOn) { dvOn = true; try { const pr = dv.play(); if (pr && pr.catch) pr.catch(() => {}); } catch (e) {} }
-      const sc = Math.max(W / dv.videoWidth, H / dv.videoHeight); c.drawImage(dv, (W - dv.videoWidth * sc) / 2, (H - dv.videoHeight * sc) / 2, dv.videoWidth * sc, dv.videoHeight * sc);
+      cover(dv, dv.videoWidth, dv.videoHeight);
       const vt = (t - VH) / 1000, white = vt < VW0 ? 0 : vt < VW1 ? ease((vt - VW0) / (VW1 - VW0)) : 1;
-      if (white > 0) { c.fillStyle = `rgba(255,250,240,${white})`; c.fillRect(0, 0, W, H); }
+      if (white > 0) { c.fillStyle = `rgba(255,250,240,${white})`; c.fillRect(X0, Y0, BW, BH); }
       const black = t < 1200 ? 1 - t / 1200 : t > DR - 900 ? cl((t - (DR - 900)) / 700) : 0;
-      if (black > 0) { c.fillStyle = `rgba(0,0,0,${black})`; c.fillRect(0, 0, W, H); }
+      if (black > 0) { c.fillStyle = `rgba(0,0,0,${black})`; c.fillRect(X0, Y0, BW, BH); }
     } else if (t < DR) {
       const k = t - FL, u = k > 300 ? cl((k - 300) / 5200) : 0, fire = k > 0 ? 1 : 0, dc = DREAM.can.getContext('2d');
       drawDream(dc, u, fire);
-      const sc = Math.max(W / DW, H / DH); c.imageSmoothingEnabled = true; c.drawImage(DREAM.can, (W - DW * sc) / 2, (H - DH * sc) / 2, DW * sc, DH * sc);
+      c.imageSmoothingEnabled = true; cover(DREAM.can, DW, DH);
       const white = k < 0 ? 0 : k < 120 ? k / 120 : k < 500 ? 1 : k < 1400 ? 1 - (k - 500) / 900 : k < 4800 ? 0 : k < 6100 ? ease((k - 4800) / 1300) : 1;
-      if (white > 0) { c.fillStyle = `rgba(255,252,244,${white})`; c.fillRect(0, 0, W, H); }
+      if (white > 0) { c.fillStyle = `rgba(255,252,244,${white})`; c.fillRect(X0, Y0, BW, BH); }
       const black = t < 1200 ? 1 - t / 1200 : k > 6100 ? cl((k - 6100) / 600) : 0;
-      if (black > 0) { c.fillStyle = `rgba(0,0,0,${black})`; c.fillRect(0, 0, W, H); }
+      if (black > 0) { c.fillStyle = `rgba(0,0,0,${black})`; c.fillRect(X0, Y0, BW, BH); }
     }
-    const bw = Math.min(W, H * 2.6);
     if (t > T[1] && vid) {
       if (!vidOn) { vidOn = true; const pr = vid.play(); if (pr && pr.catch) pr.catch(() => {}); }
       if (vid.readyState >= 2 && vid.videoWidth) {
-        const bh = Math.round(bw * vid.videoHeight / vid.videoWidth), x0 = (W - bw) / 2, y0 = (H - bh) / 2;
         // build 26: as he wakes the eyes go to black first, then the black canvas fades and the street comes up out of it (fading the eyes
         // and their black together laid a pale box over the street)
-        c.globalAlpha = Math.min(1, (t - T[1]) / D.inn) * (t > T[5] ? 1 - ease(cl((t - T[5]) / (D.out * .45))) : 1); c.drawImage(vid, x0, y0, bw, bh);
-        c.save(); c.translate(W / 2, H / 2); c.scale(bw * .56, bh * .74); const g = c.createRadialGradient(0, 0, 0, 0, 0, 1); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(.62, 'rgba(0,0,0,.08)'); g.addColorStop(.86, 'rgba(0,0,0,.75)'); g.addColorStop(1, 'rgba(0,0,0,1)'); c.fillStyle = g; c.fillRect(-1.2, -1.2, 2.4, 2.4); c.restore();      // the picture falls away to black at its edges
+        c.globalAlpha = Math.min(1, (t - T[1]) / D.inn) * (t > T[5] ? 1 - ease(cl((t - T[5]) / (D.out * .45))) : 1); cover(vid, vid.videoWidth, vid.videoHeight);      // build 31: the whole picture, no band, no vignette
         c.globalAlpha = 1;
       }
     }
+    c.restore();
     if (t > T[5]) ec.style.opacity = 1 - cl((t - T[5] - D.out * .45) / (D.out * .55));
     if (!told && t > T[5] + D.out * .5) { told = true; then(); }
     if (t < T[6]) requestAnimationFrame(frame); else { ec.style.display = 'none'; if (vid) try { vid.pause(); } catch (e) {} }
@@ -3250,7 +3302,7 @@ document.getElementById('on2').onclick = () => SL.on ? go3() : HL.on ? go5() : g
 (async function boot() {
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.fillStyle = '#5d6b80'; ctx.fillRect(0, 0, VW, VH);
   await new Promise(r => setTimeout(r, 30));
-  const chr = Promise.all([loadPack('christian-walk', CHR), loadPack('pilgrim-walk', PW).catch(() => {}), loadPack('christian-stand', STD), 
+  const chr = Promise.all([loadPack('christian-walk', CHR), loadPack('pilgrim-walk', PW).catch(() => {}), loadPack('pilgrim-run', PR).catch(() => {}), loadPack('christian-stand', STD), 
     // build 89 (owner: "when I first open link house isn't there then flickers there"): what the first picture shows (his
     // house and its row, the trees, his wife in the door) now loads before "Open the book" appears, not after
     Promise.resolve().then(() => { HOUSE = bakeTint(streetFront('h'), HOUSE_DEPTH, HOUSE_DETAIL); for (const key of ['b', 'c']) NB[key] = bakeTint(streetFront(key), HOUSE_DEPTH, HOUSE_DETAIL); buildRow(); }),      // build 13: city buildings drawn in code, not the cottage paintings
