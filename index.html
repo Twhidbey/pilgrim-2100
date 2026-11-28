@@ -249,7 +249,7 @@ every year.</div>
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 46 · Nov 28 2026</div>
+  <div id="build">build 47 · Nov 28 2026</div>
   <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
@@ -3193,14 +3193,14 @@ function drawDream(c, u, fire) {
 // traced one (no Space Needle; sources/dream/skyline.png), then a video from it: the flash behind the towers at about 2 s, the fireball and
 // the cloud rising, the camera tilting up after it (sources/dream/blast.mp4, 10 s). Silent. The code-drawn dream stays as the fallback.
 const DREAMVID = (() => { try { const v = document.createElement('video'); v.src = 'assets/dream.' + (v.canPlayType('video/mp4; codecs="avc1.640028"') ? 'mp4' : 'webm') + '?v=43'; v.muted = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('muted', ''); v.preload = 'auto'; v.load(); return v; } catch (e) { return null; } })();
-const EYEVID = (() => { try { const v = document.createElement('video'); v.src = 'assets/eyes-open.' + (v.canPlayType('video/mp4; codecs="avc1.640028"') ? 'mp4' : 'webm') + '?v=45';      /* H.264 where it plays, else VP9 */ v.muted = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('muted', ''); v.preload = 'auto'; v.load(); return v; } catch (e) { return null; } })();
+const EYEVID = (() => { try { const v = document.createElement('video'); v.src = 'assets/eyes-open.' + (v.canPlayType('video/mp4; codecs="avc1.640028"') ? 'mp4' : 'webm') + '?v=47';      /* H.264 where it plays, else VP9 */ v.muted = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('muted', ''); v.preload = 'auto'; v.load(); return v; } catch (e) { return null; } })();
 // Build 37 (owner: "animation of eyes opening didn't work", on the iPhone): Safari may not load or play a video that is not in the
 // page, and plays one only after a touch. So both videos are put in the page (hidden, 1 px), and started and stopped once from the
 // touch that begins Level 1 (primeVids, called by start()); if the eyes still do not play, two stills cross-fade instead (EYESTILL:
 // the first and last frames of the clip, eyes shut and open).
 (() => { const box = document.createElement('div'); box.style.cssText = 'position:fixed;left:0;top:0;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none;z-index:-1'; for (const v of [DREAMVID, EYEVID]) if (v) { v.style.width = v.style.height = '1px'; box.appendChild(v); } (document.body || document.documentElement).appendChild(box); })();
 function primeVids() { for (const v of [DREAMVID, EYEVID]) if (v) { try { const pr = v.play(); if (pr && pr.then) pr.then(() => { if (!v.dataset.live) { v.pause(); v.currentTime = 0; } }).catch(() => {}); } catch (e) {} } }
-const EYESTILL = ['shut', 'open'].map(n => { const im = new Image(); im.src = 'assets/eyes-still-' + n + '.webp?v=45'; return im; });
+const EYESTILL = ['shut', 'open'].map(n => { const im = new Image(); im.src = 'assets/eyes-still-' + n + '.webp?v=47'; return im; });
 function wakeEyes(then) {
   const ec = document.getElementById('eyes'); if (!ec) { setTimeout(then, 1700); return; }
   if (!DREAM) bakeDream();
