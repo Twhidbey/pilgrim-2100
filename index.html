@@ -256,7 +256,7 @@ every year.</div>
   </div>
   <button id="snd" aria-label="Sound on or off">♪</button>
   <button id="autoWalk" aria-label="He walks on by himself"><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
-  <div id="build">build 106 · Nov 28 2026</div>
+  <div id="build">build 107 · Nov 28 2026</div>
   <canvas id="eyes" style="position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;display:none;background:#000"></canvas>
 </div></div>
 <div id="rot">Turn your phone sideways for a bigger picture</div>
@@ -1866,7 +1866,7 @@ const runNow = () => PR.ready && pwOn() ? [PR, PR_META] : G.ears || !RUNP.ready 
 function coverEars() { if (G.ears) return; if (P.run) poseChange(8, true); G.ears = true; }
 const CHR = [], PLI = [], OBS = [], EVA = [], STD = [], RUN = [], CHR_K = .52, RUN_STEP = RUN_META.vpx * CHR_K, RUNV = RUN_STEP * .4,   // the run at its video's own speed (24 frames a second)
    CHR_STEP = CHR_META.vpx * CHR_K, PLI_STEP = PLI_META.vpx * CHR_K, OBS_STEP = OBS_META.vpx * CHR_K;
-const PACK_V = 51;                          // bump when the .pack files change, so phones fetch the new ones
+const PACK_V = 52;                          // bump when the .pack files change, so phones fetch the new ones
 // SOLID FIGURES (build 202; owner: "in both level 2 and 3, pilgrims sprite is clear in spots. we need to fix this"). The
 // figures were cut from their white paper by how white each pixel is, so the white paper showing inside the watercolour
 // (highlights on the cloak, the pack, the hood) was cut away too and the scene showed through those spots (2 to 7 per cent
@@ -1939,7 +1939,7 @@ const figC = mk(8, 8), shC = mk(8, 8), FEET_SINK = 9;
 // his turn round, from sources/pilgrim/turn.mp4 (made for this in the opening-artistry chat: head, then shoulders and pack, one small
 // pivoting step, about a second), video frames 8..44 at the walk's size (--height 463, toned to the walk): frame 0 faces right, the last
 // left. Played BACKWARDS for his turn toward the light (left to right), at the video's own pace (24 a second), then he stands (PST[0]).
-const PTN = [], PTN_META = {"ax": 134, "ground": 304, "frames": 37, "step": 24 / 60};
+const PTN = [], PTN_META = {"ax": 134, "ground": 304, "frames": 15, "step": .55};      // build 107 (owner: "Should be super quick, as requested"): only the turn itself (video 8..36, every 2nd frame), played in about half a second
 const PW = [], PW_META = {"ax": 132, "ground": 299, "frames": 37, "vpx": 5.1, "rest": [10, 28]}, PW_STAND = 6, PW_STEP = PW_META.vpx * CHR_K;
 const pwOn = () => PW.ready && !SL.on && !HL.on && !CR.on;
 const pwFrame = () => ((Math.floor(P.anim) % PW.length) + PW.length) % PW.length;
